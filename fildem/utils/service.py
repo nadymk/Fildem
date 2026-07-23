@@ -28,11 +28,21 @@ class AppMenuService(dbus.service.Object):
 	@dbus.service.method(BUS_NAME, in_signature='uo', sender_keyword='sender')
 	def RegisterWindow(self, windowId, menuObjectPath, sender):
 		self.window_dict[windowId] = [dbus.String(sender), dbus.ObjectPath(menuObjectPath)]
+		self.WindowRegistered(windowId, sender, menuObjectPath)
 
 	@dbus.service.method(BUS_NAME, in_signature='u')
 	def UnregisterWindow(self, windowId):
 		if windowId in self.window_dict:
 			del self.window_dict[windowId]
+		self.WindowUnregistered(windowId)
+
+	@dbus.service.signal(BUS_NAME, signature='uso')
+	def WindowRegistered(self, windowId, sender, menuObjectPath):
+		pass
+
+	@dbus.service.signal(BUS_NAME, signature='u')
+	def WindowUnregistered(self, windowId):
+		pass
 
 	@dbus.service.method(BUS_NAME, in_signature='u', out_signature='so')
 	def GetMenuForWindow(self, windowId):
