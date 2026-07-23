@@ -5,6 +5,7 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import Shell from 'gi://Shell';
 
 const BUS = 'es.inled.fildem';
 const PATH = '/es/inled/fildem';
@@ -25,6 +26,24 @@ export class NativeMenuManager {
                 logError(error, 'Fildem menu tree');
             }
         });
+        this._focusId = global.display.connect('notify::focus-window', () => this._sendWindow());
+        this._sendWindow();
+    }
+
+    _sendWindow() {
+        const window = global.display.get_focus_window();
+        const data = {};
+        if (window) {
+            const description = window.get_description() || '';
+            const match = description.match(/0x[0-9a-f]+/i);
+            data.xid = match ? String(parseInt(match[0])) : '';
+            for (const property of Object.keys(window)) {
+                if (property.startsWith('gtk_') && window[property] !== null && window[property] !== undefined)
+                    data[property] = String(window[property]);
+            }
+        }
+        this._proxy.call('WindowSwitched', new GLib.Variant('(a{ss})', [data]),
+            Gio.DBusCallFlags.NONE, -1, null, null);
     }
 
     _activate(action) {
@@ -74,5 +93,7 @@ export class NativeMenuManager {
         this._buttons = [];
         if (this._proxy && this._signalId)
             this._proxy.disconnect(this._signalId);
+        if (this._focusId)
+            global.display.disconnect(this._focusId);
     }
 }
