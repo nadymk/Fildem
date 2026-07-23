@@ -37,9 +37,21 @@ export class NativeMenuManager {
             const description = window.get_description() || '';
             const match = description.match(/0x[0-9a-f]+/i);
             data.xid = match ? String(parseInt(match[0])) : '';
-            for (const property of Object.keys(window)) {
-                if (property.startsWith('gtk_') && window[property] !== null && window[property] !== undefined)
-                    data[property] = String(window[property]);
+            const gtkProperties = [
+                'gtk_unique_bus_name', 'gtk_application_object_path',
+                'gtk_window_object_path', 'gtk_menubar_object_path',
+                'gtk_app_menu_object_path',
+            ];
+            for (const property of gtkProperties) {
+                const getter = `get_${property}`;
+                if (typeof window[getter] !== 'function') continue;
+                try {
+                    const value = window[getter]();
+                    if (value !== null && value !== undefined)
+                        data[property] = String(value);
+                } catch (error) {
+                    logError(error, `Fildem ${getter}`);
+                }
             }
         }
         this._proxy.call('WindowSwitched', new GLib.Variant('(a{ss})', [data]),
@@ -53,6 +65,12 @@ export class NativeMenuManager {
             Gio.DBusCallFlags.NONE, -1, null, null);
     }
 
+    _label(text) {
+        // GTK menu labels use '_' for mnemonics. GNOME Shell PopupMenu does
+        // not interpret them, so remove the marker while retaining the text.
+        return String(text ?? '').replace(/__/g, '\u0000').replace(/_/g, '').replace(/\u0000/g, '_');
+    }
+
     _populate(items, menu) {
         for (const item of items) {
             if (item.separator) {
@@ -60,12 +78,12 @@ export class NativeMenuManager {
                 continue;
             }
             if (item.children?.length) {
-                const submenu = new PopupMenu.PopupSubMenuMenuItem(item.label);
+                const submenu = new PopupMenu.PopupSubMenuMenuItem(this._label(item.label));
                 this._populate(item.children, submenu.menu);
                 menu.addMenuItem(submenu);
                 continue;
             }
-            const entry = new PopupMenu.PopupMenuItem(item.label);
+            const entry = new PopupMenu.PopupMenuItem(this._label(item.label));
             entry.setSensitive(item.enabled !== false);
             if (item.toggle) entry.setOrnament(PopupMenu.Ornament.CHECK);
             entry.connect('activate', () => this._activate(item.action));
@@ -77,9 +95,10 @@ export class NativeMenuManager {
         this._buttons.forEach(button => button.destroy());
         this._buttons = [];
         tree.forEach((item, index) => {
-            const button = new PanelMenu.Button(0.0, item.label);
+            const label = this._label(item.label);
+            const button = new PanelMenu.Button(0.0, label);
             button.add_child(new St.Label({
-                text: item.label,
+                text: label,
                 y_align: Clutter.ActorAlign.CENTER,
             }));
             this._populate(item.children || [], button.menu);

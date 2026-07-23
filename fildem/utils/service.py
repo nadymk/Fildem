@@ -77,6 +77,7 @@ class MyService(dbus.service.Object):
 
 	@dbus.service.method(BUS_NAME, in_signature='a{ss}')
 	def WindowSwitched(self, window_data):
+		print('Fildem window metadata:', dict(window_data), flush=True)
 		self.WindowSwitchedSignal(window_data)
 
 	@dbus.service.signal(BUS_NAME, signature='a{ss}')
