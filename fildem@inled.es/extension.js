@@ -1,683 +1,93 @@
-import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
+import Clutter from 'gi://Clutter';
 import St from 'gi://St';
 import Shell from 'gi://Shell';
-
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
-import * as WindowMenu from 'resource:///org/gnome/shell/ui/windowMenu.js';
-import { Extension, gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
-const AppSystem = Shell.AppSystem.get_default();
-const WinTracker = Shell.WindowTracker.get_default();
+const BUS = 'es.inled.fildem';
+const PATH = '/es/inled/fildem';
+// Fildem's historical MyService methods/signals use the registrar interface
+// name even though they live on the es.inled.fildem object.
+const IFACE = 'com.canonical.AppMenu.Registrar';
 
-function log(msg) {
-    console.log('[FILDEM_MENU] ' + msg);
-}
-
-const WindowActions = class WindowActions {
+class NativeMenuManager {
     constructor() {
-        this._win = global.display.get_focus_window();
-        this.actions = [];
-    }
-
-    getActions() {
-        if (!this._win) return [];
-        let type = this._win.get_window_type();
-        let win = this._win;
-
-        if (win.can_minimize())
-            this.actions.push('Minimize');
-
-        if (win.can_maximize()) {
-            const isMaximized = win.is_maximized ? win.is_maximized() : win.get_maximized();
-            this.actions.push(isMaximized ? 'Unmaximize' : 'Maximize');
-        }
-
-        if (win.allows_move())
-            this.actions.push('Move');
-
-        if (win.allows_resize())
-            this.actions.push('Resize');
-
-        if (win.titlebar_is_onscreen() && type != Meta.WindowType.DOCK && type != Meta.WindowType.DESKTOP)
-            this.actions.push('Move Titlebar Onscreen')
-
-        if (win.get_maximized() == Meta.MaximizeFlags.BOTH
-            || type == Meta.WindowType.DOCK
-            || type == Meta.WindowType.DESKTOP
-            || type == Meta.WindowType.SPLASHSCREEN) {
-
-            this.actions.push('Always on Top' + (win.is_above() ? ' ✓' : ''));
-        }
-
-        if (Main.sessionMode.hasWorkspaces
-            && (!Meta.prefs_get_workspaces_only_on_primary() || win.is_on_primary_monitor())) {
-
-            let isSticky = win.is_on_all_workspaces();
-
-            if (win.is_always_on_all_workspaces()) {
-                this.actions.push('Always on Visible Workspace' + (isSticky ? ' ✓' : ''));
-            }
-
-            if (!isSticky) {
-                let workspace = win.get_workspace();
-                if (workspace != workspace.get_neighbor(Meta.MotionDirection.LEFT))
-                    this.actions.push('Move to Workspace Left');
-
-                if (workspace != workspace.get_neighbor(Meta.MotionDirection.RIGHT))
-                    this.actions.push('Move to Workspace Right');
-
-                if (workspace != workspace.get_neighbor(Meta.MotionDirection.UP))
-                    this.actions.push('Move to Workspace Up');
-
-                if (workspace != workspace.get_neighbor(Meta.MotionDirection.DOWN))
-                    this.actions.push('Move to Workspace Down');
-            }
-        }
-
-        let display = global.display;
-        let nMonitors = display.get_n_monitors();
-        let monitorIndex = win.get_monitor();
-        if (nMonitors > 1 && monitorIndex >= 0) {
-            let dir = Meta.DisplayDirection.UP;
-            let upMonitorIndex = display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (upMonitorIndex != -1)
-                this.actions.push('Move to Monitor Up');
-
-            dir = Meta.DisplayDirection.DOWN;
-            let downMonitorIndex = display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (downMonitorIndex != -1)
-                this.actions.push('Move to Monitor Down');
-
-            dir = Meta.DisplayDirection.LEFT;
-            let leftMonitorIndex = display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (leftMonitorIndex != -1)
-                this.actions.push('Move to Monitor Left');
-
-            dir = Meta.DisplayDirection.RIGHT;
-            let rightMonitorIndex = display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (rightMonitorIndex != -1)
-                this.actions.push('Move to Monitor Right');
-        }
-        
-        if (win.can_close())
-            this.actions.push('Close');
-
-        return this.actions;
-    }
-
-    _doAction(action) {
-        if (!this._win) return;
-        if (action.endsWith(' ✓')) {
-            action = action.substr(0, action.length - 2);
-        }
-        let win = this._win;
-        switch (action) {
-            case 'Minimize':
-                win.minimize();
-                break;
-            case 'Unmaximize':
-                if (win.unmaximize && win.unmaximize.length === 0) win.unmaximize();
-                else win.unmaximize(Meta.MaximizeFlags.BOTH);
-                break;
-            case 'Maximize':
-                if (win.maximize && win.maximize.length === 0) win.maximize();
-                else win.maximize(Meta.MaximizeFlags.BOTH);
-                break;
-            case 'Move':
-                GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
-                    WindowMenu.WindowMenu.prototype._grabAction(win, Meta.GrabOp.KEYBOARD_MOVING, global.display.get_current_time_roundtrip());
-                });
-                break;
-            case 'Resize':
-                GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
-                    WindowMenu.WindowMenu.prototype._grabAction(win, Meta.GrabOp.KEYBOARD_RESIZING_UNKNOWN, global.display.get_current_time_roundtrip());
-                });
-                break;
-            case 'Move Titlebar Onscreen':
-                win.shove_titlebar_onscreen();
-                break;
-            case 'Always on Top':
-                if (win.is_above())
-                    win.unmake_above();
-                else
-                    win.make_above();
-                break;
-            case 'Always on Visible Workspace':
-                if (win.is_on_all_workspaces())
-                    win.unstick();
-                else
-                    win.stick();
-                break;
-            case 'Move to Workspace Left':
-                this._moveToWorkspace(Meta.MotionDirection.LEFT);
-                break;
-            case 'Move to Workspace Right':
-                this._moveToWorkspace(Meta.MotionDirection.RIGHT);
-                break;
-            case 'Move to Workspace Up':
-                this._moveToWorkspace(Meta.MotionDirection.UP);
-                break;
-            case 'Move to Workspace Down':
-                this._moveToWorkspace(Meta.MotionDirection.DOWN);
-                break;
-            case 'Move to Monitor Up':
-                this._moveToMonitor(Meta.DisplayDirection.UP);
-                break;
-            case 'Move to Monitor Down':
-                this._moveToMonitor(Meta.DisplayDirection.DOWN);
-                break;
-            case 'Move to Monitor Left':
-                this._moveToMonitor(Meta.DisplayDirection.LEFT);
-                break;
-            case 'Move to Monitor Right':
-                this._moveToMonitor(Meta.DisplayDirection.RIGHT);
-                break;
-            case 'Close':
-                win.delete(global.get_current_time());
-                break;
-        }
-    }
-
-    _moveToWorkspace(dir) {
-        let workspace = this._win.get_workspace();
-        this._win.change_workspace(workspace.get_neighbor(dir));
-    }
-
-    _moveToMonitor(dir) {
-        let monitorIndex = this._win.get_monitor();
-        let newMonitorIndex = global.display.get_monitor_neighbor_index(monitorIndex, dir);
-        if (newMonitorIndex != -1) {
-            this._win.move_to_monitor(newMonitorIndex);
-        }
-    }
-}
-
-const MenuButton = GObject.registerClass(
-class MenuButton extends PanelMenu.Button {
-    _init(label, menuBar) {
-        label = label.replace('_', '');
-        super._init(0.0, label);
-        this._label = label;
-        this._menuBar = menuBar;
-
-        this.box = new St.BoxLayout({ style_class: 'panel-status-menu-box menubar-button' });
-        this.labelWidget = new St.Label({
-            text: this._label,
-            y_align: Clutter.ActorAlign.CENTER,
-            reactive: true
+        this._buttons = [];
+        this._proxy = Gio.DBusProxy.new_for_bus_sync(
+            Gio.BusType.SESSION, Gio.DBusProxyFlags.NONE, null, BUS, PATH, IFACE, null);
+        this._signal = this._proxy.connect('g-signal', (_p, _sender, signal, params) => {
+            if (signal !== 'SendMenuTree') return;
+            const [payload] = params.deep_unpack();
+            try { this.setTree(JSON.parse(payload)); }
+            catch (e) { logError(e, 'Fildem menu tree'); }
         });
-        this.box.add_child(this.labelWidget);
-        this.add_child(this.box);
-        const handler = this.onButtonEvent.bind(this);
-        this.connect('button-press-event', handler);
-        this.box.connect('button-press-event', handler);
-        this.labelWidget.connect('button-press-event', handler);
+        this._focus = global.display.connect('notify::focus-window', () => this._sendWindow());
+        this._sendWindow();
     }
 
-    _onStyleChanged(actor) {
-        super._onStyleChanged(actor);
-        let padding = this._menuBar.extension.settings.get_int('min-padding');
-        this._minHPadding = padding;
-        this._natHPadding = padding;
-    }
-
-    onButtonEvent(actor, event) {
-        if (event.get_button() !== 1)
-            return Clutter.EVENT_PROPAGATE;
-
-        log(`Panel click: ${this._label}`);
-        this._menuBar.onButtonClicked(this._label);
-        return Clutter.EVENT_STOP;
-    }
-});
-
-const Cache = class Cache {
-    constructor() {
-        this.N = 10;
-        this.lru = [];
-        this.entries = {};
-        this.lastQueriedKey = '';
-    }
-
-    get(key) {
-        this.lastQueriedKey = key;
-        return this.entries[key];
-    }
-
-    _set(key, value) {
-        if (this.entries[key]) {
-            const index = this.lru.indexOf(key);
-            if (index > -1) this.lru.splice(index, 1);
-        }
-        this.lru.push(key);
-        this.entries[key] = value;
-
-        if (this.lru.length > this.N) {
-            const toRemove = this.lru.shift();
-            delete this.entries[toRemove];
-        }
-    }
-
-    withCache(f) {
-        const self = this;
-        const g = (param) => {
-            self._set(self.lastQueriedKey, param);
-            f(param);
-        }
-        return g;
-    }
-}
-
-const MenuBar = class MenuBar {
-    constructor(proxy, extension) {
-        this._menuButtons = [];
-        this._proxy = proxy;
-        this.extension = extension;
-        this._width_offset = 300;
-        this.MARGIN_FIRST_ELEMENT = 4;
-        this._isShowingMenu = false;
-
-        this._cache = new Cache();
-
-        this._notifyFocusWinId = global.display.connect('notify::focus-window', this._onWindowSwitched.bind(this));
-        this._proxy.listeners['SendTopLevelMenus'].push(this._cache.withCache(this.setMenus.bind(this)));
-        this._proxy.listeners['MenuOnOff'].push(this._onMenuOnOff.bind(this));
-        
-        Main.panel.reactive = true;
-        
-        this._panelEvHandlers = [];
-        this._forceShowMenu = false;
-        this._showAppMenuButton = false;
-        this.setForceShowMenu();
-        this.setHideAppMenuButton();
-
-        this._overviewShowingId = Main.overview.connect('showing', this._onOverviewOpened.bind(this));
-        this._overviewHidingId = Main.overview.connect('hiding', this._onOverviewClosed.bind(this));
-        
-        log('MenuBar inicializado');
-    }
-
-    setForceShowMenu() {
-        this._forceShowMenu = !this.extension.settings.get_boolean('show-only-when-hover');
-
-        if (!this._forceShowMenu) {
-            this._panelEvHandlers.push(Main.panel.connect('enter-event', this._onPanelEnter.bind(this)));
-            this._panelEvHandlers.push(Main.panel.connect('leave-event', this._onPanelLeave.bind(this)));
-        } else {
-            for (let h of this._panelEvHandlers) {
-                Main.panel.disconnect(h);
+    _sendWindow() {
+        const app = Shell.WindowTracker.get_default().focus_app;
+        const win = global.display.get_focus_window();
+        const data = {};
+        if (win) {
+            const desc = win.get_description() || '';
+            const match = desc.match(/0x[0-9a-f]+/i);
+            data.xid = match ? String(parseInt(match[0])) : '';
+            for (const key of Object.keys(win)) {
+                if (key.startsWith('gtk_') && win[key] !== null && win[key] !== undefined)
+                    data[key] = String(win[key]);
             }
-            this._panelEvHandlers = [];
         }
+        this._proxy.call('WindowSwitched', new GLib.Variant('(a{ss})', [data]),
+            Gio.DBusCallFlags.NONE, -1, null, null);
     }
 
-    setHideAppMenuButton() {
-        this._showAppMenuButton = !this.extension.settings.get_boolean('hide-app-menu');
-        this._restoreLabel();
+    _activate(path) {
+        this._proxy.call('EchoSignal', new GLib.Variant('(su)', [`__fildem_activate:${path}`, 0]),
+            Gio.DBusCallFlags.NONE, -1, null, null);
     }
 
-    addMenuButton(label, setmargin) {
-        let menuButton = new MenuButton(label, this);
-        this._menuButtons.push(menuButton);
-        const nItems = Main.panel._leftBox.get_children().length;
-        menuButton.hide();
-        if (setmargin)
-            menuButton.set_style('margin-left: '+ this.MARGIN_FIRST_ELEMENT + 'px')
-        Main.panel.addToStatusArea(label, menuButton, nItems, 'left');
-    }
-
-    setMenus(menus) {
-        log(`Recibidos ${menus.length} menús: ${menus}`);
-        if (menus.length === 0) {
-            this._hideMenu();
-        }
-        this.removeAll();
-        let first = true;
-        for (let menu of menus) {
-            this.addMenuButton(menu, first);
-            first = false;
-        }
-        if (this._forceShowMenu && !Main.overview.visibleTarget) {
-            this._onPanelEnter();
-        }
-    }
-
-    _onPanelEnter() {
-        if (this._menuButtons.length === 0 || Main.overview.visibleTarget)
-            return;
-
-        this._hideAppMenuButton();
-        this._showMenu();
-    }
-
-    _hideAppMenuButton() {
-        let width = 0;
-        for (let el of Main.panel._leftBox.get_children()) {
-            let firstChild = el.get_first_child();
-            if (firstChild === this._menuButtons[0]) {
-                this._width_offset = width;
-                break;
-            }
-            if (el.is_visible()) {
-                width += el.get_width();
+    _build(items, menu) {
+        for (const item of items) {
+            if (item.children?.length) {
+                const sub = new PopupMenu.PopupSubMenuMenuItem(item.label);
+                this._build(item.children, sub.menu);
+                menu.addMenuItem(sub);
+            } else {
+                const entry = new PopupMenu.PopupMenuItem(item.label);
+                entry.setSensitive(item.enabled !== false);
+                if (item.toggle) entry.setOrnament(PopupMenu.Ornament.CHECK);
+                entry.connect('activate', () => this._activate(item.action));
+                menu.addMenuItem(entry);
             }
         }
     }
 
-    _showMenu() {
-        this._menuButtons.forEach(btn => btn.show());
-        this._menuButtons.forEach(btn => btn.ease({
-            opacity: 255,
-            mode: Clutter.AnimationMode.EASE_OUT_QUART,
-            duration: 250
-        }));
-    }
-
-    _onPanelLeave() {
-        if (this._isShowingMenu || this._forceShowMenu)
-            return;
-
-        this._hideMenu();
-    }
-
-    _hideMenu() {
-        this._menuButtons.forEach(btn => btn.ease({
-            opacity: 0,
-            mode: Clutter.AnimationMode.EASE_OUT_QUART,
-            duration: 100,
-            onComplete: () => { 
-                this._menuButtons.forEach(btn => btn.hide()); 
-                this._restoreLabel();
-            }
-        }));
-    }
-
-    _restoreLabel() {
-    }
-
-    _onMenuOnOff(on) {
-        log(`MenuOnOff recibido: ${on}`);
-        if (on) {
-            this._onPanelEnter();
-            this.onButtonClicked('__fildem_move', this._width_offset);
-        } else {
-            this._isShowingMenu = false;
-            this._onPanelLeave();
-        }
-    }
-
-    onButtonClicked(label) {
-        this._isShowingMenu = true;
-        this._proxy.EchoSignal(label, this._width_offset);
-    }
-
-    removeAll() {
-        for (let e of this._menuButtons) {
-            e.destroy();
-        }
-        this._menuButtons = [];
-    }
-
-    _onWindowSwitched() {
-        this.removeAll();
-        this._restoreLabel();
-        this._hideMenu();
-        const focusApp = WinTracker.focus_app;
-        if (focusApp) {
-            let windowData = {};
-            let win = focusApp.get_windows()[0];
-            let appId = focusApp.get_id();
-            log(`Ventana cambiada a: ${appId}`);
-
-            let cachedValue = this._cache.get(appId);
-            if (cachedValue) {
-                this.setMenus(cachedValue);
-            }
-
-            let xid = '';
-            if (win) {
-                try {
-                    xid = parseInt(win.get_description().match(/0x[0-9a-f]+/)[0]);
-                } catch (e) {}
-                windowData['xid'] = String(xid);
-                for (let p in win) {
-                    if (p.startsWith('gtk_') && win[p] != null) {
-                        windowData[p] = win[p];
-                    }
-                }
-            }
-            this._proxy.WindowSwitched(windowData);
-        }
-    }
-
-    _onOverviewOpened() {
-        this._hideMenu();
-    }
-
-    _onOverviewClosed() {
-        if (this._forceShowMenu && this._menuButtons.length) {
-            this._hideAppMenuButton();
-            this._showMenu();
-        }
-    }
-
-    _disconnectAll() {
-        for (let h of this._panelEvHandlers) {
-            Main.panel.disconnect(h);
-        }
-        if (this._notifyFocusWinId)
-            global.display.disconnect(this._notifyFocusWinId);
-        
-        if (this._overviewShowingId)
-            Main.overview.disconnect(this._overviewShowingId);
-        if (this._overviewHidingId)
-            Main.overview.disconnect(this._overviewHidingId);
+    setTree(tree) {
+        this._buttons.forEach(button => button.destroy());
+        this._buttons = [];
+        tree.forEach((item, index) => {
+            const button = new PanelMenu.Button(0.0, item.label);
+            button.add_child(new St.Label({ text: item.label, y_align: Clutter.ActorAlign.CENTER }));
+            this._build(item.children || [], button.menu);
+            Main.panel.addToStatusArea(`fildem-native-${index}`, button, index + 1, 'left');
+            this._buttons.push(button);
+        });
     }
 
     destroy() {
-        this._disconnectAll();
-        this.removeAll();
-        this._restoreLabel();
-    }
-};
-
-const ifaceXml = `
-<node>
-  <interface name="es.inled.fildem">
-    <method name="EchoSignal">
-      <arg type="s" direction="in" name="menu"/>
-      <arg type="u" direction="in" name="x"/>
-    </method>
-    <method name="WindowSwitched">
-      <arg name="win_data" type="a{ss}" direction="in"/>
-    </method>
-
-    <signal name="WindowSwitchedSignal">
-      <arg name="win_data" type="a{ss}"/>
-    </signal>
-    <signal name="MenuActivated">
-      <arg name="menu" type="s"/>
-      <arg name="x" type="u"/>
-    </signal>
-
-    <method name="EchoMenuOnOff">
-      <arg name="on" type="b" direction="in"/>
-    </method>
-    <signal name="MenuOnOff">
-      <arg name="on" type="b"/>
-    </signal>
-
-    <method name="SendTopLevelMenus">
-      <arg name="top_level_menus" type="as" direction="in"/>
-    </method>
-    <signal name="SendTopLevelMenusSignal">
-      <arg name="top_level_menus" type="as"/>
-    </signal>
-
-
-    <method name="RequestWindowActions"/>
-    <signal name="RequestWindowActionsSignal"/>
-
-    <method name="ListWindowActions">
-      <arg name="actions" type="as" direction="in"/>
-    </method>
-    <signal name="ListWindowActionsSignal">
-      <arg name="actions" type="as"/>
-    </signal>
-
-    <method name="ActivateWindowAction">
-      <arg name="action" type="s" direction="in"/>
-    </method>
-    <signal name="ActivateWindowActionSignal">
-      <arg name="action" type="s"/>
-    </signal>
-  </interface>
-</node>`;
-
-const TestProxy = Gio.DBusProxy.makeProxyWrapper(ifaceXml);
-
-const BUS_NAME = 'es.inled.fildem';
-const BUS_PATH = '/es/inled/fildem';
-
-class MyProxy {
-    constructor() {
-        this._createProxy();
-        this._handlerIds = [];
-    }
-
-    async _createProxy() {
-        log('Creando Proxy D-Bus...');
-        this._proxy = new TestProxy(
-            Gio.DBus.session,
-            BUS_NAME,
-            BUS_PATH,
-            this._onProxyReady.bind(this)
-        );
-        this.listeners = {
-            'MenuActivated': [],
-            'SendTopLevelMenus': [],
-            'MenuOnOff': []
-        }
-    }
-
-    async _onProxyReady(result, error) {
-        if (error) {
-            console.error('[FILDEM_MENU] Error al conectar Proxy D-Bus:', error);
-            return;
-        }
-        log('Proxy D-Bus listo. Conectando señales...');
-        let id = undefined;
-        id = this._proxy.connectSignal('SendTopLevelMenus', this._onSendTopLevelMenus.bind(this));
-        this._handlerIds.push(id);
-        id = this._proxy.connectSignal('RequestWindowActionsSignal', this._onRequestWindowActionsSignal.bind(this));
-        this._handlerIds.push(id);
-        id = this._proxy.connectSignal('ActivateWindowActionSignal', this._onActivateWindowActionSignal.bind(this));
-        this._handlerIds.push(id);
-        id = this._proxy.connectSignal('MenuOnOff', this._onMenuOnOff.bind(this));
-        this._handlerIds.push(id);
-    }
-
-    async _onMenuActivated(proxy, nameOwner, args) {
-        log(`TestSignal: ${args[0]}`);
-    }
-
-    async _onSendTopLevelMenus(proxy, nameOwner, args) {
-        let topLevelMenus = args[0];
-        log(`Señal SendTopLevelMenus recibida: ${topLevelMenus}`);
-        for (let callback of this.listeners['SendTopLevelMenus']) {
-            callback(topLevelMenus);
-        }
-    }
-
-    async _onRequestWindowActionsSignal(proxy, nameOwner, args) {
-        this._currentWindow = new WindowActions();
-        let actions = this._currentWindow.getActions();
-        this._proxy.ListWindowActionsRemote(actions);
-    }
-
-    async _onActivateWindowActionSignal(proxy, nameOwner, args) {
-        if (this._currentWindow)
-            this._currentWindow._doAction(args[0]);
-    }
-
-    async _onMenuOnOff(proxy, nameOwner, args) {
-        for (let callback of this.listeners['MenuOnOff']) {
-            callback(args[0]);
-        }
-    }
-
-    _onNameOwnerChanged(proxy, sender, [name, oldOwner, newOwner]) {
-        log(`Name owner changed: ${name} ${oldOwner} -> ${newOwner}`)
-    }
-
-    async WindowSwitched(windowData) {
-        if (this._proxy) {
-            log('Enviando WindowSwitched a Python...');
-            this._proxy.WindowSwitchedRemote(windowData);
-        }
-    }
-
-    async EchoSignal(menu, x) {
-        if (this._proxy)
-            this._proxy.EchoSignalRemote(menu, x);
-    }
-
-    destroy() {
-        if (this._proxy) {
-            for (let id of this._handlerIds) {
-                this._proxy.disconnectSignal(id);
-            }
-        }
-        this._handlerIds = [];
+        if (this._focus) global.display.disconnect(this._focus);
+        if (this._proxy && this._signal) this._proxy.disconnect(this._signal);
+        this._buttons.forEach(button => button.destroy());
+        this._buttons = [];
     }
 }
 
 export default class FildemExtension extends Extension {
-    enable() {
-        log('Habilitando extensión...');
-        this.settings = this.getSettings();
-        this._handlerIds = [];
-        this.myProxy = new MyProxy();
-        this.menubar = new MenuBar(this.myProxy, this);
-
-        this._connectSettings();
-    }
-
-    _connectSettings() {
-        this._handlerIds.push(this.settings.connect(
-            'changed::show-only-when-hover',
-            () => { this.menubar.setForceShowMenu(); }
-        ));
-        this._handlerIds.push(this.settings.connect(
-            'changed::hide-app-menu',
-            () => { this.menubar.setHideAppMenuButton(); }
-        ));
-    }
-
-    disable() {
-        log('Deshabilitando extensión...');
-        this._disconnectSettings();
-        if (this.menubar)
-            this.menubar.destroy();
-        if (this.myProxy)
-            this.myProxy.destroy();
-        
-        this.menubar = null;
-        this.myProxy = null;
-        this.settings = null;
-    }
-
-    _disconnectSettings() {
-        if (this.settings) {
-            for (let h of this._handlerIds) {
-                this.settings.disconnect(h);
-            }
-        }
-        this._handlerIds = [];
-    }
+    enable() { this._manager = new NativeMenuManager(); }
+    disable() { this._manager?.destroy(); this._manager = null; }
 }

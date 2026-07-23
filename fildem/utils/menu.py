@@ -1,4 +1,5 @@
 import dbus
+import json
 
 from gi.repository import GLib
 
@@ -63,6 +64,9 @@ class DbusMenu:
 
 	def on_menu_activated(self, menu: str, x: int):
 		print('Fildem menu signal:', repr(menu), x, flush=True)
+		if menu.startswith('__fildem_activate:'):
+			self.activate(menu[len('__fildem_activate:'):])
+			return
 		if menu == '__fildem_move':
 			self._move_menu(x)
 			return
@@ -129,6 +133,24 @@ class DbusMenu:
 		self._update_menus()
 		self._handle_shortcuts(self._menu_model.top_level_menus)
 		self._send_msg(self._menu_model.top_level_menus)
+		self._send_tree()
+
+	def _send_tree(self):
+		def node_data(node):
+			data = node.data
+			children = [node_data(child) for child in self.tree.children(node.identifier)]
+			return {
+				'label': str(data.label if data else node.tag),
+				'action': str(data.text if data else ''),
+				'enabled': bool(data.enabled) if data else True,
+				'toggle': bool(data.toggle_state) if data else False,
+				'children': children,
+			}
+
+		root = self.tree[self.tree.root] if self.tree.root else None
+		tree = [node_data(child) for child in self.tree.children(root.identifier)] if root else []
+		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')
+		proxy.EchoSendMenuTree(json.dumps(tree, separators=(',', ':')))
 
 	def _send_msg(self, top_level_menus):
 		if len(top_level_menus) == 0:

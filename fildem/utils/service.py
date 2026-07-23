@@ -81,6 +81,14 @@ class MyService(dbus.service.Object):
 	def SendTopLevelMenus(self, top_level_menus):
 		pass
 
+	@dbus.service.method(BUS_NAME, in_signature='s')
+	def EchoSendMenuTree(self, menu_tree):
+		self.SendMenuTree(menu_tree)
+
+	@dbus.service.signal(BUS_NAME, signature='s')
+	def SendMenuTree(self, menu_tree):
+		pass
+
 	@dbus.service.method(BUS_NAME, in_signature='b')
 	def EchoMenuOnOff(self, on):
 		self.MenuOnOff(on)
