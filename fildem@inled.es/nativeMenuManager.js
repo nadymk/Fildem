@@ -87,8 +87,11 @@ export class NativeMenuManager {
                     submenu.menu.open();
                     // Keep the nested actor above the parent popup. This is
                     // a diagnostic for GNOME 50's nested-popup stacking.
-                    if (submenu.menu.actor?.raise_top)
+                    if (submenu.menu.actor?.raise_top) {
                         submenu.menu.actor.raise_top();
+                        if (Main.uiGroup.set_child_above_sibling)
+                            Main.uiGroup.set_child_above_sibling(submenu.menu.actor, null);
+                    }
                 });
                 menu.addMenuItem(submenu);
                 continue;
