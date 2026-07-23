@@ -3,7 +3,7 @@ import { NativeMenuManager } from './nativeMenuManager.js';
 
 export default class FildemExtension extends Extension {
     enable() {
-        this._menuManager = new NativeMenuManager();
+        this._menuManager = new NativeMenuManager(this.getSettings());
     }
 
     disable() {

@@ -27,6 +27,7 @@ class Window(object):
 		super(Window, self).__init__()
 		self.bamf_window = bamf_window
 		self.xid = 0
+		self.pid = 0
 		self.props = {}
 
 	def get_xid(self):
@@ -37,6 +38,12 @@ class Window(object):
 
 	def set_xid(self, xid):
 		self.xid = xid
+
+	def get_pid(self):
+		return self.pid
+
+	def set_pid(self, pid):
+		self.pid = pid
 
 	def get_utf8_prop(self, id):
 		if self.bamf_window != None:
@@ -131,6 +138,16 @@ class WindowManager(object):
 		for p in win_data:
 			if p == 'xid':
 				win.set_xid(int(win_data[p]) if win_data[p] != '' else 0)
+			elif p == 'pid':
+				win.set_pid(int(win_data[p]) if win_data[p] != '' else 0)
+			elif p == 'appName':
+				win.set_utf8_prop('appName', win_data[p])
+			elif p == 'appId':
+				win.set_utf8_prop('appId', win_data[p])
+			elif p == 'wmClass':
+				win.set_utf8_prop('wmClass', win_data[p])
+			elif p == 'title':
+				win.set_utf8_prop('title', win_data[p])
 			else:
 				win.set_utf8_prop('_' + p.upper(), win_data[p])
 

@@ -1,0 +1,27 @@
+Source: qtlomiri-appmenutheme
+Priority: optional
+Section: libs
+Maintainer: UBports Developers <developers@ubports.com>
+Build-Depends: debhelper-compat (= 13),
+               libglib2.0-dev,
+               qtbase5-dev,
+               qtbase5-private-dev,
+Standards-Version: 3.9.6
+Homepage: https://gitlab.com/ubports/development/core/qtlomiri-appmenutheme
+Vcs-Git: https://gitlab.com/ubports/development/core/qtlomiri-appmenutheme.git
+Vcs-Browser: https://gitlab.com/ubports/development/core/qtlomiri-appmenutheme
+
+Package: qtlomiri-appmenutheme-qt5
+Replaces: qtlomiri-appmenutheme
+Breaks: qtlomiri-appmenutheme
+Provides: qtlomiri-appmenutheme (=${binary:Version})
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: Qt platform theme for exported application menus to Lomiri
+ Appmenutheme enables the export of application menus to a global menu bar.
+ It is implemented in a QPA platform theme plugin.
+ .
+ This package will work for applications designed for Qt5, as well as QML
+ applications

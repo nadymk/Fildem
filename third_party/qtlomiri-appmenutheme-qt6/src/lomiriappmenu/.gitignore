@@ -1,0 +1,6 @@
+*.o
+*.so
+.qmake.stash
+Makefile
+menuregistrar_interface.*
+moc_*

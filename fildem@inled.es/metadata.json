@@ -3,6 +3,7 @@
   "description": "Global menu and HUD for GNOME",
   "settings-schema": "org.gnome.shell.extensions.fildem-global-menu",
   "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "session-modes": ["user", "ubuntu"],
   "url": "https://github.com/InledGroup/Fildem",
   "uuid": "fildem@inled.es"
 }

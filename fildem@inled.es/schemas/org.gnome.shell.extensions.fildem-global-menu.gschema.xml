@@ -5,6 +5,16 @@
 			<default>6</default>
 			<summary>Button paddings (tweak this if the menu and items desynchronize)</summary>
 		</key>
+		<key type="i" name="hover-switch-delay">
+			<range min="0" max="3000"/>
+			<default>1000</default>
+			<summary>Delay in milliseconds before switching open menus on hover</summary>
+		</key>
+		<key type="i" name="max-menu-width-percent">
+			<range min="10" max="80"/>
+			<default>33</default>
+			<summary>Maximum menu width as a percentage of the active monitor width</summary>
+		</key>
 		<key type="b" name="show-only-when-hover">
 			<default>true</default>
 			<summary>Show menu only when the mouse is over the panel</summary>

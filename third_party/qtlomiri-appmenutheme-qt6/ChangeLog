@@ -1,0 +1,5577 @@
+2026-06-19 Mike Gabriel
+
+        * Release 0.67 (HEAD -> main, tag: 0.67)
+
+2026-03-15 Mike Gabriel
+
+        * Merge branch 'mariogrip-main-patch-04237' into 'main' (7a1e81f)
+
+2026-03-15 Marius Gripsgard
+
+        * Rename pkg to match debian (27470f6)
+
+2025-01-29 Ratchanan Srirattanamet
+
+        * Merge branch 'personal/sunweaver/typo-fixes' into 'main' (a455610)
+
+2025-01-29 Mike Gabriel
+
+        * src/lomiriappmenu/: Typo fixes. (93b02c2)
+        * Release 0.66 (dcaeac8) (tag: 0.66)
+        * Drop .bzr* remnants. (e39da48)
+
+2025-01-22 Mike Gabriel
+
+        * Merge branch 'personal/peat-psuwit/build-against-noble' into 'main'
+          (235e3fd)
+
+2025-01-22 Ratchanan Srirattanamet
+
+        * debian/: remove obsolete "convert to GLES" patch and script
+          (b0bd83d)
+        * debian/: update for qtlomiri-appmenetheme (7f48998)
+        * README.md: complete rewrite to reflect current status, and some
+          history (54e7ce0)
+        * src: remove leftover platforms/ folder (5fb2434)
+        * src: rename DBus interface com.{ubuntu => lomiri}.MenuRegistrar
+          (b4d068e)
+        * src: rename logging categories to lomiriappmenu{,Registrar}
+          (3d22df7)
+        * src: rename C++ classes containing Ubuntu to Lomiri (ce7a743)
+        * src: rename QPA plugin to lomiriappmenu (c4736fc)
+        * Remove ubuntumirclient (350a044)
+        * Rename project to qtlomiri-appmenutheme (9131100)
+
+2024-06-23 Mike Gabriel
+
+        * Merge branch 'personal/peat-psuwit/build-against-noble' into 'main'
+          (6b249b6)
+
+2024-06-21 Ratchanan Srirattanamet
+
+        * d/control: update maintainership metadata (48cb3f2)
+        * debian/: upgrade debhelper compat level to 13 & tidy up packaging
+          (744a759)
+        * d/control: update B-Ds for Mir 1 and Content Hub package rename
+          (ba9c6b8)
+        * ubuntumirclient: migrate to QWSI::handleMouseEvent() w/ btn & event
+          type (eec8e45)
+        * ubuntumirclient: migrate to QWSI::handleScreenRemoved() (7af236b)
+
+2024-06-20 Ratchanan Srirattanamet
+
+        * ubuntumirclient: fix QRegion::rects() deprecation (d80dc56)
+        * ubuntuappmenu: migrate to Qt::endl (9ce343a)
+        * ubuntuappmenu: migrate to Qt::SkipEmptyParts (7dac876)
+        * ubuntumirclient: ignore -Wdeprecated-declarations only at mirclient
+          call (94b1066)
+        * ubuntumirclient: Workaround egl_support-private USE'ing libdl
+          (71a5f57)
+        * ubuntumirclient: adapt for Mir 1 package rename (9449b83)
+        * ubuntumirclient: adapt for liblomiri-content-hub rename (57173ba)
+
+2023-08-18 Mike Gabriel
+
+        * Merge branch 'personal/peat-psuwit/platformwindow-minmaxsize' into
+          'main' (89e127f)
+
+2023-08-05 Ratchanan Srirattanamet
+
+        * qmirclientwindow: do follow scaling for sizing constraint
+          (c63f5f5)
+          Fixes:
+          https://gitlab.com/ubports/development/apps/lomiri-clock-app/-/issues/185
+
+2023-01-29 Mike Gabriel
+
+        * Merge branch 'personal/fredldotme/smoothscrolling' into 'main'
+          (a06a50c)
+
+2022-10-30 Alfred Neumayer
+
+        * ubuntumirclient: Further cleanup & abrupt kinetic scroll stop
+          (c81a316)
+
+2022-10-29 Alfred Neumayer
+
+        * ubuntumirclient: Reset pending scroll attempt (ac5a36d)
+        * ubuntumirclient: Tweak timing & scroll end behavior (7be2452)
+
+2022-10-28 Alfred Neumayer
+
+        * ubuntumirclient: Sort out validAngleDelta and some naming (412f838)
+        * ubuntumirclient: Fix precision for mice and trackpads alike
+          (b42010f)
+        * ubuntumirclient: Stop scrolling within 300ms of moving the mouse
+          (8a42f87)
+
+2022-10-27 Alfred Neumayer
+
+        * ubuntumirclient: Cleanups & crash fix (6fd99a7)
+        * ubuntumirclient: End previous scrolling on new scroll attempt
+          (3a017c7)
+        * ubuntumirclient: Pass keymodifiers to pending scroll (47b17a4)
+
+2022-10-26 Alfred Neumayer
+
+        * ubuntumirclient: Restore scrolling for non-touchpads (6e0745d)
+        * ubuntumirclient: Animate inertial scrolling (fb33591)
+        * ubuntumirclient: Unify mir_pointer_action switch-case again
+          (8cd3637)
+        * ubuntumirclient: Improve ScrollEnd phase handling (7193d90)
+
+2022-10-25 Alfred Neumayer
+
+        * ubuntumirclient: Stick-to-the-finger smooth scrolling (86ab1cc)
+
+2022-12-12 Marius Gripsgard
+
+        * Merge branch 'personal/fredldotme/desktopmode' into 'main'
+          (57882dd)
+
+2022-11-30 Alfred Neumayer
+
+        * ScreenObserver & Integration: Use QWindowSystemInterface & cleanup
+          (2c753e7)
+        * ScreenObserver: Only hide virtual touchpad screen for non-OSK
+          clients (e3d08ca)
+        * ScreenObserver: Cause screenRemoved for the primary screen to be
+          emitted (9deb1bb)
+
+2022-11-29 Alfred Neumayer
+
+        * ScreenObserver: Provide the client with ignored screen (f959ab7)
+
+2022-10-25 Alfred Neumayer
+
+        * ubuntumirclient: Avoid querying EGL surface geometry (95efd09)
+
+2022-11-26 Alfred Neumayer
+
+        * ScreenObserver: Remove index check (cf2dc20)
+
+2022-11-17 Alfred Neumayer
+
+        * ClientScreen: Always send update signals, at start and during
+          lifecycle (0bf5d94)
+        * ScreenObserver: Still remove old screens, should they have changed
+          (db8e9f6)
+        * ScreenObserver: Ignore internal output device with virtual touchpad
+          enabled (4299359)
+
+2022-01-25 Dalton Durst
+
+        * Merge branch 'personal/peat-psuwit/merge-xenial-2022Jan' into
+          'main' (0237b8b)
+
+2022-01-25 Ratchanan Srirattanamet
+
+        * Merge remote-tracking branch 'gitlab_ubports/ubports/xenial' into
+          personal/peat-psuwit/merge-xenial-2022Jan (71d6f01)
+
+2022-01-12 Dalton Durst
+
+        * Merge branch 'personal/peat-psuwit/depends-on-gles' into 'main'
+          (5252cce)
+
+2022-01-07 Ratchanan Srirattanamet
+
+        * debian/control: depends on libqt5gui5-gles (68ffad3)
+
+2022-01-05 Rodney
+
+        * Merge branch 'xenial_-_gpu-browser' into 'ubports/xenial' (d8d50c6)
+
+2021-09-04 Florian Leeber
+
+        * Merge branch 'ubports/xenial_-_trustpromptcrash' into 'main'
+          (1de59cc)
+
+2021-09-01 Marius Gripsgard
+
+        * mirclientwindow: Do not post events when application is closing
+          (be733d7)
+          Fixes:
+          https://github.com/ubports/ubuntu-touch/issues/1814
+
+2021-07-08 Alfred Neumayer
+
+        * Merge branch 'personal/peat-psuwit/build-main' into 'main'
+          (4798a94)
+
+2021-07-08 Ratchanan Srirattanamet
+
+        * debian/docs: update the README file name (8794f42)
+        * qmirclientwindow: adjust ifdef to the version we vendor in Focal
+          (d8c3d7b)
+
+2019-01-30 Marius Gripsgard
+
+        * Update and rename README to README.md (78a7064)
+
+2021-04-22 Ratchanan Srirattanamet
+
+        * New changelog entry with qtubuntu-gles source name (f5a6ba2)
+        * d/control: build -android variant for armhf out of this source
+          (505334d)
+        * d/control: build qtubuntu-gles on arm64 also (aab62b9)
+        * d/control: remove not-required Qt B-D (d6f1d16)
+
+2021-04-21 Ratchanan Srirattanamet
+
+        * Apply gles patch to create initial gles branch (27c8a10)
+
+2021-04-20 Ratchanan Srirattanamet
+
+        * ubuntumirclient: prevent error from -Wdeprecated-declarations
+          (0aed593)
+        * ubuntumirclient: define the more-standard EGL_NO_X11 (5eacebe)
+
+2021-05-18 Ratchanan Srirattanamet
+
+        * Support both older and newer content-hub (da19f2d)
+
+2021-04-20 Ratchanan Srirattanamet
+
+        * Support (and prefer) lomiri-url-dispatcher (7346fd0)
+
+2021-06-07 Ratchanan Srirattanamet
+
+        * Move Jenkinsfile to debian/ per the new guideline (19f2174)
+        * Update Jenkinsfile to use shared library (00b2c5b)
+
+2020-04-12 Chris Clime
+
+        * Add Native Interface EglConfig (ff3c4e1)
+
+2021-06-01 Rodney
+
+        * Merge pull request #21 from
+          ubports/xenial_-_qtubuntu-no-platform-api (998c0a5)
+
+2021-04-22 Ratchanan Srirattanamet
+
+        * d/control: don't depend on platform-api backend package (0e506de)
+
+2021-04-17 Ratchanan Srirattanamet
+
+        * Remove dependency to platform-api (c520df1)
+
+2021-04-20 Ratchanan Srirattanamet
+
+        * d/control: get rid of obsolete B-D (ead35ee)
+
+2021-04-18 Ratchanan Srirattanamet
+
+        * Adapt to Mir changes (abc1a40)
+
+2021-04-20 Ratchanan Srirattanamet
+
+        * d/rules: fix incorrect dir in override_dh_clean (ca95882)
+
+2021-03-05 Rodney
+
+        * Merge pull request #20 from ubports/xenial_-_doubletap (82a7a30)
+
+2021-03-05 Dalton Durst
+
+        * platformtheme: Implement DoubleClick/DoubleTap distances (080035d)
+
+2021-03-05 Marius Gripsgard
+
+        * Merge pull request #19 from ubports/xenial_-_rastergl (f7b6791)
+
+2021-03-02 Rodney Dawes
+
+        * Use RasterGLSurface instead. (c191925)
+
+2021-01-08 Marius Gripsgard
+
+        * Merge pull request #17 from ubports/xenial_-_qt-5-12 (e241013)
+
+2020-07-27 Rodney Dawes
+
+        * Handle change to private window state API (37a15ab)
+
+2020-04-29 Ratchanan Srirattanamet
+
+        * ubuntumirclient: better theme support (a9a0e3b)
+        * ubuntumirclient: remove dead code (fbf7be4)
+
+2020-01-05 Ratchanan Srirattanamet
+
+        * Save focused state even when suspended (0a83eff)
+
+2020-01-03 Ratchanan Srirattanamet
+
+        * Make sure set{Suspended,Resumed} get called from main thread
+          (a92108a)
+
+2020-01-04 Ratchanan Srirattanamet
+
+        * Update Jenkinsfile as of ubports/build-tools@0af3831 (76d862c)
+
+2019-12-23 Marius Gripsgard
+
+        * Merge pull request #13 from
+          ubports/xenial_-_noorieventbeforebuffers (b1e1692)
+
+2019-12-21 Marius Gripsgard
+
+        * [QMirScreen] Don't send orientation events before initial buffers
+          (d51f00f)
+
+2019-11-01 Marius Gripsgard
+
+        * Merge pull request #11 from ubports/xenial_-_gst-droid (fd335aa)
+
+2019-09-14 Ratchanan Srirattanamet
+
+        * Return EglDisplay from pni->nativeResourceForIntegration()
+          (7794e89)
+
+2019-02-26 Dalton Durst
+
+        * Un-implement devicePixelRatio (3ef08fd)
+        * Remove more dead code (f7a4c82)
+        * Implement pixelDensity (e9a5f36)
+
+2019-02-25 Dalton Durst
+
+        * Remove files left after bad merge (954fdec)
+
+2019-01-08 Marius Gripsgard
+
+        * Handle mir_window_type_decoration (8f367aa)
+
+2018-11-29 Marius Gripsgard
+
+        * Merge branch 'xenial' into xenial_-_edge_-_mir (33ff367)
+
+2018-09-11 Dalton Durst
+
+        * Tweak scaling values to be more pleasing on every device (ed59e3b)
+        * Try to use non-integer values (16c5b4f)
+
+2018-09-10 Dalton Durst
+
+        * Return appropriate value for Qt automatic scaling (c412ddf)
+
+2018-02-16 Marius Gripsgard
+
+        * Disable amd64 (ab322f1)
+        * Update Jenkinsfile (35ee7d8)
+
+2017-12-28 Marius Gripsgard
+
+        * Use modularized qtplatformsupport introduced in Qt 5.8 (7f1bc9b)
+        * Merge remote-tracking branch 'u8t/master' into xenial_-_mir26
+          (10bf045)
+        * Update Jenkinsfile (d137939)
+
+2017-10-26 Marius Gripsgard
+
+        * Build in parallel (1f6de1e)
+        * Use modularized qtplatformsupport introduced in Qt 5.8 (449c6b1)
+        * QOpenGLTextureBlitter is open api now (6e4a8e1)
+
+2017-10-13 Marius Gripsgard
+
+        * Update Jenkins file, and target xenial (5f25e98)
+
+2017-09-25 Marius Gripsgard
+
+        * Bring back PendingFocusGainedEvents (fixes
+          https://github.com/ubports/ubports-touch/issues/52)
+          (7a4d51a)
+        * Imported to UBports (104b800)
+
+2017-04-04 Bileto Bot
+
+        * Releasing 0.64+17.04.20170404-0ubuntu1 (8102e77)
+
+2017-04-04 Lukáš Tinkl
+
+        * Use the correct font (Ubuntu family) and icon theme (suru) (LP:
+          #1676878) (256c910)
+
+2017-03-29 Lukáš Tinkl
+
+        * s/UbuntuIconTheme/UbuntuTheme (433cf88)
+        * factor out the common QPlatformTheme bits into a shared header file
+          (6ac980c)
+        * update (c), prefix private member with "m" (086ccdb)
+
+2017-03-28 Bileto Bot
+
+        * Releasing 0.64+17.04.20170328.1-0ubuntu1 (f65851e)
+
+2017-03-28 Daniel d'Andrada
+
+        * Proper implementation of QPlatformScreen::logicalDpi (1244d4a)
+
+2017-03-28 Alberto Aguirre
+
+        * Remove more uses of deprecated mir apis. (334ffe7)
+
+2017-03-28 Albert Astals Cid
+
+        * Honor the menu item visibility (LP: #1675802) (b3f5aac)
+        * Remove signal noone uses (b9a47f7)
+
+2017-03-28 Gerry Boland
+
+        * BackingStore: is possible for context's QPlatformSurface to be
+          deleted before backing store is. (73fb7e5)
+
+2017-03-28 Daniel d'Andrada
+
+        * Qt::Tool == mir_window_type_satellite (LP: #1673415) (3d57b1e)
+
+2017-03-28 Lukáš Tinkl
+
+        * use the correct font (Ubuntu family) and icon theme (suru)
+          (c1de846)
+
+2017-03-28 Daniel d'Andrada
+
+        * Forget about GRID_UNIT_PX (b758f19)
+
+2017-03-27 Albert Astals Cid
+
+        * Honor the menu item visibility (79098b5)
+        * Remove signal noone uses (35a5889)
+
+2017-03-24 Gerry Boland
+
+        * QOffScreenSurface on stack instead of heap (3f0bf8c)
+
+2017-03-24 Daniel d'Andrada
+
+        * Proper implementation of QPlatformScreen::logicalDpi (6dcdbf7)
+
+2017-03-20 Bileto Bot
+
+        * Releasing 0.64+17.04.20170320-0ubuntu1 (94453ef)
+
+2017-03-20 Albert Astals Cid
+
+        * Build with clang (40fb094)
+        * fix image conversion to Format_ARGB32 (4c18134)
+
+2017-03-20 Gerry Boland
+
+        * Use correct parented/parentless dialog and utility window types
+          from Mir (a8dde1f)
+
+2017-03-20 Albert Astals Cid
+
+        * Set enabled state for menus in the submenu-enabled property since
+          GMenuModel doesn't support that concept (LP: #1670694)
+          (9de4a8b)
+        * Set qtubuntu-tag and handle aboutToShow calls (LP: #1664578)
+          (a6d98cb)
+
+2017-03-17 Daniel d'Andrada
+
+        * Qt::Tool == mir_window_type_satellite (3e5faec)
+
+2017-03-16 Albert Astals Cid
+
+        * Fix review comments (65b48ae)
+
+2017-03-15 Albert Astals Cid
+
+        * fix nasty c&p error (f6b1169)
+        * Merge lp:~aacid/qtubuntu/fixImageConvert (92afd90)
+        * Build with clang (4b85264)
+        * fix image conversion to Format_ARGB32 (ba2d93f)
+        * override++ (9817efd)
+
+2017-03-13 Gerry Boland
+
+        * Missing close quote (119f6b5)
+        * Shrink diff slightly (c7f1fec)
+        * Add required header (dac5c99)
+
+2017-03-13 Albert Astals Cid
+
+        * Merge (41aa19d)
+        * Merge (4871242)
+
+2017-03-13 Gerry Boland
+
+        * Typo (ddd71a4)
+        * BackingStore: is possible for context's QPlatformSurface to be
+          deleted before backing store is. (b044eac)
+
+2017-03-09 Gerry Boland
+
+        * Use correct parented/parentless dialog implementation from Mir
+          (a93bdfd)
+
+2017-03-08 Bileto Bot
+
+        * Releasing 0.64+17.04.20170308-0ubuntu1 (2e6b35c)
+
+2017-03-08 Albert Astals Cid
+
+        * Initialize m_tag (70e14b9)
+        * Make sure mMimeData doesn't point to already deleted memory
+          (16223cb)
+
+2017-03-08 Bileto Bot
+
+        * Implement QPlatformWindow::setMask and add support for special
+          InputMethod window type (b25ea08)
+
+2017-03-08 Albert Astals Cid
+
+        * Register metatype used in queued invokeMethod (9c54a9c)
+        * Implement UbuntuAppMenuTheme::createPlatformSystemTrayIcon
+          (7d84888)
+
+2017-03-08 Gerry Boland
+
+        * BackingStore: make current only if no existing context current
+          (3358a59)
+
+2017-03-08 Albert Astals Cid
+
+        * Set enabled state for menus in the submenu-enabled property since
+          GMenuModel doesn't support that concept (e5a9652)
+
+2017-03-07 Albert Astals Cid
+
+        * More cleanup (f7e7cea)
+        * Reorganize cleaning helpers so we can clear per menu (a96ecfc)
+        * Add 0 timer to collapse all structureChanged signals (089d6f6)
+
+2017-03-06 Albert Astals Cid
+
+        * Add QtUbuntuExtraActionHandler::disconnect (4d2dd5a)
+        * Crash-- (9d66074)
+        * init,me! (a497b8b)
+        * don't change whitespace (4b4cacf)
+        * Move the xml/dbus handling to a different file/class (c4ae23e)
+        * Set qtubuntu-tag and handle aboutToShow calls (5d75008)
+
+2017-03-02 Albert Astals Cid
+
+        * Daniel prefers this (f9c2eb2)
+        * Initialize m_tag (af7111c)
+
+2017-03-01 Albert Astals Cid
+
+        * Make sure mMimeData doesn't point to already deleted memory
+          (a2a7a54)
+
+2017-02-23 Gerry Boland
+
+        * Change InputMethod type specifier to better match Qt design, and
+          rename to clarify (13a30dc)
+        * [deb] bump version number, ubuntu-keyboard will depend on it
+          (1be6f35)
+        * Fix magic number (aaa3c50)
+
+2017-02-22 Gerry Boland
+
+        * Add custom InputMethod window type, and enable setMask (e4868c9)
+
+2017-02-21 Alberto Aguirre
+
+        * Merge lp:qtubuntu, fix conflicts (2573cb9)
+
+2017-02-21 Gerry Boland
+
+        * BackingStore: make current only if no existing context current
+          (6b1f263)
+
+2017-02-17 Albert Astals Cid
+
+        * Register metatype used in queued invokeMethod (ae3d774)
+
+2017-02-16 Albert Astals Cid
+
+        * Reimplement UbuntuAppMenuTheme::createPlatformSystemTrayIcon
+          (698f2f7)
+
+2017-02-15 Bileto Bot
+
+        * Releasing 0.63+17.04.20170215-0ubuntu1 (f401f27)
+
+2017-02-15 Alberto Aguirre
+
+        * Changes for mir 0.26.1: PersitentID has been renamed to WindowID
+          (618d63d)
+
+2017-02-15 Albert Astals Cid
+
+        * Fix crash when starting konsole (3495a7b)
+
+2017-02-15 Arthur Mello
+
+        * Update code to use new Mir Api's. (3dea01b)
+
+2017-02-15 Gerry Boland
+
+        * Class renaming and syntax changes to shrink delta with upstream
+          mirclient QPA plugin (which is equivalent to rev 360)
+          (15fa79d)
+
+2017-02-14 Alberto Aguirre
+
+        * Changes for mir 0.26.1: PersitentID has been renamed to WindowID
+          (70360af)
+
+2017-02-13 Albert Astals Cid
+
+        * Fix crash when starting konsole (006c002)
+
+2017-02-07 Alberto Aguirre
+
+        * Use a window spec to apply a cursor name to a window. (1bd8557)
+        * Use proper extension for translating window coordinates. (9e19074)
+
+2017-02-07 Arthur Mello
+
+        * Make sure pixel format is applied in makeSurfaceSpec (b68c432)
+        * Make sure pixel format is applied in makeSurfaceSpec (2cd6d97)
+        * Rename mirWindowStateToWindowState to mirWindowStateToQt (4cff680)
+        * Rename mirWindowStateToWindowState to mirWindowStateToQt (f6529af)
+        * Replace deprecated mir_debug_surface_coords_to_screen (785208e)
+        * Replace deprecated mir_debug_surface_coords_to_screen (240bf7e)
+        * Update the copyright header of all modified files to 2017 (a0a8388)
+        * Update the copyright header of all modified files to 2017 (5c9fba9)
+        * Merge with lp:~gerboland/qtubuntu/upstream-closer (3915cc4)
+        * Merge with lp:~gerboland/qtubuntu/upstream-closer (b711017)
+        * Remove deprecated mir_event_type_input_configuration (15a86d8)
+        * Remove deprecated mir_event_type_input_configuration (c513da8)
+        * Replace more deprecated enum entries (d1a0fa7)
+        * Replace more deprecated enum entries (82aa68d)
+        * Replace deprecated enum entries
+          mir_event_type_close_surface/mir_event_type_surface_output/mir_event_type_surface_placement
+          (7a942b3)
+        * Replace deprecated enum entries
+          mir_event_type_close_surface/mir_event_type_surface_output/mir_event_type_surface_placement
+          (bd1bcfb)
+        * Change mir_event_type_surface to user mir_event_type_window
+          (ff3a6ef)
+        * Change mir_event_type_surface to user mir_event_type_window
+          (1f44a19)
+        * Update new Mir APIs (cc3eb4c)
+        * Update new Mir APIs (8b7a526)
+
+2017-02-07 Gerry Boland
+
+        * Merge trunk and resolve conflict (3b7944f)
+
+2017-01-25 Gerry Boland
+
+        * Undo qpa plugin name change (2ed130d)
+        * Undo qpa plugin name change (04affc1)
+        * Undo qpa plugin name change (39af351)
+
+2017-01-24 Gerry Boland
+
+        * Class renaming and syntax changes to shrink delta with upstream
+          mirclient QPA plugin (which is equivalent to rev 360)
+          (6ae440b)
+
+2017-02-08 Nick Dedekind
+
+        * merged trunk (0a5f012)
+
+2017-02-08 Gerry Boland
+
+        * merge trunk (92f95ae)
+
+2017-01-24 Gerry Boland
+
+        * Class renaming and syntax changes to shrink delta with upstream
+          mirclient QPA plugin (which is equivalent to rev 360)
+          (43b45b2)
+
+2017-01-25 Gerry Boland
+
+        * Undo qpa plugin name change (1db6e5e)
+
+2017-01-24 Gerry Boland
+
+        * Class renaming and syntax changes to shrink delta with upstream
+          mirclient QPA plugin (which is equivalent to rev 360)
+          (2dc5f4f)
+        * Class renaming and syntax changes to shrink delta with upstream
+          mirclient QPA plugin (which is equivalent to rev 360)
+          (aba3fe7)
+        * lp:~dandrader/qtubuntu/resizeToolTip (5ce843f)
+        * lp:~gerboland/qtubuntu/quit-gracefully-on-no-mirconnection
+          (52466d4)
+        * lp:~nick-dedekind/qtubuntu/1648842.window-focus-regression
+          (233c48c)
+
+2017-01-19 Bileto Bot
+
+        * Releasing 0.63+17.04.20170119.2-0ubuntu1 (a0acf73)
+
+2017-01-19 Gerry Boland
+
+        * Quit gracefully if Mir connection failed (LP: #1655936) (54a6be0)
+
+2017-01-19 Daniel d'Andrada
+
+        * Resize menus and toolips when told to do so (249c4b6)
+        * Update copyright header (e049426)
+        * Fix positioning (b46e69c)
+
+2017-01-18 Daniel d'Andrada
+
+        * Also move child window when updating its geometry (204a356)
+        * Resize menus and toolips when told to do so (104be0c)
+
+2017-01-16 Bileto Bot
+
+        * Resync trunk. (c7fafe5)
+
+2017-01-12 Gerry Boland
+
+        * Clarify comment a bit (c33aad6)
+        * Get Mir's error message (8346108)
+        * Quit gracefully if Mir connection failed (fa797b9)
+
+2017-01-10 Bileto Bot
+
+        * Releasing 0.63+17.04.20170110.1-0ubuntu1 (16ef794)
+        * Remove mircommon specifier for header, fix other ftbfs with mir
+          0.25 (LP: #1653905) (601f187)
+
+2017-01-10 Nick Dedekind
+
+        * Added a QPlatformTheme for exporting gmenumodel for qt menus.
+          (ba8346d)
+
+2017-01-10 Timo Jyrinki
+
+        *     Releasing 0.63+17.04.20170104-0ubuntu1 (6b73d2f)
+
+2017-01-04 Bileto Bot
+
+        * Releasing 0.63+17.04.20170104-0ubuntu1 (b381224)
+
+2017-01-04 Gerry Boland
+
+        * Remove mircommon specifier for header, fix other ftbfs with mir
+          0.25 (LP: #1653905) (19d8734)
+
+2016-12-19 Gerry Boland
+
+        * [debian] Bump mirclient required version (105c5f8)
+        * Explicitly handle enum end conditions that gcc6 errors out on
+          (15519fc)
+        * Remove mircommon specifier for header, fix ftbfs with mir 0.25
+          (72ddded)
+
+2016-12-09 Nick Dedekind
+
+        * added qt5.6 functions (969e33c)
+        * merged with trunk (d012ad9)
+        * only flush non-input events (382665c)
+        * fixed focus check regression (fbac801)
+
+2016-12-01 Bileto Bot
+
+        * Releasing 0.63+17.04.20161201.1-0ubuntu1 (0522d25)
+        * Releasing 0.63+17.04.20161201.1-0ubuntu1 (8c4f59f)
+
+2016-12-01 Gerry Boland
+
+        * Use debug extension only if mir-debug loaded (8168ec0)
+        * Use debug extension only if mir-debug loaded (ca44f7a)
+        * Use debug extension only if mir-debug loaded (0604eb8)
+        * Use debug extension only if mir-debug loaded (59f34d4)
+
+2016-11-23 Bileto Bot
+
+        * Releasing 0.63+17.04.20161123-0ubuntu1 (3dab0a1)
+        * Releasing 0.63+17.04.20161123-0ubuntu1 (417be6f)
+
+2016-11-23 Gerry Boland
+
+        * Fix for Qt5.6 mapToGlobal: QPlatformWindow::geometry() expected to
+          be in absolute screens coordinates (452f639)
+        * Fix for Qt5.6 mapToGlobal: QPlatformWindow::geometry() expected to
+          be in absolute screens coordinates (0a3514e)
+        * Enable Accessibility (b969c7e)
+        * Enable Accessibility (c967e22)
+        * Add support for more surface types and surface repositioning.
+          (2ec9e36)
+        * Add support for more surface types and surface repositioning.
+          (cdd38a1)
+        * Small BackingStore fixes: call makeCurrent on texture changes, and
+          choose correct QImage format to avoid bit swizzling (LP:
+          #1543467) (7059aba)
+        * Small BackingStore fixes: call makeCurrent on texture changes, and
+          choose correct QImage format to avoid bit swizzling (LP:
+          #1543467) (0b86f0f)
+        * Move all App State management logic to dedicated controller, use
+          Timer to compress active-inactive-active invocations (LP:
+          #1543467) (fb182da)
+        * Move all App State management logic to dedicated controller, use
+          Timer to compress active-inactive-active invocations (LP:
+          #1543467) (744d721)
+        * Create Mir surface with hidden state, as Qt expects. (a49380f)
+        * Create Mir surface with hidden state, as Qt expects. (a9296b4)
+
+2016-11-16 Gerry Boland
+
+        * Fix for getting absolute surface positioning for autopilot
+          (67b7679)
+        * Fix for getting absolute surface positioning for autopilot
+          (7943f13)
+
+2016-11-04 Gerry Boland
+
+        * Stick to existing var naming standard (77ae133)
+        * Stick to existing var naming standard (63c0bf3)
+        * Merge trunk (9ec8188)
+        * Merge trunk (1d9776f)
+        * Merge trunk & resolve conflict (d6296b4)
+        * Merge trunk & resolve conflict (1babcb6)
+        * Merge trunk and resolve conflicts (94ece45)
+        * Merge trunk and resolve conflicts (658cc95)
+
+2016-11-03 Gerry Boland
+
+        * Only set internal position in setGeometry, not size (85f6151)
+        * Only set internal position in setGeometry, not size (32347eb)
+
+2016-10-26 Gerry Boland
+
+        * This is not python, fix comment (d55f09d)
+        * This is not python, fix comment (5ea485b)
+
+2016-10-24 Bileto Bot
+
+        * Releasing 0.63+17.04.20161024-0ubuntu1 (e407590)
+        * Releasing 0.63+17.04.20161024-0ubuntu1 (fd76901)
+
+2016-10-24 Gerry Boland
+
+        * Fix rendering of apps using QQuickWidget (14b7da6)
+        * Fix rendering of apps using QQuickWidget (ebd44e3)
+        * Use mir-client-debug to map window coordinates to screen
+          coordinates (adfdf2f)
+        * Use mir-client-debug to map window coordinates to screen
+          coordinates (6322b6b)
+
+2016-10-24 Daniel van Vugt
+
+        * Implement named cursors that Mir understands (LP: #1625853) (LP:
+          #1625853) (c0138fa)
+        * Implement named cursors that Mir understands (LP: #1625853) (LP:
+          #1625853) (2a5ad8d)
+
+2016-10-24 Gerry Boland
+
+        * Stricter enum use, avoid default switch case (2b7ae9e)
+        * Stricter enum use, avoid default switch case (28539af)
+
+2016-10-24 Daniel d'Andrada
+
+        * Some logging fixes (d57ee45)
+        * Some logging fixes (a127d3a)
+
+2016-10-21 Gerry Boland
+
+        * Enable Accessibility (643907a)
+        * Enable Accessibility (6b5be02)
+
+2016-10-18 Gerry Boland
+
+        * Fix for dialogs crash (5edf936)
+        * Fix for dialogs crash (4c3fd2b)
+
+2016-10-13 Gerry Boland
+
+        * Using mirclient version better for gating on mirclient api
+          (0bce28a)
+        * Using mirclient version better for gating on mirclient api
+          (349a36f)
+        * Fix input method bug, missing break in switch (a0c21a8)
+        * Fix input method bug, missing break in switch (d65ac91)
+        * Add support for more surface types and surface repositioning.
+          (4d194ca)
+        * Add support for more surface types and surface repositioning.
+          (fb2c39f)
+
+2016-10-12 Gerry Boland
+
+        * Choose correct QImage format to avoid bit swizzling (2130d1a)
+        * Choose correct QImage format to avoid bit swizzling (df098a9)
+        * Fix console error messages on surface resize/delete - make context
+          current (ed58177)
+        * Fix console error messages on surface resize/delete - make context
+          current (f82f4b6)
+        * Add comment explaining purpose (858ee66)
+        * Add comment explaining purpose (8905611)
+        * Timer only reliable way to listen for active-inactive-active
+          invocation (8cff116)
+        * Timer only reliable way to listen for active-inactive-active
+          invocation (1e0b70b)
+        * Move all App State management logic to dedicated controller
+          (c1697fc)
+        * Move all App State management logic to dedicated controller
+          (58a4c23)
+        * This works better, remove all AppState events from the event queue
+          on focus (94afd65)
+        * This works better, remove all AppState events from the event queue
+          on focus (e62d597)
+        * Refactor the attempt to surpress Application state changes when
+          focus switches between app surfaces (65b14dc)
+        * Refactor the attempt to surpress Application state changes when
+          focus switches between app surfaces (8afd31e)
+
+2016-10-12 Nick Dedekind
+
+        * removed appmenutheme package from gles (ea19e50)
+
+2016-10-10 Nick Dedekind
+
+        * fixed depends (4d625db)
+
+2016-10-05 Nick Dedekind
+
+        * merged trunk (3c40454)
+
+2016-10-04 Gerry Boland
+
+        * Fix rendering of apps using QQuickWidget (258eeec)
+        * Fix rendering of apps using QQuickWidget (d68c799)
+        * Merge trunk (de6dbfb)
+        * Merge trunk (9c1e327)
+
+2016-09-30 Nick Dedekind
+
+        * updated package description (6b2bea1)
+        * use QGuiApplication::platformName (bb414cc)
+        * Added Ubuntu class prefix (b752141)
+        * update gles patch (9a0c5ae)
+
+2016-09-29 Nick Dedekind
+
+        * connect compile-time check (654ef13)
+        * review 4 (26ddfab)
+        * review 3 (5013749)
+        * review 2 (66434b6)
+        * review 1 (92a4ae6)
+        * better dbus interface documentation (3f98d45)
+        * fixed typos (168eb87)
+        * merged with trunk (5a13362)
+
+2016-09-28 Bileto Bot
+
+        * Releasing 0.63+16.10.20160928.1-0ubuntu1 (4c7f8f4)
+        * Releasing 0.63+16.10.20160928.1-0ubuntu1 (d6f07fa)
+
+2016-09-28 Nick Dedekind
+
+        * Moved focus handling to UbuntuWindow to ensure focus optimization
+          supports multiple windows rather than being application
+          global. (LP: #1623861) (02a45de)
+        * Moved focus handling to UbuntuWindow to ensure focus optimization
+          supports multiple windows rather than being application
+          global. (LP: #1623861) (c5e9337)
+        * Use pbuffer for offscreen surfaces. (LP: #1596524) (d4dbcee)
+        * Use pbuffer for offscreen surfaces. (LP: #1596524) (92f4b74)
+        * removed debug fix (ca45b75)
+        * removed debug fix (4ad013b)
+
+2016-09-28 Daniel van Vugt
+
+        * Try again, Jenkins (61d2bed)
+        * Try again, Jenkins (07755d3)
+
+2016-09-28 Nick Dedekind
+
+        * added other comment (bc2d167)
+        * added other comment (ac4ddd9)
+
+2016-09-28 Daniel van Vugt
+
+        * Remove blank line (3f199a5)
+        * Remove blank line (bb5a0f2)
+        * Best of both worlds (the missing cursors will now at least work in
+          Unity8) (d141154)
+        * Best of both worlds (the missing cursors will now at least work in
+          Unity8) (4b89096)
+
+2016-09-28 Nick Dedekind
+
+        * readded comment (3091a2e)
+        * readded comment (b327dd2)
+
+2016-09-26 Gerry Boland
+
+        * Windows are hidden on creation (2d2b805)
+        * Windows are hidden on creation (c60fc7c)
+
+2016-09-26 Daniel van Vugt
+
+        * Try again (f8617eb)
+        * Try again (a8d87d0)
+
+2016-09-23 Daniel van Vugt
+
+        * Implement named cursors that Mir understands (LP: #1625853)
+          (661364e)
+        * Implement named cursors that Mir understands (LP: #1625853)
+          (067eb37)
+
+2016-09-22 Gerry Boland
+
+        * Use dedicated logging category for debug-related messages (7037899)
+        * Use dedicated logging category for debug-related messages (9643e36)
+        * Use category logging for debug extension warnings (b2b258a)
+        * Use category logging for debug extension warnings (8297c8a)
+        * Merge trunk (ca4dc20)
+        * Merge trunk (a7f7ef0)
+
+2016-09-21 Nick Dedekind
+
+        * Fixed multi-window focus (b3fb7ee)
+        * Fixed multi-window focus (a142113)
+
+2016-09-14 Gerry Boland
+
+        * Stricter enum use, avoid default switch case (3e6a619)
+        * Stricter enum use, avoid default switch case (3bfb7dd)
+
+2016-09-12 Gerry Boland
+
+        * Shorten names and add final (unused) return (6bd82a4)
+        * Shorten names and add final (unused) return (e089819)
+        * Add newly added Mir surface event types (fde6d25)
+        * Add newly added Mir surface event types (51c1a83)
+
+2016-09-12 Daniel d'Andrada
+
+        * Tweak switch (321d977)
+        * Tweak switch (685e06d)
+
+2016-09-09 Daniel d'Andrada
+
+        * Some logging fixes (052b7a2)
+        * Some logging fixes (65713c2)
+
+2016-08-31 Bileto Bot
+
+        * Releasing 0.63+16.10.20160831-0ubuntu1 (f83e610)
+        * Releasing 0.63+16.10.20160831-0ubuntu1 (d4ff9c9)
+
+2016-08-31 Daniel d'Andrada
+
+        * Use content-hub for clipboard services (LP: #1471998) (36a82d8)
+        * Use content-hub for clipboard services (LP: #1471998) (d1790ac)
+
+2016-08-26 Bileto Bot
+
+        * Releasing 0.63+16.10.20160826-0ubuntu1 (e93bf3a)
+        * Releasing 0.63+16.10.20160826-0ubuntu1 (61042d7)
+
+2016-08-26 Nick Dedekind
+
+        * Fixed panel position shifting and initial surface exposure. (LP:
+          #1616968) (44ec042)
+        * Fixed panel position shifting and initial surface exposure. (LP:
+          #1616968) (8d4ac75)
+        * fixed problems with exposure and panel hack. (f685797)
+        * fixed problems with exposure and panel hack. (d495f6d)
+
+2016-08-24 Daniel d'Andrada
+
+        * Use content-hub for clipboard services (c481d87)
+        * Use content-hub for clipboard services (b611073)
+
+2016-08-24 Nick Dedekind
+
+        * fixes (99d76c7)
+
+2016-08-23 Nick Dedekind
+
+        * review comments (da7b5bf)
+        * fixed indent (8097e37)
+        * merged with trunk (fed6e67)
+
+2016-08-17 Nick Dedekind
+
+        * added check for surface type (8c363ec)
+        * added check for surface type (f99c2e0)
+        * fixed coding style (a0cfa4e)
+        * fixed coding style (aedb71d)
+
+2016-08-16 Nick Dedekind
+
+        * use pbuffer for offscreen surface (3de192a)
+        * use pbuffer for offscreen surface (0f5eeed)
+
+2016-08-10 Gerry Boland
+
+        * Fix FTBFS, pass debug extension to Window (1aa0c19)
+        * Fix FTBFS, pass debug extension to Window (e022dd4)
+        * Merged trunk (3e7a8a3)
+        * Merged trunk (43b9cf9)
+
+2016-08-09 Bileto Bot
+
+        * Releasing 0.63+16.10.20160809-0ubuntu1 (0e23384)
+        * Releasing 0.63+16.10.20160809-0ubuntu1 (c364a28)
+
+2016-08-09 Daniel van Vugt
+
+        * Use correct scrolling scale of 120 as documented:
+          http://doc.qt.io/qt-5/qwheelevent.html#angleDelta because
+          it's in eighths of a degree, and not degrees. So now the
+          speed is correct when used with the corresponding Unity8
+          fix (LP: #1607240) (LP: #1607223, #1607240) (68f79ac)
+        * Use correct scrolling scale of 120 as documented:
+          http://doc.qt.io/qt-5/qwheelevent.html#angleDelta because
+          it's in eighths of a degree, and not degrees. So now the
+          speed is correct when used with the corresponding Unity8
+          fix (LP: #1607240) (LP: #1607223, #1607240) (c4774ff)
+
+2016-08-09 Gerry Boland
+
+        * Logging: separate graphics & cursor logging into their own logging
+          categories (9f1aa42)
+        * Logging: separate graphics & cursor logging into their own logging
+          categories (190b51e)
+        * Reapply rev 324 plus fix: EGL convenience, plus workaround for
+          hybris not supporting GLESv3. (LP: #1507817, #1594198)
+          (176af14)
+        * Reapply rev 324 plus fix: EGL convenience, plus workaround for
+          hybris not supporting GLESv3. (LP: #1507817, #1594198)
+          (cb47659)
+        * Merge trun (caa74a9)
+        * Merge trun (9fcc26b)
+
+2016-07-30 Bileto Bot
+
+        * Releasing 0.63+16.10.20160730-0ubuntu1 (376a9fa)
+        * Releasing 0.63+16.10.20160730-0ubuntu1 (410b80f)
+
+2016-07-30 Lukáš Tinkl
+
+        * Differentiate between left/right Alt when extracting the modifiers
+          for Qt (LP: #1590515) (8b6497f)
+        * Differentiate between left/right Alt when extracting the modifiers
+          for Qt (LP: #1590515) (817e228)
+
+2016-07-30 Nick Dedekind
+
+        * Re-added window exposure for occlusion detection (LP: #1475678)
+          (cee90c1)
+        * Re-added window exposure for occlusion detection (LP: #1475678)
+          (d5cda0d)
+
+2016-07-29 Daniel van Vugt
+
+        * Use correct scrolling scale of 120 as documented:
+          http://doc.qt.io/qt-5/qwheelevent.html#angleDelta because
+          it's in eighths of a degree, and not degrees. So now the
+          speed is correct when used with the corresponding Unity8
+          fix (LP: #1607240) (8336347)
+        * Use correct scrolling scale of 120 as documented:
+          http://doc.qt.io/qt-5/qwheelevent.html#angleDelta because
+          it's in eighths of a degree, and not degrees. So now the
+          speed is correct when used with the corresponding Unity8
+          fix (LP: #1607240) (c6187d1)
+
+2016-07-26 Timo Jyrinki
+
+        * Rebuild against Qt 5.6. (cb28644)
+        * Rebuild against Qt 5.6. (5be4f61)
+
+2016-07-22 Lukáš Tinkl
+
+        * merge trunk (c02004b)
+        * merge trunk (9866f5d)
+        * differentiate between left/right Alt (63ee31a)
+        * differentiate between left/right Alt (59d80ab)
+
+2016-07-22 Gerry Boland
+
+        * remove parens (6e1f376)
+        * remove parens (f87c8f4)
+
+2016-07-21 Gerry Boland
+
+        * Revert rev 330, workaround unnecessary now (b0be033)
+        * Revert rev 330, workaround unnecessary now (178231a)
+
+2016-06-30 Bileto Bot
+
+        * Releasing 0.63+16.10.20160630.1-0ubuntu1 (dd6171e)
+        * Releasing 0.63+16.10.20160630.1-0ubuntu1 (d66dda0)
+        * Expose MirSurface to client apps through the native interface
+          (4cf5d25)
+        * Expose MirSurface to client apps through the native interface
+          (00951e9)
+
+2016-06-24 Gerry Boland
+
+        * Fix up some bad merge decisions, and bump copyrights (f5a40b1)
+        * Fix up some bad merge decisions, and bump copyrights (64db242)
+        * Merge trunk & fix conflicts (77c935f)
+        * Merge trunk & fix conflicts (13fe1bd)
+
+2016-06-22 Gerry Boland
+
+        * Put cursor in its own category too (2d49536)
+        * Put cursor in its own category too (7915904)
+        * Logging: separate graphics-related logging into its own logging
+          category (b5b858a)
+        * Logging: separate graphics-related logging into its own logging
+          category (6682abd)
+        * Hybris-backed GL drivers can claim to have GLESv3 support, but
+          hybris does not expose those API additions. Prevent Qt
+          from trying to use GLESv3 APIs (a39ad2a)
+        * Hybris-backed GL drivers can claim to have GLESv3 support, but
+          hybris does not expose those API additions. Prevent Qt
+          from trying to use GLESv3 APIs (603898a)
+        * Un-revert the adoption of eglconvenience (cd99e88)
+        * Un-revert the adoption of eglconvenience (16cd929)
+
+2016-06-22 Nick Dedekind
+
+        * appmenu registration for non mir clients (19a82d4)
+        * logging update (87c79f4)
+        * merged with trunk (faf5719)
+
+2016-06-21 Nick Dedekind
+
+        * update files (2336cbf)
+
+2016-06-21 Daniel d'Andrada
+
+        * Expose MirSurface to client apps through the native interface
+          (8c7a06a)
+        * Expose MirSurface to client apps through the native interface
+          (7789600)
+
+2016-06-20 Nick Dedekind
+
+        * updated copywrites (31219d2)
+        * merged with trunk (3dda6bf)
+
+2016-06-20 Gerry Boland
+
+        * Prevent Qt using GLESv3 functions as resolving them fails (possibly
+          due to bug lp:1490956) (cbdbf68)
+        * Prevent Qt using GLESv3 functions as resolving them fails (possibly
+          due to bug lp:1490956) (7ac8e45)
+
+2016-06-20 Bileto Bot
+
+        * Releasing 0.62+16.10.20160620-0ubuntu1 (2c6d9ff)
+        * Releasing 0.62+16.10.20160620-0ubuntu1 (07cdbf1)
+
+2016-06-20 Michał Sawicz
+
+        * Revert r324 "EGL convenience" (LP: #1594198) (414dca4)
+        * Revert r324 "EGL convenience" (LP: #1594198) (0037295)
+        * Revert r324 "EGL convenience" (f093d36)
+        * Revert r324 "EGL convenience" (884690d)
+
+2016-06-17 Nick Dedekind
+
+        * update gles (d6b9a92)
+        * merged crossbuild support (d4e5403)
+        * fixes and logging (c57a686)
+        * merged crossbuild support (ab53dc7)
+
+2016-06-14 Nick Dedekind
+
+        * added expose catchup (1095e00)
+        * added expose catchup (c5e98a9)
+        * crossbuild support (4a27c3b)
+        * crossbuild support (f634a6a)
+
+2016-06-14 Bileto Bot
+
+        * Releasing 0.62+16.10.20160614-0ubuntu1 (3fda74c)
+        * Releasing 0.62+16.10.20160614-0ubuntu1 (292070d)
+
+2016-06-14 Gerry Boland
+
+        * Integration: no need for the non-const versions of createWindow and
+          createGLContext (ee3d29a)
+        * Integration: no need for the non-const versions of createWindow and
+          createGLContext (d971161)
+        * Convert UbuntuOpenGLContext to use QEGLPlatformContext, and allow
+          clients to customize chosen GLConfig (LP: #1507817,
+          #1549455) (81eb0f2)
+        * Convert UbuntuOpenGLContext to use QEGLPlatformContext, and allow
+          clients to customize chosen GLConfig (LP: #1507817,
+          #1549455) (6441b68)
+
+2016-06-14 Nick Dedekind
+
+        * Support for cross building (54a847b)
+        * Support for cross building (d29a13e)
+
+2016-06-14 Daniel d'Andrada
+
+        * Generate better mir session names (6e77aca)
+        * Generate better mir session names (06f2c42)
+
+2016-06-10 Nick Dedekind
+
+        * use native interface window properties (4c74d01)
+        * persistent Id (88eb30b)
+
+2016-06-09 Nick Dedekind
+
+        * whitespace (3fa3423)
+        * re-add default icon theme (7925e95)
+        * removed export (82bcaeb)
+        * react to action state change (821fe24)
+        * debug streams (898d01e)
+
+2016-06-07 Nick Dedekind
+
+        * fixed log (1e1c103)
+        * separated integration & theme (2d64809)
+        * merged with parent (dbc0dca)
+        * MenuRegistrar -> App + Surface (6b4c33b)
+
+2016-06-03 Daniel d'Andrada
+
+        * Generate better mir session names (d2c4ea8)
+        * Generate better mir session names (996353c)
+
+2016-06-03 Nick Dedekind
+
+        * gles patch update (7cd75a7)
+        * gles patch update (fac16c3)
+
+2016-06-03 Gerry Boland
+
+        * Merge trunk, fix conflicts, give hints to branch predictor
+          (9e63a10)
+        * Merge trunk, fix conflicts, give hints to branch predictor
+          (e6b8eda)
+
+2016-06-03 Nick Dedekind
+
+        * merge with trunk (90c707d)
+        * merge with trunk (ca6ef6f)
+
+2016-05-30 Gerry Boland
+
+        * Refactor again to remove the SurfaceFormatFilter, and just retry
+          config choice with lower GL version (72d6e7e)
+        * Refactor again to remove the SurfaceFormatFilter, and just retry
+          config choice with lower GL version (a8e869e)
+        * Set a sensible QSurfaceFormat::setDefaultFormat instead of
+          guess-filtering after user request (10f49ac)
+        * Set a sensible QSurfaceFormat::setDefaultFormat instead of
+          guess-filtering after user request (9c3f44b)
+        * GCC disagreeed with CLang about removing the default from the
+          switch (10ee04e)
+        * GCC disagreeed with CLang about removing the default from the
+          switch (b53eefa)
+        * Minor syntax standardization (79255a7)
+        * Minor syntax standardization (5c08aa2)
+        * Micro optimisation (1370bf7)
+        * Micro optimisation (2f2bd03)
+        * Enable GL version hack only on Mesa (e559fda)
+        * Enable GL version hack only on Mesa (18bffdd)
+        * Update comments to reflect reality (2a4b27f)
+        * Update comments to reflect reality (2e385a1)
+        * Typo spot dy duflu (9ecbe25)
+        * Typo spot dy duflu (e8833b6)
+
+2016-05-27 Gerry Boland
+
+        * QML does not need alpha channel to render correctly, so do not
+          impose it (07b99f9)
+        * QML does not need alpha channel to render correctly, so do not
+          impose it (e7df682)
+        * Rename SurfaceFormatChooser to SurfaceFormatFilter and add env var
+          to disable filteringi (4ec657c)
+        * Rename SurfaceFormatChooser to SurfaceFormatFilter and add env var
+          to disable filteringi (b579a65)
+
+2016-05-27 CI Train Bot
+
+        * Releasing 0.62+16.10.20160527.1-0ubuntu1 (66c7f6e)
+        * Releasing 0.62+16.10.20160527.1-0ubuntu1 (5e4d230)
+
+2016-05-27 Michael Terry
+
+        * Build qtubuntu for arm64, and drop ancient qthybris transition
+          package. (7ef1319)
+        * Build qtubuntu for arm64, and drop ancient qthybris transition
+          package. (2827800)
+
+2016-05-27 Albert Astals Cid
+
+        * Enable workaround_brokenFBOReadBack on the Mali-T760 Approved by:
+          Gerry Boland, Unity8 CI Bot (505ff49)
+        * Enable workaround_brokenFBOReadBack on the Mali-T760 Approved by:
+          Gerry Boland, Unity8 CI Bot (8530937)
+        * Enable workaround_brokenFBOReadBack on the PowerVR Rogue G6200
+          Approved by: Gerry Boland, Unity8 CI Bot (7580fff)
+        * Enable workaround_brokenFBOReadBack on the PowerVR Rogue G6200
+          Approved by: Gerry Boland, Unity8 CI Bot (9b11704)
+        * Enable workaround_brokenFBOReadBack on the Mali 400 (da91e7e)
+        * Enable workaround_brokenFBOReadBack on the Mali 400 (9de2632)
+
+2016-05-27 Michael Terry
+
+        * Guh, that stupid gles patch (2c1f257)
+        * Guh, that stupid gles patch (e96e3bc)
+
+2016-05-27 Gerry Boland
+
+        * Set minimum GL version to 1.0 so that EGL chooses a suitable
+          context on Atom-based hardware (365878c)
+        * Set minimum GL version to 1.0 so that EGL chooses a suitable
+          context on Atom-based hardware (f22df70)
+
+2016-05-27 Michael Terry
+
+        * Whoops, and actually use gles2 on arm64 (dbfd3bd)
+        * Whoops, and actually use gles2 on arm64 (133436f)
+        * Update gles patch (3f1e1dd)
+        * Update gles patch (df452f9)
+        * Add arm64 support to qtubuntu-android, drop qthybris (d4d4338)
+        * Add arm64 support to qtubuntu-android, drop qthybris (13a35ac)
+
+2016-05-25 Albert Astals Cid
+
+        * Make it detect the M10 GPU too (a 720) (107d0cc)
+        * Make it detect the M10 GPU too (a 720) (b8fab55)
+
+2016-05-19 Gerry Boland
+
+        * Fix typo (8c3e17d)
+        * Fix typo (2b2972b)
+        * Remove old incorrect info from readme (90fe24c)
+        * Remove old incorrect info from readme (6ddbde8)
+        * Integration: no need for the non-const versions of createWindow and
+          createGLContext (a3b10db)
+        * Integration: no need for the non-const versions of createWindow and
+          createGLContext (2d107cd)
+        * Use final as these methods in UbuntuOpenGLContext should never be
+          overridden (67947ca)
+        * Use final as these methods in UbuntuOpenGLContext should never be
+          overridden (dab37a7)
+
+2016-05-16 Nick Dedekind
+
+        * leaks and logging (cffb8c8)
+
+2016-05-13 Albert Astals Cid
+
+        * Compile++ (7789799)
+        * Compile++ (ab9266e)
+
+2016-05-12 Gerry Boland
+
+        * Ensure alpha buffer enabled on initial EGLConfig decision (9235ca8)
+        * Ensure alpha buffer enabled on initial EGLConfig decision (5f202dd)
+        * Ensure RGB888 color format preferential to anything lower (f879c37)
+        * Ensure RGB888 color format preferential to anything lower (d802cd5)
+
+2016-05-12 Albert Astals Cid
+
+        * brace yourselves! (14c7feb)
+        * brace yourselves! (426da55)
+        * And the turbo needs this too (cf8123e)
+        * And the turbo needs this too (63b29d0)
+        * The MX4 also is faster with the workaround (1036124)
+        * The MX4 also is faster with the workaround (de73627)
+        * Enable workaround_brokenFBOReadBack on the Mali 400 (e0add57)
+        * Enable workaround_brokenFBOReadBack on the Mali 400 (3f44593)
+
+2016-05-12 Gerry Boland
+
+        * Slight comment clarification (72f19fd)
+        * Slight comment clarification (a2a6c6c)
+        * If client does not request alpha channel, but EGL chooses config
+          with one, override the MirPixelFormat to disable the alpha
+          channel (7edc150)
+        * If client does not request alpha channel, but EGL chooses config
+          with one, override the MirPixelFormat to disable the alpha
+          channel (94e7fbe)
+
+2016-05-11 Gerry Boland
+
+        * Have Qt choose the EGLConfig it most desires. Set the most suitable
+          Mir pixel format for the surface. (3b701b9)
+        * Have Qt choose the EGLConfig it most desires. Set the most suitable
+          Mir pixel format for the surface. (0f2c56c)
+        * Tidy up comment (8bbc664)
+        * Tidy up comment (6056849)
+
+2016-05-10 Gerry Boland
+
+        * Update README (0654ddf)
+        * Update README (0337c6d)
+        * Return the base classes result of makeCurrent (b15c628)
+        * Return the base classes result of makeCurrent (9538b62)
+        * Remove custom printer of OpenGL state, QSG_INFO=1 can do it just as
+          well (c7fb968)
+        * Remove custom printer of OpenGL state, QSG_INFO=1 can do it just as
+          well (75a4c1a)
+        * Make UbuntuOpenGLContext subclass convenience class
+          QEGLPlatformContext (9567016)
+        * Make UbuntuOpenGLContext subclass convenience class
+          QEGLPlatformContext (49c2f10)
+
+2016-04-28 CI Train Bot
+
+        * Releasing 0.62+16.04.20160428-0ubuntu1 (91e2d40)
+        * Releasing 0.62+16.04.20160428-0ubuntu1 (c901d7c)
+
+2016-04-28 Robert Bruce Park
+
+        * Inline GLES packaging using a quilt patch. Approved by: Unity8 CI
+          Bot (f2726da)
+        * Inline GLES packaging using a quilt patch. Approved by: Unity8 CI
+          Bot (8983d59)
+
+2016-04-28 Daniel d'Andrada
+
+        * Proper support for multiple screens and dynamic scaling support
+
+          Fixes: #1534682, #1573532 Approved by: Nick Dedekind,
+          Unity8 CI Bot, Daniel d'Andrada, Gerry Boland (6888cbd)
+        * Proper support for multiple screens and dynamic scaling support
+
+          Fixes: #1534682, #1573532 Approved by: Nick Dedekind,
+          Unity8 CI Bot, Daniel d'Andrada, Gerry Boland (3b63c5b)
+        * Update copyright header of input.* (c62cc53)
+        * Update copyright header of input.* (e7e1049)
+        * Replace qWarning() with qCWarning(ubuntumirclient) (99d6e41)
+        * Replace qWarning() with qCWarning(ubuntumirclient) (22848a5)
+        * Improve UbuntuWindow encapsulation (73b6a67)
+        * Improve UbuntuWindow encapsulation (b367b7f)
+
+2016-04-28 Gerry Boland
+
+        * Refactor to move egl ownership out of Screen and into Intergration.
+          This decouples Screen & Window, enabling Screen
+          replacement (47536df)
+        * Refactor to move egl ownership out of Screen and into Intergration.
+          This decouples Screen & Window, enabling Screen
+          replacement (8ac2a64)
+
+2016-04-27 Daniel d'Andrada
+
+        * Call eglInitialize() and eglTerminate() only once per process, not
+          once per screen. (8a8b34c)
+        * Call eglInitialize() and eglTerminate() only once per process, not
+          once per screen. (7e5aded)
+        * More categorized logging (1e7fd1b)
+        * More categorized logging (dc925e4)
+        * Use categorized logging (48f5061)
+        * Use categorized logging (dccf384)
+        * Add some sort of error handling (acd4ebf)
+        * Add some sort of error handling (f09c92e)
+
+2016-04-25 Gerry Boland
+
+        * Spacing (9e82046)
+        * Spacing (59cb946)
+        * 2016 copyright (b1bb58d)
+        * 2016 copyright (370d00d)
+        * Fix recursive call, should call the base class method (3068360)
+        * Fix recursive call, should call the base class method (9e900e6)
+        * Input: check QPointer<Window> exists before using it (501b11c)
+        * Input: check QPointer<Window> exists before using it (f2eee75)
+
+2016-04-22 Nick Dedekind
+
+        * Fixed crash from premature event (ebd172f)
+        * Fixed crash from premature event (17c65f6)
+
+2016-04-20 Gerry Boland
+
+        * Fix some small type errors exposed by clang code model (9766214)
+        * Fix some small type errors exposed by clang code model (ef391bd)
+        * Remove dpr from another calculation (706772a)
+        * Remove dpr from another calculation (d34ecf5)
+        * Small comment cleanups (b8519fd)
+        * Small comment cleanups (6dbb29f)
+        * Totally removed DPR from this dynamic grid units approach (f440b4d)
+        * Totally removed DPR from this dynamic grid units approach (3cadba3)
+        * Revert last 2 changes, very DPR focused (77f2c6d)
+        * Revert last 2 changes, very DPR focused (f383129)
+
+2016-04-15 Gerry Boland
+
+        * Refactor to move egl ownership out of Screen and into Intergration.
+          This decouples Screen & Window, enabling Screen
+          replacement (ec522dc)
+        * Refactor to move egl ownership out of Screen and into Intergration.
+          This decouples Screen & Window, enabling Screen
+          replacement (8145c10)
+        * First pass at enabling runtime DPR changing. (309b16d)
+        * First pass at enabling runtime DPR changing. (f79712e)
+
+2016-04-13 Gerry Boland
+
+        * Need to specify library version so that QLibrary can find
+          libmirclient-debug-extension.so.1 (401e655)
+        * Need to specify library version so that QLibrary can find
+          libmirclient-debug-extension.so.1 (9aff74a)
+
+2016-04-12 Gerry Boland
+
+        * Merge lp:~dandrader/qtubuntu/enable-debug-mode, he kindly fixed
+          merging this with trunk (cd97cd9)
+        * Merge lp:~dandrader/qtubuntu/enable-debug-mode, he kindly fixed
+          merging this with trunk (5daa613)
+
+2016-04-11 Daniel d'Andrada
+
+        * Merge lp:~gerboland/qtubuntu/enable-debug-mode (cc39a52)
+        * Merge lp:~gerboland/qtubuntu/enable-debug-mode (55b5616)
+
+2016-04-01 Robert Bruce Park
+
+        * Documentation tweaks. (74be95e)
+        * Documentation tweaks. (fe0e5cc)
+
+2016-03-31 Robert Bruce Park
+
+        * Fix quilt dir name. (52ebbd3)
+        * Fix quilt dir name. (0d08c1d)
+        * Add quilt build-dep. (28a7514)
+        * Add quilt build-dep. (3ddd416)
+        * Merge lp:qtubuntu/gles into lp:qtubuntu. (86ba085)
+        * Merge lp:qtubuntu/gles into lp:qtubuntu. (711c4e3)
+
+2016-03-31 Gerry Boland
+
+        * Merge trunk (fb24e71)
+        * Merge trunk (bc55cf3)
+
+2016-03-23 Nick Dedekind
+
+        * merged with trunk (01097b3)
+        * leaks (fa74d92)
+        * registry & popup (b50b688)
+
+2016-03-22 CI Train Bot
+
+        * Releasing 0.62+16.04.20160322-0ubuntu1 (e999564)
+        * Releasing 0.62+16.04.20160322-0ubuntu1 (bb5c041)
+
+2016-03-22 Lukáš Tinkl
+
+        * Support for switching kbd layouts
+          Fixes: #1491340, #1524400
+          Approved by: Unity8 CI Bot, Michael Terry, PS Jenkins bot
+          (2bb72e2)
+        * Support for switching kbd layouts
+          Fixes: #1491340, #1524400
+          Approved by: Unity8 CI Bot, Michael Terry, PS Jenkins bot
+          (7c82ca2)
+
+2016-03-22 Nick Dedekind
+
+        * Added support for low shell chrome
+          Fixes: #1535397 Approved by:
+          Gerry Boland, Unity8 CI Bot (cbfb35f)
+        * Added support for low shell chrome
+          Fixes: #1535397 Approved by:
+          Gerry Boland, Unity8 CI Bot (5b5dd9a)
+
+2016-03-14 Nick Dedekind
+
+        * removed check for input method (7abb0e9)
+        * removed check for input method (ae4279b)
+
+2016-03-11 Lukáš Tinkl
+
+        * add support for right_alt modifier (300c339)
+        * add support for right_alt modifier (213ec0f)
+
+2016-03-10 Nick Dedekind
+
+        * log (43eff89)
+        * log (ccc7fb5)
+        * removed unneeded code (f61da0c)
+        * removed unneeded code (fdc0ccf)
+        * parent surface changes (4878c68)
+        * parent surface changes (fc1bf76)
+        * renamed flag (c78e8ca)
+        * renamed flag (877647b)
+
+2016-03-07 Michał Sawicz
+
+        * cross build support (0f90450)
+        * cross build support (e93c44f)
+
+2016-02-25 Lukáš Tinkl
+
+        * merge trunk (c383179)
+        * merge trunk (37a70f9)
+
+2016-02-18 Nick Dedekind
+
+        * use hidden state (ac8442c)
+        * use hidden state (5d12f2f)
+        * fixed crash from event handling before constructor completed.
+          (2147718)
+        * fixed crash from event handling before constructor completed.
+          (5249329)
+
+2016-02-17 Gerry Boland
+
+        * Fix for build fail (0f08cf9)
+        * Fix for build fail (ba66cf8)
+
+2016-02-17 Nick Dedekind
+
+        * dont update on expose (82568c9)
+        * dont update on expose (f077184)
+        * merge bugs (25d9047)
+        * merge bugs (3184bfb)
+
+2016-02-17 Michał Sawicz
+
+        * Merge lp:~nick-dedekind/qtubuntu/shell_chrome (6a9e1cc)
+        * Merge lp:~nick-dedekind/qtubuntu/shell_chrome (33ca23a)
+
+2016-02-17 Nick Dedekind
+
+        * implement shell chrome and window state propogation (c63ee39)
+        * implement shell chrome and window state propogation (0d0854a)
+
+2016-02-15 Gerry Boland
+
+        * Change getter of custom Screen properties, return pointer to float,
+          instead of shoving float into pointer. Nicer for apps
+          (e3d5a18)
+        * Change getter of custom Screen properties, return pointer to float,
+          instead of shoving float into pointer. Nicer for apps
+          (763fe56)
+        * Safer float to void* casting (7f87b7d)
+        * Safer float to void* casting (16c1fea)
+        * Add per-Screen property change signal and getter for the custom
+          properties scale & formfactor (dade724)
+        * Add per-Screen property change signal and getter for the custom
+          properties scale & formfactor (5553096)
+
+2016-02-11 Gerry Boland
+
+        * Experimental refactor, to keep ScreenObserver isolated from Qt
+          state handling (d88683f)
+        * Experimental refactor, to keep ScreenObserver isolated from Qt
+          state handling (5096d2e)
+        * Do not flush window system events in QPlatformWindow::setVisible,
+          can crash during screen changes (e485375)
+        * Do not flush window system events in QPlatformWindow::setVisible,
+          can crash during screen changes (7bbdcb1)
+
+2016-02-03 Gerry Boland
+
+        * Fix another compile error, type mistake (e67f3f3)
+        * Fix another compile error, type mistake (5158c1c)
+        * Bad weave merge, fix duplicate line (69f3503)
+        * Bad weave merge, fix duplicate line (421a8f1)
+        * Fix comment, resolve build error (33c927e)
+        * Fix comment, resolve build error (78da81f)
+        * Drop the new changelog entry (90bed08)
+        * Drop the new changelog entry (18b3308)
+        * Merge trunk (ede7d15)
+        * Merge trunk (8331413)
+
+2016-02-02 CI Train Bot
+
+        * Releasing 0.62+16.04.20160128.1-0ubuntu1 (b774fbf)
+        * Releasing 0.62+16.04.20160128.1-0ubuntu1 (ee3df94)
+
+2016-02-02 Daniel d'Andrada
+
+        * Implement QPlatformOffscreenSurface (24b0a7b)
+        * Implement QPlatformOffscreenSurface (c67e862)
+        * Use logging categories and fix coding style (tab length) (8a15f49)
+        * Use logging categories and fix coding style (tab length) (5e9e368)
+
+2016-02-01 Lukáš Tinkl
+
+        * explicitely link against xkbcommon (43aba73)
+        * explicitely link against xkbcommon (ffd05d8)
+
+2016-02-01 Gerry Boland
+
+        * Disable DPR changing at runtime, requires extra work (f08baaf)
+        * Disable DPR changing at runtime, requires extra work (8888308)
+        * Bug fix: emit on scale change (f0a62e7)
+        * Bug fix: emit on scale change (ff62173)
+
+2016-01-28 Olivier Tilloy
+
+        * Instantiate QKeyEvents with the scan code, native modifiers and
+          native virtual key code, and special-case XKB_KEY_Return
+          and XKB_KEY_KP_Enter to emit a carriage return character.
+
+          Fixes: #1433138 Approved by: Lukáš Tinkl, PS Jenkins bot
+          (c180224)
+        * Instantiate QKeyEvents with the scan code, native modifiers and
+          native virtual key code, and special-case XKB_KEY_Return
+          and XKB_KEY_KP_Enter to emit a carriage return character.
+
+          Fixes: #1433138 Approved by: Lukáš Tinkl, PS Jenkins bot
+          (234355a)
+
+2016-01-27 Lukáš Tinkl
+
+        * correctly map UTF-8 text (beeeb64)
+        * correctly map UTF-8 text (a72b300)
+        * merge lp:~osomon/qtubuntu/qkeyevent-native-virtual-key (231cea0)
+        * merge lp:~osomon/qtubuntu/qkeyevent-native-virtual-key (683539a)
+
+2016-01-27 Gerry Boland
+
+        * Clean up commented-out experimental code to force QWindow
+          regeneration (46a5888)
+        * Clean up commented-out experimental code to force QWindow
+          regeneration (1c5e42e)
+        * Export Window/Screen scale & formFactor via the NativeInterface
+          (5fbfd7f)
+        * Export Window/Screen scale & formFactor via the NativeInterface
+          (8d9f5f4)
+
+2016-01-26 Gerry Boland
+
+        * Apply scale & form factor changes (9ae2b1f)
+        * Apply scale & form factor changes (a34902e)
+
+2016-01-15 Olivier Tilloy
+
+        * Send the Carriage Return character to actually get a new line.
+          (1037604)
+        * Send the Carriage Return character to actually get a new line.
+          (8983934)
+        * Special case Enter and Return to forward the event with the correct
+          text. (2cfec8b)
+        * Special case Enter and Return to forward the event with the correct
+          text. (6beae89)
+
+2016-01-15 Nick Dedekind
+
+        * changes for gmenumodel (16876b2)
+
+2016-01-14 Olivier Tilloy
+
+        * Also pass the scan code, native modifiers and native virtual key
+          code to QWindowSystemInterface. (3f934bf)
+        * Also pass the scan code, native modifiers and native virtual key
+          code to QWindowSystemInterface. (6dfdc8a)
+
+2016-01-13 Olivier Tilloy
+
+        * Instantiate QKeyEvents with the scan code, native modifiers and
+          native virtual key code. (6a66892)
+        * Instantiate QKeyEvents with the scan code, native modifiers and
+          native virtual key code. (d1c93fe)
+
+2016-01-11 CI Train Bot
+
+        * Releasing 0.62+16.04.20160111-0ubuntu1 (5cc956c)
+        * Releasing 0.62+16.04.20160111-0ubuntu1 (dec57b8)
+
+2016-01-11 Gerry Boland
+
+        * Fix getting MirConnection pointer
+          Fixes: #1526684 Approved by:
+          Jonas G. Drange, PS Jenkins bot (66946a1)
+        * Fix getting MirConnection pointer
+          Fixes: #1526684 Approved by:
+          Jonas G. Drange, PS Jenkins bot (213bb2c)
+
+2016-01-06 Gerry Boland
+
+        * First pass at enabling multi-screen awareness (33c024b)
+        * First pass at enabling multi-screen awareness (0e69231)
+
+2016-01-05 Gerry Boland
+
+        * Merge DPI branch (f803c83)
+        * Merge DPI branch (815e3ae)
+        * Add missing file (5d39e4b)
+        * Add missing file (0e6d57f)
+        * Implement support for QT_DEVICE_PIXEL_RATIO (b62969d)
+        * Implement support for QT_DEVICE_PIXEL_RATIO (e942c07)
+        * Merge loggingCategory (4e1a67f)
+        * Merge loggingCategory (cb633d7)
+
+2016-01-04 Daniel d'Andrada
+
+        * Implement QPlatformOffscreenSurface (5e40aa6)
+        * Implement QPlatformOffscreenSurface (de5f261)
+        * Merge lp:~dandrader/qtubuntu/loggingCategory (a5f7dee)
+        * Merge lp:~dandrader/qtubuntu/loggingCategory (8f2d585)
+
+2016-01-04 CI Train Bot
+
+        * Releasing 0.62+16.04.20160104-0ubuntu1 (51d4ce4)
+        * Releasing 0.62+16.04.20160104-0ubuntu1 (93a700d)
+
+2016-01-04 Daniel d'Andrada
+
+        * Fix QGuiApplication::applicationState() updates
+          Fixes: #1528668
+          Approved by: PS Jenkins bot (f6834d9)
+        * Fix QGuiApplication::applicationState() updates
+          Fixes: #1528668
+          Approved by: PS Jenkins bot (0228190)
+
+2016-01-04 Gerry Boland
+
+        * On geometry change, save new geometry before creating change event
+
+          Fixes: #1526328 Approved by: Daniel d'Andrada, PS Jenkins
+          bot (f383374)
+        * On geometry change, save new geometry before creating change event
+
+          Fixes: #1526328 Approved by: Daniel d'Andrada, PS Jenkins
+          bot (0873498)
+
+2015-12-23 Daniel d'Andrada
+
+        * Fix QGuiApplication::applicationState() updates (ee9ad38)
+        * Fix QGuiApplication::applicationState() updates (a646d76)
+
+2015-12-16 Daniel d'Andrada
+
+        * Merge trunk (fc9f7e2)
+        * Merge trunk (fd13574)
+
+2015-12-16 Gerry Boland
+
+        * On geometry change, save new geometry before creating change event
+          (e7de52a)
+        * On geometry change, save new geometry before creating change event
+          (c5ff5e0)
+
+2015-12-15 Gerry Boland
+
+        * Fix getting MirConnection pointer (de1a857)
+        * Fix getting MirConnection pointer (3bd0d77)
+
+2015-12-09 Daniel d'Andrada
+
+        * Update README (356ec01)
+        * Update README (6f02866)
+        * Move all logging category declarations to logging.h (c26af82)
+        * Move all logging category declarations to logging.h (4bc832d)
+        * Remove extra space (6f3e35f)
+        * Remove extra space (0ac9648)
+
+2015-12-07 CI Train Bot
+
+        * Releasing 0.62+16.04.20151207-0ubuntu1 (f2143d1)
+        * Releasing 0.62+16.04.20151207-0ubuntu1 (8b9a772)
+
+2015-12-07 Daniel d'Andrada
+
+        * Update panel height hack when window enters or leaves fullscreen
+
+          Fixes: #1422523 Approved by: PS Jenkins bot, Gerry Boland,
+          Florian Boucault (196f557)
+        * Update panel height hack when window enters or leaves fullscreen
+
+          Fixes: #1422523 Approved by: PS Jenkins bot, Gerry Boland,
+          Florian Boucault (7edb915)
+
+2015-12-07 Lukáš Tinkl
+
+        * Update the panel height hack, orange line is gone Approved by: PS
+          Jenkins bot, Gerry Boland (5087a3d)
+        * Update the panel height hack, orange line is gone Approved by: PS
+          Jenkins bot, Gerry Boland (21046a2)
+
+2015-12-07 Daniel d'Andrada
+
+        * Implement support for application state (a4e37fd)
+        * Implement support for application state (0d43c85)
+
+2015-12-07 Michał Sawicz
+
+        * Run wrap-and-sort -at Approved by: PS Jenkins bot (8e6c3ce)
+        * Run wrap-and-sort -at Approved by: PS Jenkins bot (41f98fe)
+        * wrap-and-sort -at (d8396c8)
+        * wrap-and-sort -at (86ccd76)
+
+2015-12-04 Daniel d'Andrada
+
+        * Use logging categories and fix coding style (tab length) (5922f44)
+        * Use logging categories and fix coding style (tab length) (ae67d59)
+
+2015-12-03 Nick Dedekind
+
+        * merged with trunk (2608675)
+
+2015-12-01 Timo Jyrinki
+
+        * Rebuild against Qt 5.5.1. (56d8d8b)
+        * Rebuild against Qt 5.5.1. (edae1f8)
+
+2015-11-27 Daniel d'Andrada
+
+        * Update panel height hack when window enters or leaves fullscreen
+          (6a40659)
+        * Update panel height hack when window enters or leaves fullscreen
+          (19a8932)
+
+2015-11-26 Lukáš Tinkl
+
+        * update the panel height hack, the orange line is gone (325fb71)
+        * update the panel height hack, the orange line is gone (4e318d9)
+
+2015-11-24 CI Train Bot
+
+        * Releasing 0.62+16.04.20151124-0ubuntu1 (e9d1a44)
+        * Releasing 0.62+16.04.20151124-0ubuntu1 (cf90b9c)
+
+2015-11-24 Daniel d'Andrada
+
+        * Implemented cursor support Approved by: PS Jenkins bot, Lukáš Tinkl
+          (ffe6916)
+        * Implemented cursor support Approved by: PS Jenkins bot, Lukáš Tinkl
+          (a93c8c5)
+        * Fix mir #includes (29a1574)
+        * Fix mir #includes (358a50e)
+
+2015-11-23 Daniel d'Andrada
+
+        * Merge trunk (c73aca7)
+        * Merge trunk (5ca586d)
+
+2015-11-20 Daniel d'Andrada
+
+        * Remove redundant break (a9fceee)
+        * Remove redundant break (4274534)
+
+2015-11-17 Daniel d'Andrada
+
+        * Merge and tweak lp:~sam-sgrs/qtubuntu/qtubuntu-fix-1504776
+          (30c61f7)
+        * Merge and tweak lp:~sam-sgrs/qtubuntu/qtubuntu-fix-1504776
+          (0980ed2)
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (c1a3d11)
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (732da07)
+
+2015-11-17 CI Train Bot
+
+        * Releasing 0.62+16.04.20151117-0ubuntu1 (c3daed0)
+        * Releasing 0.62+16.04.20151117-0ubuntu1 (adaea16)
+
+2015-11-17 Albert Astals Cid
+
+        * Improvements from running clazy over the code (515cfcc)
+        * Improvements from running clazy over the code (81108bc)
+
+2015-11-17 Lukáš Tinkl
+
+        * Fix inconsistent mouse wheel scrolling behavior Approved by: Daniel
+          d'Andrada, PS Jenkins bot (5041cf9)
+        * Fix inconsistent mouse wheel scrolling behavior Approved by: Daniel
+          d'Andrada, PS Jenkins bot (f905458)
+
+2015-11-17 Alberto Aguirre
+
+        * Add support for Qt popups and dialog windows. (07b59ed)
+        * Add support for Qt popups and dialog windows. (d9b5880)
+
+2015-11-17 Nick Dedekind
+
+        * Added check for valid mime data.
+          Fixes: #1493530 Approved by: PS
+          Jenkins bot, Daniel d'Andrada (57016df)
+        * Added check for valid mime data.
+          Fixes: #1493530 Approved by: PS
+          Jenkins bot, Daniel d'Andrada (6bff31c)
+
+2015-11-17 Albert Astals Cid
+
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (b923d7b)
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (6493ecf)
+
+2015-11-17 Gerry Boland
+
+        * Rebase on use-mir-surface-apis and resolve conflicts (769d402)
+        * Rebase on use-mir-surface-apis and resolve conflicts (db119eb)
+
+2015-11-16 Alberto Aguirre
+
+        * merge lp:~dandrader/qtubuntu/sizeHintsOnWindowCreation (1ae1f56)
+        * merge lp:~dandrader/qtubuntu/sizeHintsOnWindowCreation (c7d59f8)
+
+2015-11-16 Daniel d'Andrada
+
+        * Set sizing constraints on window creation (8fb7e59)
+        * Set sizing constraints on window creation (4acf701)
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (567e1bd)
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (e472310)
+
+2015-11-16 Alberto Aguirre
+
+        * merge lp:~dandrader/qtubuntu/fix-use-mir-surface-apis (c88d188)
+        * merge lp:~dandrader/qtubuntu/fix-use-mir-surface-apis (80a4fcb)
+
+2015-11-16 Daniel d'Andrada
+
+        * Bring back hack to get autopilot tests passing again (de5d0d6)
+        * Bring back hack to get autopilot tests passing again (5a650c3)
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (4269afa)
+        * Merge lp:~albaguirre/qtubuntu/use-mir-surface-apis (11a8683)
+        * Use a C++ cast instead of a C one (09bf525)
+        * Use a C++ cast instead of a C one (f192d27)
+
+2015-11-11 Daniel d'Andrada
+
+        * Implement support for pixmap QCursors (52379bc)
+        * Implement support for pixmap QCursors (964b8de)
+
+2015-11-10 Lukáš Tinkl
+
+        * use window->position() + localPoint() instead of globalPos
+          (6e14110)
+        * use window->position() + localPoint() instead of globalPos
+          (794b99c)
+
+2015-11-10 Daniel d'Andrada
+
+        * Fix cursor names (530d38e)
+        * Fix cursor names (0cdf520)
+        * Merge lp:~unity-team/qtubuntu/revert-occlusion-detection (3efb5e6)
+        * Merge lp:~unity-team/qtubuntu/revert-occlusion-detection (fbcb156)
+        * Support cursor shapes (38c8ef7)
+        * Support cursor shapes (361485e)
+
+2015-11-09 CI Train Bot
+
+        * Releasing 0.62+16.04.20151109-0ubuntu1 (26e7dc8)
+        * Releasing 0.62+16.04.20151109-0ubuntu1 (9bb8f47)
+
+2015-11-09 Nick Dedekind
+
+        * Reverted occlusion detection (lp#1514556) Approved by: PS Jenkins
+          bot (30e22f2)
+        * Reverted occlusion detection (lp#1514556) Approved by: PS Jenkins
+          bot (a7f7f1e)
+        * revert occlusion detection (4964f45)
+        * revert occlusion detection (bf3bf14)
+
+2015-11-09 Lukáš Tinkl
+
+        * pass wheel events to window (6c3b37d)
+        * pass wheel events to window (50cd87b)
+        * merge trunk (3e3bab7)
+        * merge trunk (5165457)
+
+2015-11-09 Nick Dedekind
+
+        * moved changed signal to if block (c424e25)
+        * moved changed signal to if block (5d62c54)
+        * merged with trunk (01d3066)
+        * merged with trunk (160e0cc)
+
+2015-11-05 CI Train Bot
+
+        * Releasing 0.62+16.04.20151105-0ubuntu1 (a898112)
+        * Releasing 0.62+16.04.20151105-0ubuntu1 (1aeb1d7)
+
+2015-11-05 Olivier Tilloy
+
+        * Re-implement QPlatformScreen::physicalSize().
+          Fixes: #1504293
+          Approved by: PS Jenkins bot, Gerry Boland (fbd1a62)
+        * Re-implement QPlatformScreen::physicalSize().
+          Fixes: #1504293
+          Approved by: PS Jenkins bot, Gerry Boland (795617c)
+
+2015-11-05 Nick Dedekind
+
+        * Support server->client visibility change to stop rendering
+          (lp:#1475678)
+          Fixes: #1475678 Approved by: PS Jenkins bot
+          (5872f12)
+        * Support server->client visibility change to stop rendering
+          (lp:#1475678)
+          Fixes: #1475678 Approved by: PS Jenkins bot
+          (c744965)
+        * Exposure initialization (76ef56a)
+        * Exposure initialization (47ebea9)
+
+2015-10-31 Sam Segers
+
+        * Add ApplicationState functionality to platform. Also adds
+          ApplicationSuspended for better lifecycle support.
+          (1e9ed55)
+        * Add ApplicationState functionality to platform. Also adds
+          ApplicationSuspended for better lifecycle support.
+          (cdb5a9a)
+
+2015-10-30 Gerry Boland
+
+        * use angle brackets for external lib header files (65c49d4)
+        * use angle brackets for external lib header files (69e8633)
+        * Alphabetize source & header files in qmake file (14175ac)
+        * Alphabetize source & header files in qmake file (392504d)
+        * Fix plugin load detection (aa9e0a2)
+        * Fix plugin load detection (51b8127)
+        * Use mir-client-debug to map window coordinates to screen
+          coordinates (3df50c4)
+        * Use mir-client-debug to map window coordinates to screen
+          coordinates (7b738fe)
+
+2015-10-30 Lukáš Tinkl
+
+        * fix wheel events sometimes happening at wrong places (40c5ca0)
+        * fix wheel events sometimes happening at wrong places (02492e1)
+
+2015-10-29 Gerry Boland
+
+        * Merge use-mir-surface-apis branch (d64460e)
+        * Merge use-mir-surface-apis branch (99ecc10)
+
+2015-10-27 Alberto Aguirre
+
+        * Don't create 0x0 mir surfaces (25f1026)
+        * Don't create 0x0 mir surfaces (49af66c)
+
+2015-10-26 Alberto Aguirre
+
+        * merge lp:qtubuntu, fix conflicts (e60ab33)
+        * merge lp:qtubuntu, fix conflicts (e830400)
+        * Fix resize corner case (2b37735)
+        * Fix resize corner case (187b393)
+
+2015-10-26 Nick Dedekind
+
+        * merge with trunk (d576497)
+        * merge with trunk (39fb61c)
+
+2015-10-25 Alberto Aguirre
+
+        * Slight cleanup (98d2b6b)
+        * Slight cleanup (8abbba2)
+        * Update log message (188029f)
+        * Update log message (4e21550)
+        * Add support for propagateSizeHints (d6cee2d)
+        * Add support for propagateSizeHints (6099063)
+        * Support updating title (afa3210)
+        * Support updating title (1d3d3d1)
+        * Support morphing non-modal to modal dialog. (5846f6f)
+        * Support morphing non-modal to modal dialog. (bfea2f1)
+
+2015-10-23 Alberto Aguirre
+
+        * Avoid telling Qt that no windows have focus when receiving a focus
+          lost/gained pair. (c2db86f)
+        * Avoid telling Qt that no windows have focus when receiving a focus
+          lost/gained pair. (2f6790e)
+        * Use screen output id when creating a fullscreen mir surface.
+          (b79e4ca)
+        * Use screen output id when creating a fullscreen mir surface.
+          (b507e28)
+        * Fix resize handling behavior. (c947bb6)
+        * Fix resize handling behavior. (24f2ac8)
+        * More cleanup (3a1ebe8)
+        * More cleanup (d65554b)
+
+2015-10-22 Alberto Aguirre
+
+        * Initialize egl surface at construction time. (7cdab5b)
+        * Initialize egl surface at construction time. (77def7e)
+        * Fix usage of mutex to protect private state. (0b53008)
+        * Fix usage of mutex to protect private state. (3c68897)
+        * More cleanup. (b8d9eb1)
+        * More cleanup. (484f755)
+        * Track the last surface to receive input. (ef3f7b5)
+        * Track the last surface to receive input. (d926e40)
+
+2015-10-21 Alberto Aguirre
+
+        * When a window is made visible expose the correct region in local
+          coordinates. (735855b)
+        * When a window is made visible expose the correct region in local
+          coordinates. (9438bdc)
+        * Send expose event if Qt resizes a window after its visible.
+          (f37aab7)
+        * Send expose event if Qt resizes a window after its visible.
+          (0193fce)
+        * Restore TODO to use mir_surface_state_hidden (1e66f77)
+        * Restore TODO to use mir_surface_state_hidden (c2f0bb3)
+        * Do not remove framenumber debug logs (e604464)
+        * Do not remove framenumber debug logs (6307b7e)
+        * Remove tab chars (b37a192)
+        * Remove tab chars (0a8a7da)
+
+2015-10-21 CI Train Bot
+
+        * Releasing 0.62+15.10.20151021-0ubuntu1 (ef97d23)
+        * Releasing 0.62+15.10.20151021-0ubuntu1 (c300c89)
+
+2015-10-21 Lukáš Tinkl
+
+        * Implement support for mouse wheel events
+          Fixes: #1497091 Approved
+          by: PS Jenkins bot, Daniel d'Andrada (1ae5762)
+        * Implement support for mouse wheel events
+          Fixes: #1497091 Approved
+          by: PS Jenkins bot, Daniel d'Andrada (b608ef6)
+        * Override QPlatformWindow::setWindowTitle() and update the caption
+          accordingly
+          Fixes: #1497092 Approved by: PS Jenkins bot,
+          Daniel d'Andrada (6cb4549)
+        * Override QPlatformWindow::setWindowTitle() and update the caption
+          accordingly
+          Fixes: #1497092 Approved by: PS Jenkins bot,
+          Daniel d'Andrada (ec924ad)
+
+2015-10-16 Alberto Aguirre
+
+        * Ignore unfocusing events (d7df9ce)
+        * Ignore unfocusing events (860f2c6)
+
+2015-10-15 Alberto Aguirre
+
+        * merge lp:qtubuntu, fix conflict (e7ab7e2)
+        * merge lp:qtubuntu, fix conflict (22fb287)
+
+2015-10-12 Nick Dedekind
+
+        * better exposure handling (f889710)
+        * better exposure handling (7ca6253)
+
+2015-10-09 Olivier Tilloy
+
+        * Re-implement QPlatformScreen::physicalSize(). (ec86142)
+        * Re-implement QPlatformScreen::physicalSize(). (865c3ed)
+
+2015-10-07 Lukáš Tinkl
+
+        * remove include QDebug (61b26e3)
+        * remove include QDebug (20ff43d)
+
+2015-10-05 Nick Dedekind
+
+        * log (d55e7de)
+        * log (6440f32)
+
+2015-10-01 Lukáš Tinkl
+
+        * convert the delta steps to degrees (e3e68e1)
+        * convert the delta steps to degrees (3780159)
+
+2015-09-30 Lukáš Tinkl
+
+        * merge trunk (05d0341)
+        * merge trunk (398f1cd)
+
+2015-09-29 Lukáš Tinkl
+
+        * remove unrelated input.cpp changes (13ea589)
+        * remove unrelated input.cpp changes (8d6ae1f)
+        * override setWindowTitle() (33c098f)
+        * override setWindowTitle() (bc8d4ae)
+        * recognize the back/forward buttons (071170b)
+        * recognize the back/forward buttons (87ffde8)
+        * remove debug (42221db)
+        * remove debug (60d682f)
+
+2015-09-29 Albert Astals Cid
+
+        * const & (07922b6)
+        * const & (959deba)
+        * Clazy fixes (c1f2606)
+        * Clazy fixes (ae6af41)
+
+2015-09-29 Lukáš Tinkl
+
+        * don't leak the spec (d779262)
+        * don't leak the spec (6812630)
+
+2015-09-28 Nick Dedekind
+
+        * added mime data pointer check (b5ec353)
+        * added mime data pointer check (7fb03be)
+
+2015-09-25 Lukáš Tinkl
+
+        * react to QWindow::windowTitleChanged() signals and update the
+          caption accordingly (ea7db6e)
+        * react to QWindow::windowTitleChanged() signals and update the
+          caption accordingly (e3c59ac)
+
+2015-09-23 Nick Dedekind
+
+        * updates (a19851e)
+        * updates (5f69d16)
+        * handle mir surface visibility events (022749d)
+        * handle mir surface visibility events (f0ea77c)
+
+2015-09-14 CI Train Bot
+
+        * Releasing 0.62+15.10.20150914-0ubuntu1 (63b8473)
+        * Releasing 0.62+15.10.20150914-0ubuntu1 (9d273b9)
+
+2015-09-14 Daniel d'Andrada
+
+        * Add
+          QPlatformNativeInterface::nativeResourceForIntegration("mirConnection")
+          (2450935)
+        * Add
+          QPlatformNativeInterface::nativeResourceForIntegration("mirConnection")
+          (853d7a1)
+
+2015-09-14 Paul Olav Tvete
+
+        * Remove QtSensors dependency (00b2130)
+        * Remove QtSensors dependency (24764ae)
+
+2015-08-28 CI Train Bot
+
+        * Releasing 0.62+15.04.20150828-0ubuntu1 (caf5970)
+        * Releasing 0.62+15.04.20150828-0ubuntu1 (89021dd)
+
+2015-08-28 Daniel d'Andrada
+
+        * UbuntuWindow - keep redrawing a bit until you get the promised
+          resized buffer (9f3a6bc)
+        * UbuntuWindow - keep redrawing a bit until you get the promised
+          resized buffer (2895080)
+        * UbuntuClipboard: ensure DBus has been set up before setting
+          clipboard contents Approved by: PS Jenkins bot, Gerry
+          Boland (771acf7)
+        * UbuntuClipboard: ensure DBus has been set up before setting
+          clipboard contents Approved by: PS Jenkins bot, Gerry
+          Boland (15a2037)
+        * Fix build (f5b1927)
+        * Fix build (de9d05e)
+
+2015-08-27 Daniel d'Andrada
+
+        * UbuntuWindow - keep redrawing a bit until you get the promised
+          resized buffer (40bd0bf)
+        * UbuntuWindow - keep redrawing a bit until you get the promised
+          resized buffer (0e617bc)
+        * Add
+          QPlatformNativeInterface::nativeResourceForIntegration("mirConnection")
+          (49c0c37)
+        * Add
+          QPlatformNativeInterface::nativeResourceForIntegration("mirConnection")
+          (eb8bb7f)
+
+2015-08-25 Alberto Aguirre
+
+        * Separate visibility from mir surface state (e837381)
+        * Separate visibility from mir surface state (f0be289)
+
+2015-08-20 Daniel d'Andrada
+
+        * UbuntuClipboard: ensure DBus has been set up before setting
+          clipboard contents (b1a1af7)
+        * UbuntuClipboard: ensure DBus has been set up before setting
+          clipboard contents (658e70e)
+
+2015-08-14 CI Train Bot
+
+        * Releasing 0.62+15.04.20150814-0ubuntu1 (7c77479)
+        * Releasing 0.62+15.04.20150814-0ubuntu1 (a7f37d5)
+
+2015-08-14 Daniel d'Andrada
+
+        * Fix surface resize (697099b)
+        * Fix surface resize (2f0b576)
+
+2015-08-14 Michael Zanetti
+
+        * bump (d4677cf)
+        * bump (81032f1)
+        * merge trunk (08517ae)
+        * merge trunk (903afc5)
+
+2015-08-14 Timo Jyrinki
+
+        * No-change rebuild to pick up qtbase change.;  No-change test
+          rebuild for g++5 ABI transition (55cdf25)
+        * No-change rebuild to pick up qtbase change.;  No-change test
+          rebuild for g++5 ABI transition (c89e3bd)
+
+2015-08-10 Alberto Aguirre
+
+        * Fix typo made during camel case renaming. (11b1e07)
+        * Fix typo made during camel case renaming. (5f46edb)
+
+2015-08-07 Nick Dedekind
+
+        * initial gmenumodel menus (00e77b9)
+
+2015-08-06 Alberto Aguirre
+
+        * merge lp:~dandrader/qtubuntu/busySwap-lp1473720 (96b1d6f)
+        * merge lp:~dandrader/qtubuntu/busySwap-lp1473720 (2d4f8a3)
+
+2015-08-06 Daniel d'Andrada
+
+        * We don't need gui-private either (41d537e)
+        * We don't need gui-private either (81f570d)
+        * Update debian/copyright (61dcf5d)
+        * Update debian/copyright (05fe6ec)
+        * Remove unneeded dependencies from debian/control and ancient manual
+          tests (0edc3f8)
+        * Remove unneeded dependencies from debian/control and ancient manual
+          tests (d10d37c)
+
+2015-08-06 Paul Olav Tvete
+
+        * Remove QtSensors dependency (3687d4f)
+        * Remove QtSensors dependency (df56cd5)
+
+2015-07-30 Alberto Aguirre
+
+        * More hungarian notation (bf8b348)
+        * More hungarian notation (ccb7fe9)
+        * Address feedback comments. (21acd69)
+        * Address feedback comments. (8f13a99)
+
+2015-07-28 Alberto Aguirre
+
+        * merge lp:qtubuntu (f97684d)
+        * merge lp:qtubuntu (0bca05b)
+
+2015-07-22 CI Train Bot
+
+        * Releasing 0.61+15.10.20150722-0ubuntu1 (d77c9d4)
+        * Releasing 0.61+15.10.20150722-0ubuntu1 (923612f)
+
+2015-07-22 Andreas Pokorny
+
+        * in step with mir release 0.14.0 Approved by: PS Jenkins bot, Gerry
+          Boland (74330c7)
+        * in step with mir release 0.14.0 Approved by: PS Jenkins bot, Gerry
+          Boland (a85a622)
+
+2015-07-15 Daniel d'Andrada
+
+        * Add a flush right after the expose to make Qt swap buffers ASAP
+          (9d9af50)
+        * Add a flush right after the expose to make Qt swap buffers ASAP
+          (5d68b34)
+
+2015-07-14 Daniel d'Andrada
+
+        * Fix surface resize (89ebb4d)
+        * Fix surface resize (be077e2)
+
+2015-07-07 Alberto Aguirre
+
+        * merge lp:qtubuntu (0f3f9ce)
+        * merge lp:qtubuntu (8ee07b4)
+        * merge lp:~albaguirre/qtubuntu/migrate-to-papi3 (e7dca68)
+        * merge lp:~albaguirre/qtubuntu/migrate-to-papi3 (4215186)
+
+2015-07-06 CI Train Bot
+
+        * Releasing 0.61+15.10.20150706-0ubuntu1 (05fe342)
+        * Releasing 0.61+15.10.20150706-0ubuntu1 (b6d0522)
+
+2015-07-06 Alberto Aguirre
+
+        * Migrate to platform-api 3 Approved by: PS Jenkins bot, Andreas
+          Pokorny, Kevin DuBois, Daniel d'Andrada (1858a3e)
+        * Migrate to platform-api 3 Approved by: PS Jenkins bot, Andreas
+          Pokorny, Kevin DuBois, Daniel d'Andrada (623d7a0)
+
+2015-07-01 Alberto Aguirre
+
+        * Fix conflict resolution (f94d080)
+        * Fix conflict resolution (b4292b8)
+        * merge lp:qtubuntu, fix conflicts (3ad77e7)
+        * merge lp:qtubuntu, fix conflicts (dbc9a5e)
+
+2015-06-26 Andreas Pokorny
+
+        * empty commit for mir release 0.14.0 (b5f88ba)
+        * empty commit for mir release 0.14.0 (0183d64)
+
+2015-06-24 Alberto Aguirre
+
+        * Cleanup usage of non-existant platform-api headers and types.
+          (705ed78)
+        * Cleanup usage of non-existant platform-api headers and types.
+          (37bfb95)
+
+2015-06-23 Alberto Aguirre
+
+        * Use mirclient api directly to obtain eglNativeDisplay and display
+          mode resolution. (90643d2)
+        * Use mirclient api directly to obtain eglNativeDisplay and display
+          mode resolution. (2f1a949)
+        * merge lp:qtubuntu (6ccf135)
+        * merge lp:qtubuntu (d4529a0)
+        * Migrate to platform-api 3 (5557c67)
+        * Migrate to platform-api 3 (7a0dea2)
+
+2015-06-17 CI Train Bot
+
+        * Releasing 0.61+15.10.20150617-0ubuntu1 (1c03e22)
+        * Releasing 0.61+15.10.20150617-0ubuntu1 (1b86b6b)
+
+2015-06-17 Daniel d'Andrada
+
+        * Drastically improve surface resize responsiveness (30e3b58)
+        * Drastically improve surface resize responsiveness (45c3e23)
+
+2015-06-17 Lukáš Tinkl
+
+        * fix logic error when testing QFlags (0bf0080)
+        * fix logic error when testing QFlags (eca4e0e)
+
+2015-06-17 Timo Jyrinki
+
+        * Build depend against libinput-dev to fix build with Qt 5.5 (LP:
+          #1437192)
+          Fixes: #1437192 Approved by: Gerry Boland, PS
+          Jenkins bot (ad418a9)
+        * Build depend against libinput-dev to fix build with Qt 5.5 (LP:
+          #1437192)
+          Fixes: #1437192 Approved by: Gerry Boland, PS
+          Jenkins bot (b432bf5)
+
+2015-06-17 Gerry Boland
+
+        * Add support for Mir window close event
+          Fixes: #1434584 Approved by:
+          Nick Dedekind, Robert Carr (43b919e)
+        * Add support for Mir window close event
+          Fixes: #1434584 Approved by:
+          Nick Dedekind, Robert Carr (aa74969)
+
+2015-06-17 Daniel d'Andrada
+
+        * Refactor optional logging and remove trailing whitespace (0bcb623)
+        * Refactor optional logging and remove trailing whitespace (add4bbc)
+
+2015-06-16 Alberto Aguirre
+
+        * Undo changelog changes when merging. (9e9d6fe)
+        * Undo changelog changes when merging. (1f2c0f4)
+        * merge trunk (d5d59bc)
+        * merge trunk (1c65ae9)
+        * Use new mir surface apis (c4c8b75)
+        * Use new mir surface apis (c5202fc)
+
+2015-06-15 Timo Jyrinki
+
+        * No-change rebuild against Qt 5.4.2. (b08e2c1)
+        * No-change rebuild against Qt 5.4.2. (1d0d338)
+
+2015-06-14 Alberto Aguirre
+
+        * Remove unused IS_OPAQUE_FLAG (b39eafa)
+        * Remove unused IS_OPAQUE_FLAG (902bcc6)
+        * report nonfullscreen cap (0ad260a)
+        * report nonfullscreen cap (3e34e60)
+        * Support surface resizing (01c4e74)
+        * Support surface resizing (0211e64)
+        * Advertise multiple window support (58e4da7)
+        * Advertise multiple window support (5108232)
+
+2015-06-11 CI Train Bot
+
+        * Releasing 0.61+15.10.20150611-0ubuntu1 (fc7acde)
+        * Releasing 0.61+15.10.20150611-0ubuntu1 (e8642ed)
+
+2015-06-11 Michał Sawicz
+
+        * Flip screen dimensions to compensate for a rotated window (1728ee0)
+        * Flip screen dimensions to compensate for a rotated window (98cad4c)
+
+2015-06-11 Alan Griffiths
+
+        * Track mir deprecations and renames. Approved by: Gerry Boland
+          (bb29c06)
+        * Track mir deprecations and renames. Approved by: Gerry Boland
+          (c090ba1)
+
+2015-06-10 Alberto Aguirre
+
+        * local headers first (eccc73f)
+        * local headers first (8489727)
+        * fix build failure when QT_NO_DEBUG is undefined (311a09c)
+        * fix build failure when QT_NO_DEBUG is undefined (bce6513)
+
+2015-06-02 Alberto Aguirre
+
+        * merge lp:~dandrader/qtubuntu/shellRotation (f857370)
+        * merge lp:~dandrader/qtubuntu/shellRotation (9887ed5)
+        * merge lp:~mir-team/qtubuntu/track-mir-deprecations (714cde3)
+        * merge lp:~mir-team/qtubuntu/track-mir-deprecations (aeaf6e4)
+
+2015-06-02 Daniel d'Andrada
+
+        * Merge lp:~mir-team/qtubuntu/track-mir-deprecations (eff4e16)
+        * Merge lp:~mir-team/qtubuntu/track-mir-deprecations (88b4db6)
+
+2015-05-27 Alan Griffiths
+
+        * Update libmirclient-dev dependency (12771be)
+        * Update libmirclient-dev dependency (f69e9a0)
+        * merge lp:~mir-team/qtubuntu/track-mir-deprecations (99b07e5)
+        * merge lp:~mir-team/qtubuntu/track-mir-deprecations (e84a49b)
+
+2015-05-26 Robert Carr
+
+        * Track mir deprecations (0138033)
+        * Track mir deprecations (06a49fb)
+
+2015-05-26 Alan Griffiths
+
+        * Fixup for Mir 0.13.0 API (025dc67)
+        * Fixup for Mir 0.13.0 API (a08eafd)
+
+2015-05-18 Lukáš Tinkl
+
+        * fix logic error when testing QFlags (a436265)
+        * fix logic error when testing QFlags (5fd7354)
+
+2015-05-12 Daniel d'Andrada
+
+        * Drastically improve surface resize responsiveness (e02a598)
+        * Drastically improve surface resize responsiveness (b28dd84)
+
+2015-04-13 Michał Sawicz
+
+        * Merge trunk. (79a6f38)
+        * Merge trunk. (b56451f)
+
+2015-03-27 Timo Jyrinki
+
+        * Build depend against libinput-dev to fix build with Qt 5.5 (LP:
+          #1437192) (fe0b8c1)
+        * Build depend against libinput-dev to fix build with Qt 5.5 (LP:
+          #1437192) (3939df0)
+
+2015-03-20 Ricardo Salveti de Araujo
+
+        * No-change rebuild against latest platform-api (44619b7)
+        * No-change rebuild against latest platform-api (8f72947)
+
+2015-03-19 Daniel d'Andrada
+
+        * Remove unused variable (fa16d0c)
+        * Remove unused variable (5fad998)
+        * Merge trunk (ad7d2a1)
+        * Merge trunk (7ca9226)
+
+2015-03-18 CI Train Bot
+
+        * Releasing 0.60+15.04.20150318-0ubuntu1 (fccc7e6)
+        * Releasing 0.60+15.04.20150318-0ubuntu1 (a0fd397)
+
+2015-03-18 Robert Carr
+
+        * Port qtubuntu to direct mirclient usage for window creation and
+          input handling. Approved by: Michał Sawicz, Daniel
+          d'Andrada, Albert Astals Cid (6fc269f)
+        * Port qtubuntu to direct mirclient usage for window creation and
+          input handling. Approved by: Michał Sawicz, Daniel
+          d'Andrada, Albert Astals Cid (8e75a42)
+
+2015-03-18 Timo Jyrinki
+
+        * No-change rebuild against Qt 5.4.1. (345e264)
+        * No-change rebuild against Qt 5.4.1. (688b7e6)
+
+2015-03-05 Robert Carr
+
+        * Fix mirclient dep (f63bfbb)
+        * Fix mirclient dep (020c87f)
+
+2015-03-04 Daniel d'Andrada
+
+        * Adapt to changes in Qt's platform API (9861b31)
+        * Adapt to changes in Qt's platform API (679ff7e)
+
+2015-03-02 Robert Carr
+
+        * Correct build deps (f373e8e)
+        * Correct build deps (9ffc8a9)
+
+2015-02-23 Daniel d'Andrada
+
+        * Stick to minimized instead of hidden for now (50e5977)
+        * Stick to minimized instead of hidden for now (a83eebe)
+        * qtWindowStateToStr(Qt::WindowState) is only used in debug builds
+          (2487440)
+        * qtWindowStateToStr(Qt::WindowState) is only used in debug builds
+          (2a22373)
+        * Fix UbuntuWindow::setVisible(true) (11bdea0)
+        * Fix UbuntuWindow::setVisible(true) (3ebeea5)
+
+2015-02-17 Robert Carr
+
+        * Correct QFlags usage (b869d5c)
+        * Correct QFlags usage (e69e942)
+
+2015-02-16 Timo Jyrinki
+
+        * No-change rebuild against Qt 5.4.0. (baf5fd5)
+        * No-change rebuild against Qt 5.4.0. (376bccd)
+
+2015-02-12 Gerry Boland
+
+        * Add experimental mouse wheel support (49d91bf)
+        * Add experimental mouse wheel support (e6e6bd5)
+        * Add support for back & forward mouse buttons. Removes todo
+          (ddb9e8c)
+        * Add support for back & forward mouse buttons. Removes todo
+          (bdb34a3)
+        * Handle pointer enter/leave event from Mir (0137771)
+        * Handle pointer enter/leave event from Mir (20ff6bf)
+        * Add support for Mir window close event (ab57f6e)
+        * Add support for Mir window close event (28ece92)
+
+2015-02-11 Robert Carr
+
+        * Correct various small errors (1c4ca46)
+        * Correct various small errors (32427fc)
+
+2015-02-05 Alberto Aguirre
+
+        * undo geom debug (b9bc9a1)
+        * undo geom debug (e5c2207)
+
+2015-02-04 Alberto Aguirre
+
+        * fix style and copyright years (9b3dbb3)
+        * fix style and copyright years (879cf9e)
+        * Fix crash when using multiple windows (571bbc9)
+        * Fix crash when using multiple windows (d1962bd)
+        * Fix debug build (649f0f9)
+        * Fix debug build (0f866af)
+
+2015-01-29 Robert Carr
+
+        * Cleanup (4c1f9b7)
+        * Cleanup (68bfc7b)
+        * Remove hack (10ca69d)
+        * Remove hack (323eaa6)
+        * Fix osk logic (08e1ed6)
+        * Fix osk logic (2ccdf6c)
+
+2015-01-28 Robert Carr
+
+        * Implement pointer support (c042a76)
+        * Implement pointer support (d781e2e)
+        * Bump papi dep (db69b44)
+        * Bump papi dep (a416a0b)
+        * Correct linkage against platform API (55a32f1)
+        * Correct linkage against platform API (2b51e8f)
+
+2015-01-27 Robert Carr
+
+        * Correct input event constness (0e778da)
+        * Correct input event constness (e89f43d)
+
+2015-01-12 Daniel d'Andrada
+
+        * Flip screen dimensions to compensate for a rotated window (a28a442)
+        * Flip screen dimensions to compensate for a rotated window (aee6117)
+
+2014-12-18 Robert Carr
+
+        * Update to modifier changes (70e5286)
+        * Update to modifier changes (6a0b18e)
+
+2014-12-17 Robert Carr
+
+        * Cleanup (44d2382)
+        * Cleanup (0b5ec1b)
+
+2014-12-15 Robert Carr
+
+        * Well it builds (ee5ee72)
+        * Well it builds (1c70c99)
+        * Some progress I suppose (fb6ee50)
+        * Some progress I suppose (d91b893)
+        * Some progress I suppose (c38ed33)
+        * Some progress I suppose (12ef146)
+        * Some progress I suppose (a4440a3)
+        * Some progress I suppose (f4471bb)
+        * Some progress I suppose (a3d9813)
+        * Some progress I suppose (ebfc3f7)
+
+2014-12-12 CI Train Bot
+
+        * Releasing 0.60+15.04.20141212-0ubuntu1 (2cb286e)
+        * Releasing 0.60+15.04.20141212-0ubuntu1 (eaa4a82)
+
+2014-12-12 Gerry Boland
+
+        * Fix raster-based (QWidget) application rendering. (b126546)
+        * Fix raster-based (QWidget) application rendering. (5c93e1e)
+
+2014-12-12 Robert Carr
+
+        * Utilize repeat_count value from Mir in constructing QKeyEvents.
+
+          Fixes: #1349416 Approved by: Daniel d'Andrada, PS Jenkins
+          bot (9cbf8f4)
+        * Utilize repeat_count value from Mir in constructing QKeyEvents.
+
+          Fixes: #1349416 Approved by: Daniel d'Andrada, PS Jenkins
+          bot (167ca43)
+
+2014-12-04 Gerry Boland
+
+        * Mark end of code taken from Qt (0f3a98d)
+        * Mark end of code taken from Qt (8de0dc6)
+
+2014-11-11 Gerry Boland
+
+        * Small syntax standardization (469977f)
+        * Small syntax standardization (b8021bc)
+        * Fix Raster drawing by implementing proper QPlatformBackingStore
+          (9e122f8)
+        * Fix Raster drawing by implementing proper QPlatformBackingStore
+          (18116d1)
+
+2014-11-11 CI bot
+
+        * Releasing 0.60+15.04.20141111-0ubuntu1 (7c952dc)
+        * Releasing 0.60+15.04.20141111-0ubuntu1 (4bec611)
+
+2014-11-11 Timo Jyrinki
+
+        * Add libmtdev-dev build dependency (LP: #1379152)
+          Fixes: 1379152
+          Approved by: PS Jenkins bot (eef7c8f)
+        * Add libmtdev-dev build dependency (LP: #1379152)
+          Fixes: 1379152
+          Approved by: PS Jenkins bot (153de20)
+
+2014-10-09 Timo Jyrinki
+
+        * Add libmtdev-dev build dependency (LP: #1379152) (18a5094)
+        * Add libmtdev-dev build dependency (LP: #1379152) (f80873f)
+
+2014-10-01 CI bot
+
+        * Releasing 0.60+14.10.20141001.3-0ubuntu1 (c062ba2)
+        * Releasing 0.60+14.10.20141001.3-0ubuntu1 (1251b82)
+
+2014-10-01 Daniel d'Andrada
+
+        * Use the global clipboard from D-Bus
+          Fixes: 1367814, 1367816
+          Approved by: Robert Carr, PS Jenkins bot (6ac70a5)
+        * Use the global clipboard from D-Bus
+          Fixes: 1367814, 1367816
+          Approved by: Robert Carr, PS Jenkins bot (a41fab6)
+
+2014-10-01 Zsombor Egri
+
+        * Handle PasswordMaskDelay.
+          Fixes: 1237614 Approved by: Loïc
+          Molinari, PS Jenkins bot (ce6b957)
+        * Handle PasswordMaskDelay.
+          Fixes: 1237614 Approved by: Loïc
+          Molinari, PS Jenkins bot (8476d28)
+
+2014-10-01 Robert Carr
+
+        * Support mir restored surface state as a way to leave fullscreen.
+
+          Fixes: 1194550, 1328839 Approved by: Daniel d'Andrada
+          (021c349)
+        * Support mir restored surface state as a way to leave fullscreen.
+
+          Fixes: 1194550, 1328839 Approved by: Daniel d'Andrada
+          (1005e4e)
+
+2014-09-30 Robert Carr
+
+        * Remove weird comment, support minimized state (c089551)
+        * Remove weird comment, support minimized state (4dc031c)
+
+2014-09-29 Robert Carr
+
+        * Merge lp:qtubuntu (afdc9b2)
+        * Merge lp:qtubuntu (f3ce48d)
+        * Bump papi dep (8a0303b)
+        * Bump papi dep (eaa66eb)
+
+2014-09-26 Robert Carr
+
+        * Bump papi dependency (ed3029c)
+        * Bump papi dependency (62cb6bd)
+
+2014-09-24 Robert Carr
+
+        * Now with correctness (ff9c682)
+        * Now with correctness (b8a2cac)
+        * Utilize repeat count from mir (9518763)
+        * Utilize repeat count from mir (abf509e)
+
+2014-09-23 Daniel d'Andrada
+
+        * Implement contents size limitation on the global clipboard
+          (f427d69)
+        * Implement contents size limitation on the global clipboard
+          (5f6a150)
+
+2014-09-22 Robert Carr
+
+        * Add state changing (1233edf)
+        * Add state changing (f015feb)
+
+2014-09-22 CI bot
+
+        * Releasing 0.60+14.10.20140922.1-0ubuntu1 (8d2f0a2)
+        * Releasing 0.60+14.10.20140922.1-0ubuntu1 (e60c812)
+
+2014-09-22 Gerry Boland
+
+        * Expose Mir surface orientation property instead of connecting to
+          orientation sensor directly
+          Fixes: 1288332 Approved by:
+          Daniel d'Andrada (b539f09)
+        * Expose Mir surface orientation property instead of connecting to
+          orientation sensor directly
+          Fixes: 1288332 Approved by:
+          Daniel d'Andrada (5360faa)
+
+2014-09-22 Daniel d'Andrada
+
+        * Use the global clipboard from D-Bus (472da02)
+        * Use the global clipboard from D-Bus (aa4a298)
+
+2014-09-19 Gerry Boland
+
+        * Dump dependency on papi to 2.4.0 (b478918)
+        * Dump dependency on papi to 2.4.0 (33f1ee5)
+
+2014-09-17 Zsombor Egri
+
+        * bug attached (f30df70)
+        * bug attached (deb7d31)
+        * add passwordMaskDelayhandling (4c310c9)
+        * add passwordMaskDelayhandling (5ce00b4)
+
+2014-09-09 Gerry Boland
+
+        * Undo changes to mapping of OrientationReading->ScreenOrientation,
+          better the old way (a2e49bb)
+        * Undo changes to mapping of OrientationReading->ScreenOrientation,
+          better the old way (42f79c2)
+
+2014-09-02 Gerry Boland
+
+        * Use QOrientationReading::Orientation in the OrientationChangeEvent
+          (6125934)
+        * Use QOrientationReading::Orientation in the OrientationChangeEvent
+          (9ebe712)
+
+2014-09-01 Gerry Boland
+
+        * oops, %s not %d (61aa265)
+        * oops, %s not %d (359e72e)
+        * Add text description for a debug output (8ddd1dd)
+        * Add text description for a debug output (d7c1725)
+
+2014-08-26 Gerry Boland
+
+        * Alphabetize (602e316)
+        * Alphabetize (05aa013)
+        * Depend on PAPI 2.2.1 (7da42ad)
+        * Depend on PAPI 2.2.1 (0f8b30c)
+
+2014-08-25 Gerry Boland
+
+        * Expose Mir surface orientation property instead of connecting to
+          orientation sensor directly (41f7a79)
+        * Expose Mir surface orientation property instead of connecting to
+          orientation sensor directly (80e85e8)
+
+2014-08-15 CI bot
+
+        * Releasing 0.60+14.10.20140815.1-0ubuntu1 (2df1c8b)
+        * Releasing 0.60+14.10.20140815.1-0ubuntu1 (0daa375)
+
+2014-08-15 Daniel d'Andrada
+
+        * Remove leftover pkg dependencies: mircommon and mirclient (03b9bd6)
+        * Remove leftover pkg dependencies: mircommon and mirclient (1b80049)
+
+2014-08-15 Ricardo Mendoza
+
+        * Check window is valid before delivering event. Approved by: Gerry
+          Boland (60e3b63)
+        * Check window is valid before delivering event. Approved by: Gerry
+          Boland (b8cc6d8)
+
+2014-08-14 Daniel d'Andrada
+
+        * Remove leftover pkg dependencies: mircommon and mirclient (b10528a)
+        * Remove leftover pkg dependencies: mircommon and mirclient (dfdd74f)
+
+2014-08-14 Ricardo Mendoza
+
+        * Check for window validity before delivering event (5808884)
+        * Check for window validity before delivering event (7994f93)
+
+2014-08-12 CI bot
+
+        * Releasing 0.60+14.10.20140812-0ubuntu1 (3b172d3)
+        * Releasing 0.60+14.10.20140812-0ubuntu1 (36332fc)
+
+2014-08-12 Florian Boucault
+
+        * Scale the minimum distance before drag
+          (QPlatformIntegration::StartDragDistance) taking into
+          account the grid unit definition (the scale factor).
+          Approved by: PS Jenkins bot (096427d)
+        * Scale the minimum distance before drag
+          (QPlatformIntegration::StartDragDistance) taking into
+          account the grid unit definition (the scale factor).
+          Approved by: PS Jenkins bot (2fb1e92)
+        * Merged with trunk (d393dda)
+        * Merged with trunk (6e0a770)
+
+2014-08-08 CI bot
+
+        * Releasing 0.60+14.10.20140808.1-0ubuntu1 (a172e8a)
+        * Releasing 0.60+14.10.20140808.1-0ubuntu1 (cb757a3)
+
+2014-08-08 Gerry Boland
+
+        * Workaround for bug 1346633 broke
+          QGuiApplication::topLevelWindows(), perform a different
+          workaround. (dac8294)
+        * Workaround for bug 1346633 broke
+          QGuiApplication::topLevelWindows(), perform a different
+          workaround. (be982f2)
+        * Review comments addressed (6273650)
+        * Review comments addressed (c168816)
+        * Workaround for bug 1346633 broke
+          QGuiApplication::topLevelWindows(), perform a different
+          workaround (493f5fc)
+        * Workaround for bug 1346633 broke
+          QGuiApplication::topLevelWindows(), perform a different
+          workaround (ee5f351)
+
+2014-08-05 Florian Boucault
+
+        * Scale the minimum distance before drag
+          (QPlatformIntegration::StartDragDistance) taking into
+          account the grid unit definition (the scale factor).
+          (9895b1b)
+        * Scale the minimum distance before drag
+          (QPlatformIntegration::StartDragDistance) taking into
+          account the grid unit definition (the scale factor).
+          (8f76f87)
+
+2014-07-28 CI bot
+
+        * Releasing 0.60+14.10.20140728-0ubuntu1 (961426e)
+        * Releasing 0.60+14.10.20140728-0ubuntu1 (7f20e2f)
+
+2014-07-28 Gerry Boland
+
+        * Major refactor: remove SurfaceFlinger & Mir
+          in-server-process-client support, flatten class hierarchy.
+          Only Mir client QPA remains (bbd57aa)
+        * Major refactor: remove SurfaceFlinger & Mir
+          in-server-process-client support, flatten class hierarchy.
+          Only Mir client QPA remains (32c8e1e)
+
+2014-07-22 Gerry Boland
+
+        * HACK: implement hackish Window::mapToGlobal and isExposed to work
+          around Autopilot relying on QWindow::mapToGlobal for
+          coordinates in screen space (7d1fa4f)
+        * HACK: implement hackish Window::mapToGlobal and isExposed to work
+          around Autopilot relying on QWindow::mapToGlobal for
+          coordinates in screen space (a4bf16d)
+
+2014-07-15 Daniel d'Andrada
+
+        * Adapt to latest platform-api API (ffd5225)
+        * Adapt to latest platform-api API (f3eb113)
+
+2014-07-09 Gerry Boland
+
+        * debian: remove unneeded build deps (2d6e4dc)
+        * debian: remove unneeded build deps (33a8f16)
+
+2014-07-08 Gerry Boland
+
+        * Bump platform-api dependency version to 2.2.0 (fbbace3)
+        * Bump platform-api dependency version to 2.2.0 (2586f0f)
+        * More verbose error message for mir connection fails (0f9d575)
+        * More verbose error message for mir connection fails (64f8c03)
+
+2014-07-02 Daniel d'Andrada
+
+        * Handle mir surface focus changes (967c64d)
+        * Handle mir surface focus changes (2dbdf91)
+
+2014-06-30 Gerry Boland
+
+        * Restore orientation event notifications to clients (64005aa)
+        * Restore orientation event notifications to clients (0fadc91)
+        * Update copyright year (2a92835)
+        * Update copyright year (d5d31f5)
+        * Add entry in debianchangelog (99beaab)
+        * Add entry in debianchangelog (63576b0)
+        * Merge trunk, fpxi conflicts (787e79f)
+        * Merge trunk, fpxi conflicts (8ae6d91)
+
+2014-06-20 Gerry Boland
+
+        * Clean up debian/rules and root PRO flie. Delete useless deploy
+          script (3321705)
+        * Clean up debian/rules and root PRO flie. Delete useless deploy
+          script (1c69df1)
+        * Explicitly set Surface Renderable type (ab652ba)
+        * Explicitly set Surface Renderable type (f1e5dc6)
+
+2014-06-19 Gerry Boland
+
+        * Drop useless TODO (7e8b584)
+        * Drop useless TODO (2dc7431)
+        * Flatten class hierarchy, drop legacy and ubuntumirserver plugins -
+          just ubuntumirclient remaining (ca51833)
+        * Flatten class hierarchy, drop legacy and ubuntumirserver plugins -
+          just ubuntumirclient remaining (af993d4)
+
+2014-06-13 CI bot
+
+        * Releasing 0.54+14.10.20140613-0ubuntu1 (11f978e)
+        * Releasing 0.54+14.10.20140613-0ubuntu1 (c66df44)
+
+2014-06-13 Alexandros Frantzis
+
+        * Set the surface renderable type to QSurfaceFormat::OpenGLES when
+          using OpenGL ES 2.0 (ed4fa17)
+        * Set the surface renderable type to QSurfaceFormat::OpenGLES when
+          using OpenGL ES 2.0 (ea99457)
+
+2014-06-12 CI bot
+
+        * Releasing 0.54+14.10.20140612-0ubuntu1 (683cc2e)
+        * Releasing 0.54+14.10.20140612-0ubuntu1 (926651a)
+
+2014-06-12 Ricardo Mendoza
+
+        * Migrate to Platform API v2 (fd19954)
+        * Migrate to Platform API v2 (f7c7296)
+
+2014-06-02 Ricardo Mendoza
+
+        * Merge trunk (bcf0123)
+        * Merge trunk (2d2e774)
+
+2014-05-29 Ricardo Mendoza
+
+        * Resolve (6087d4a)
+        * Resolve (1e21506)
+        * Migrate to Platform API V2 (a78103b)
+        * Migrate to Platform API V2 (cf08b97)
+
+2014-05-26 CI bot
+
+        * Releasing 0.54+14.10.20140526.1-0ubuntu1 (9f1eb62)
+        * Releasing 0.54+14.10.20140526.1-0ubuntu1 (ce237d2)
+
+2014-05-26 Michael Terry
+
+        * Note that unity8-greeter is a shell too. (e0d0314)
+        * Note that unity8-greeter is a shell too. (a7f2a3b)
+
+2014-05-23 CI bot
+
+        * Releasing 0.54+14.10.20140523-0ubuntu1 (a16207b)
+        * Releasing 0.54+14.10.20140523-0ubuntu1 (8707db4)
+
+2014-05-23 Timo Jyrinki
+
+        * Depend on libqt5sensors5-dev instead of qtsensors5-dev. (LP:
+          #1317885)
+          Fixes: 1317885 (0034ab0)
+        * Depend on libqt5sensors5-dev instead of qtsensors5-dev. (LP:
+          #1317885)
+          Fixes: 1317885 (3982954)
+
+2014-05-22 Ricardo Mendoza
+
+        * Migrate to Platform API v2 (64de3aa)
+        * Migrate to Platform API v2 (e99ede1)
+
+2014-05-22 Alexandros Frantzis
+
+        * Set the surface renderable type to QSurfaceFormat::OpenGLES when
+          using OpenGL ES 2.0 (6454ccf)
+        * Set the surface renderable type to QSurfaceFormat::OpenGLES when
+          using OpenGL ES 2.0 (6dc37b7)
+
+2014-05-21 Michael Terry
+
+        * Support marking unity8-greeter as a shell too (474b8c7)
+        * Support marking unity8-greeter as a shell too (69ab31c)
+
+2014-05-15 CI bot
+
+        * Releasing 0.54+14.10.20140515.1-0ubuntu1 (e42c9bb)
+        * Releasing 0.54+14.10.20140515.1-0ubuntu1 (a37ffd8)
+
+2014-05-15 Kevin Gunn
+
+        * rebuild only (88ab9ae)
+        * rebuild only (7b5a275)
+        * rebuild (af53fff)
+        * rebuild (11211b1)
+
+2014-05-12 Timo Jyrinki
+
+        * Depend on libqt5sensors5-dev instead of qtsensors5-dev. (LP:
+          #1317885) (6882541)
+        * Depend on libqt5sensors5-dev instead of qtsensors5-dev. (LP:
+          #1317885) (e2f6b0c)
+
+2014-05-09 Ricardo Salveti de Araujo
+
+        * releasing package qtubuntu version 0.54+14.10.20140430.1-0ubuntu3
+          (d5d6e17)
+        * releasing package qtubuntu version 0.54+14.10.20140430.1-0ubuntu3
+          (00bb84e)
+        * Moving back qtubuntu-desktop's arch to any, as there's no easy way
+          to guarantee that the package is broken on armhf (e692ea0)
+        * Moving back qtubuntu-desktop's arch to any, as there's no easy way
+          to guarantee that the package is broken on armhf (a767b41)
+
+2014-05-08 Ricardo Salveti de Araujo
+
+        * releasing package qtubuntu version 0.54+14.10.20140430.1-0ubuntu2
+          (61c2bc1)
+        * releasing package qtubuntu version 0.54+14.10.20140430.1-0ubuntu2
+          (ec835b5)
+
+2014-04-30 CI bot
+
+        * Releasing 0.54+14.10.20140430.1-0ubuntu1 (3f54cde)
+        * Releasing 0.54+14.10.20140430.1-0ubuntu1 (e44e84e)
+
+2014-04-30 Gerry Boland
+
+        * Lifecycle events emit expose events to safely stop & resume the
+          renderer threads. (4460ce3)
+        * Lifecycle events emit expose events to safely stop & resume the
+          renderer threads. (f43d5f3)
+
+2014-04-16 Gerry Boland
+
+        * Using the hide/show events at all is dangerous, rely solely on
+          expose (666fc21)
+        * Using the hide/show events at all is dangerous, rely solely on
+          expose (39714bc)
+        * Implement QPlatformWindow::isExposed to properly tell Qt to
+          start/stop rendering. (1c18a06)
+        * Implement QPlatformWindow::isExposed to properly tell Qt to
+          start/stop rendering. (caf4662)
+
+2014-04-15 Gerry Boland
+
+        * Attempt 2 (64e3791)
+        * Attempt 2 (9faef0c)
+        * Use lifecycle messanger to set window hide/show - to neatly
+          stop/start the render loop (b9ec210)
+        * Use lifecycle messanger to set window hide/show - to neatly
+          stop/start the render loop (ccc8ef3)
+
+2014-04-14 Ricardo Salveti de Araujo
+
+        * releasing package qtubuntu version 0.54+14.04.20140402-0ubuntu2
+          (da892e0)
+        * releasing package qtubuntu version 0.54+14.04.20140402-0ubuntu2
+          (3b10f6a)
+
+2014-04-02 CI bot
+
+        * Releasing 0.54+14.04.20140402-0ubuntu1 (87d810a)
+        * Releasing 0.54+14.04.20140402-0ubuntu1 (6499edc)
+
+2014-04-02 Stephen M. Webb
+
+        * Force the OpenGL surface format in qtubuntu-desktop.
+          Fixes: 1295309
+          (b9e67e3)
+        * Force the OpenGL surface format in qtubuntu-desktop.
+          Fixes: 1295309
+          (796a062)
+
+2014-04-01 CI bot
+
+        * Releasing 0.54+14.04.20140401-0ubuntu1 (1f020bd)
+        * Releasing 0.54+14.04.20140401-0ubuntu1 (4923170)
+
+2014-04-01 Michael Zanetti
+
+        * Drop applicationmanager module from qtubuntu. (bd1a5b5)
+        * Drop applicationmanager module from qtubuntu. (58cfd51)
+
+2014-04-01 Michał Sawicz
+
+        * Make changelog UNRELEASED. (7ee0202)
+        * Make changelog UNRELEASED. (a6ae039)
+
+2014-03-31 Michael Zanetti
+
+        * also break old versions of ubuntu-touch-session (0d1c157)
+        * also break old versions of ubuntu-touch-session (bbb976e)
+        * break unity8 << 7.85 (73bd2cc)
+        * break unity8 << 7.85 (1472cac)
+        * drop qtutubutu-shell from provides (414296c)
+        * drop qtutubutu-shell from provides (bf4d2fd)
+
+2014-03-25 Michael Zanetti
+
+        * bump changelog (f2f4172)
+        * bump changelog (824e9fc)
+        * drop unity-api from depends (dd07310)
+        * drop unity-api from depends (a6b954b)
+        * drop applicationmanager module from qtubuntu. (a19b3bb)
+        * drop applicationmanager module from qtubuntu. (3eff81c)
+
+2014-03-20 Stephen M. Webb
+
+        * Force the OpenGL surface format in qtubuntu-desktop. (df404b2)
+        * Force the OpenGL surface format in qtubuntu-desktop. (e5df708)
+
+2014-03-18 CI bot
+
+        * Releasing 0.53+14.04.20140318-0ubuntu1 (4d64bea)
+        * Releasing 0.53+14.04.20140318-0ubuntu1 (5f27566)
+
+2014-03-18 Chris Coulson
+
+        * Implement QPlatformNativeInterface::nativeResourceForScreen() for
+          accessing the native display handle (lp: #1278868)
+          Fixes:
+          1278868 (f94aada)
+        * Implement QPlatformNativeInterface::nativeResourceForScreen() for
+          accessing the native display handle (lp: #1278868)
+          Fixes:
+          1278868 (6cbe56d)
+        * Pass the EGL share context to eglCreateContext (lp: #1278470)
+
+          Fixes: 1278470 (bf879fc)
+        * Pass the EGL share context to eglCreateContext (lp: #1278470)
+
+          Fixes: 1278470 (fc35edd)
+        * Merge from trunk (b74e628)
+        * Merge from trunk (ff7398c)
+
+2014-03-04 CI bot
+
+        * Releasing 0.53+14.04.20140304-0ubuntu1 (7c08ea6)
+        * Releasing 0.53+14.04.20140304-0ubuntu1 (3485df8)
+        * No change rebuild against Qt 5.2.1. (dbfeb7d)
+        * No change rebuild against Qt 5.2.1. (cf9b316)
+
+2014-02-28 CI bot
+
+        * Releasing 0.53+14.04.20140228-0ubuntu1 (4886325)
+        * Releasing 0.53+14.04.20140228-0ubuntu1 (7196ec1)
+
+2014-02-28 Stephen M. Webb
+
+        * build qtubuntu-desktop to use an OpenGL context instead of an
+          OpenGL|ES context (lp: #1274763)
+          Fixes: 1274763 (046ffa9)
+        * build qtubuntu-desktop to use an OpenGL context instead of an
+          OpenGL|ES context (lp: #1274763)
+          Fixes: 1274763 (8c7f115)
+
+2014-02-21 CI bot
+
+        * Releasing 0.53+14.04.20140221-0ubuntu1 (1228156)
+        * Releasing 0.53+14.04.20140221-0ubuntu1 (46a03e9)
+
+2014-02-21 Michał Sawicz
+
+        * Increase the side stage threshold to 100GU. (aa9a6fd)
+        * Increase the side stage threshold to 100GU. (0e2bd15)
+        * Increase side stage threshold. (e74566d)
+        * Increase side stage threshold. (0b8842e)
+
+2014-02-11 Chris Coulson
+
+        * Implement QPlatformNativeInterface::nativeResourceForScreen() for
+          accessing the native display handle (94a77ff)
+        * Implement QPlatformNativeInterface::nativeResourceForScreen() for
+          accessing the native display handle (d3b631f)
+
+2014-02-10 Chris Coulson
+
+        * Pass the EGL share context to eglCreateContext (61f4689)
+        * Pass the EGL share context to eglCreateContext (279f968)
+
+2014-01-31 CI bot
+
+        * Releasing 0.53+14.04.20140131-0ubuntu1 (b5ef98c)
+        * Releasing 0.53+14.04.20140131-0ubuntu1 (ebd1ee9)
+        * Flushing trunk (95f8f03)
+        * Flushing trunk (e5c3292)
+
+2014-01-30 Stephen M. Webb
+
+        * src/platforms/base/context.cc (api_in_use): new function (1f1d788)
+        * src/platforms/base/context.cc (api_in_use): new function (0ae8ae1)
+        * debian/rules: adjust build flags for desktop (66f000c)
+        * debian/rules: adjust build flags for desktop (e37fddf)
+
+2014-01-30 Ricardo Mendoza
+
+        * Clean up build rules to allow for correct building of multiple
+          binary packages from the same source.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1271464. (1471898)
+        * Clean up build rules to allow for correct building of multiple
+          binary packages from the same source.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1271464. (99876cc)
+        * Split installation sets so that we can pull non-object files from
+          the base source. (917b2fc)
+        * Split installation sets so that we can pull non-object files from
+          the base source. (374a801)
+        * Clean up build rules to allow for correct building of multiple
+          binary packages from the same source (0621699)
+        * Clean up build rules to allow for correct building of multiple
+          binary packages from the same source (292044a)
+
+2014-01-14 Automatic PS uploader
+
+        * Releasing 0.53+14.04.20140114.1-0ubuntu1 (revision 200 from
+          lp:qtubuntu). (5c87d96)
+        * Releasing 0.53+14.04.20140114.1-0ubuntu1 (revision 200 from
+          lp:qtubuntu). (11eb8c4)
+        * Releasing 0.53+14.04.20140114.1-0ubuntu1, based on r200 (28fdb95)
+        * Releasing 0.53+14.04.20140114.1-0ubuntu1, based on r200 (2d4a909)
+
+2014-01-09 Ricardo Mendoza
+
+        * Use set_dimensions() for initial surface parameters. (d53f632)
+        * Use set_dimensions() for initial surface parameters. (83ec816)
+
+2014-01-07 Stephen M. Webb
+
+        * provide two binary deb variants: Touch and Desktop (lp: #1246851).
+
+          Fixes: https://bugs.launchpad.net/bugs/1246851. (8efed97)
+        * provide two binary deb variants: Touch and Desktop (lp: #1246851).
+
+          Fixes: https://bugs.launchpad.net/bugs/1246851. (bcd7a0a)
+
+2013-12-19 Ricardo Mendoza
+
+        * Force main stage when on tablet hardware (7512fc9)
+        * Force main stage when on tablet hardware (e771c29)
+
+2013-12-10 Ricardo Mendoza
+
+        * Make use of set_dimensions() (bbd060f)
+        * Make use of set_dimensions() (835b97f)
+
+2013-12-09 Stephen M. Webb
+
+        * debian/changelog: backed out PPA changes (c67d0cc)
+        * debian/changelog: backed out PPA changes (eb0ecf6)
+        * Split packaging into -android and -desktop variants (lp: #1246851)
+          (75e11d0)
+        * Split packaging into -android and -desktop variants (lp: #1246851)
+          (6ca01a6)
+        * split packaging for android/desktop variants (66fea36)
+        * split packaging for android/desktop variants (a3d8c72)
+
+2013-11-25 Automatic PS uploader
+
+        * Releasing 0.52+14.04.20131125-0ubuntu1 (revision 197 from
+          lp:qtubuntu). (a3e8b38)
+        * Releasing 0.52+14.04.20131125-0ubuntu1 (revision 197 from
+          lp:qtubuntu). (8907c5c)
+        * Releasing 0.52+14.04.20131125-0ubuntu1, based on r197 (d5a56f1)
+        * Releasing 0.52+14.04.20131125-0ubuntu1, based on r197 (2a0ee96)
+
+2013-11-25 Albert Astals
+
+        * Do not include the catch-all QtQuick include . (9767dce)
+        * Do not include the catch-all QtQuick include . (8a527dd)
+        * Do not include the catch-all QtQuick include (8c4f13d)
+        * Do not include the catch-all QtQuick include (a3d169b)
+
+2013-11-22 Albert Astals
+
+        * Remove unused -private .
+          Fixes:
+          https://bugs.launchpad.net/bugs/1254051. (3c7e218)
+        * Remove unused -private .
+          Fixes:
+          https://bugs.launchpad.net/bugs/1254051. (509ca4d)
+        * Need the non private version (8114783)
+        * Need the non private version (a4c9782)
+        * Now make it build with 5.2 (36cdf11)
+        * Now make it build with 5.2 (9e9b353)
+        * Remove unused -private (4fc7689)
+        * Remove unused -private (15dbebe)
+
+2013-11-21 Albert Astals
+
+        * Link against EGL since we use it (76f2739)
+        * Link against EGL since we use it (a441441)
+        * Link against EGL since we use it (428671a)
+        * Link against EGL since we use it (400acb4)
+
+2013-11-20 Albert Astals
+
+        * Adapt to the Qt 5.2 way of creating the event dispatcher .
+          Fixes:
+          https://bugs.launchpad.net/bugs/1246498. (a1363d7)
+        * Adapt to the Qt 5.2 way of creating the event dispatcher .
+          Fixes:
+          https://bugs.launchpad.net/bugs/1246498. (e7c6e40)
+
+2013-11-19 Albert Astals
+
+        * Don't include the QtQml catch-all header (5da0ac6)
+        * Don't include the QtQml catch-all header (ee9a5d8)
+        * Don't include the QtQml catch-all header (89d23af)
+        * Don't include the QtQml catch-all header (e454291)
+        * Use QPlatformIntegrationFactoryInterface_iid instead of hardcoding
+          "org.qt-project.Qt.QPA.QPlatformIntegrationFactoryInterface.5.1"
+          (befa888)
+        * Use QPlatformIntegrationFactoryInterface_iid instead of hardcoding
+          "org.qt-project.Qt.QPA.QPlatformIntegrationFactoryInterface.5.1"
+          (e4fe1ce)
+        * Merge (b4b138a)
+        * Merge (00580a3)
+
+2013-11-18 Albert Astals
+
+        * Pass QRectF as const reference instead of copying it . (890b064)
+        * Pass QRectF as const reference instead of copying it . (0f11f48)
+
+2013-11-06 Albert Astals
+
+        * adapt to file style (c433563)
+        * adapt to file style (8e52584)
+        * Adapt to the Qt 5.2 way of creating the event dispatcher (f7e51a5)
+        * Adapt to the Qt 5.2 way of creating the event dispatcher (a30f3b1)
+        * Pass QRectF as const reference instead of copying it (fad4d96)
+        * Pass QRectF as const reference instead of copying it (c10e761)
+
+2013-10-22 Daniel d'Andrada
+
+        * Make no assumptions on pointer ids (55a83c4)
+        * Make no assumptions on pointer ids (4ed71ef)
+
+2013-10-17 Daniel d'Andrada
+
+        * Make no assumptions on pointer ids (87ce577)
+        * Make no assumptions on pointer ids (3c0160e)
+
+2013-10-16 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20131016-0ubuntu1 (revision 189 from
+          lp:qtubuntu). (3d405d1)
+        * Releasing 0.52+13.10.20131016-0ubuntu1 (revision 189 from
+          lp:qtubuntu). (f4d9c44)
+        * Releasing 0.52+13.10.20131016-0ubuntu1, based on r189 (22e4da2)
+        * Releasing 0.52+13.10.20131016-0ubuntu1, based on r189 (49387a1)
+
+2013-10-15 Michał Sawicz
+
+        * Map PowerDown and PowerOff keys and fix indentation.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1232122. (25e83cb)
+        * Map PowerDown and PowerOff keys and fix indentation.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1232122. (20b3988)
+        * Add PowerDown and PowerOff key mapping and fix indentation.
+          (18f7ca8)
+        * Add PowerDown and PowerOff key mapping and fix indentation.
+          (baf8458)
+
+2013-10-14 Alexandros Frantzis
+
+        * Abort if we can't get an ubuntu application instance.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1233988. (1ad5f17)
+        * Abort if we can't get an ubuntu application instance.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1233988. (407093f)
+        * Abort if we can't get an ubuntu application instance. (cc5a9d7)
+        * Abort if we can't get an ubuntu application instance. (8552aee)
+
+2013-10-09 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20131009-0ubuntu1 (revision 186 from
+          lp:qtubuntu). (93724c0)
+        * Releasing 0.52+13.10.20131009-0ubuntu1 (revision 186 from
+          lp:qtubuntu). (f956eb9)
+        * Releasing 0.52+13.10.20131009-0ubuntu1, based on r186 (7005136)
+        * Releasing 0.52+13.10.20131009-0ubuntu1, based on r186 (9cbf9b1)
+
+2013-10-09 Alexandros Frantzis
+
+        * Release the EGL window surface before releasing the attached native
+          window (6e0361a)
+        * Release the EGL window surface before releasing the attached native
+          window (cc509dc)
+
+2013-10-09 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20131008-0ubuntu1 (revision 184 from
+          lp:qtubuntu). (a324d2d)
+        * Releasing 0.52+13.10.20131008-0ubuntu1 (revision 184 from
+          lp:qtubuntu). (4509047)
+
+2013-10-09 Alexandros Frantzis
+
+        * Release the EGL window surface before releasing the attached native
+          window (b45b4ee)
+        * Release the EGL window surface before releasing the attached native
+          window (37b21c0)
+
+2013-10-08 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20131008-0ubuntu1, based on r184 (948ae29)
+        * Releasing 0.52+13.10.20131008-0ubuntu1, based on r184 (8cc7e4c)
+
+2013-10-08 Robert Carr
+
+        * Map the volume up and down keys to keysyms in mir.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1233245. (21cc930)
+        * Map the volume up and down keys to keysyms in mir.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1233245. (a8a0536)
+
+2013-10-07 Robert Carr
+
+        * Mir: Map audio keys (9962a09)
+        * Mir: Map audio keys (5840a36)
+
+2013-09-23 Loïc Minier
+
+        * Add Vcs-Bzr field with lp:qtubuntu. (0fa1285)
+        * Add Vcs-Bzr field with lp:qtubuntu. (4027aec)
+        * Per Didier, add header to reassure Ubuntu developers that they can
+          indeed upload directly to the archive. (e1b50dc)
+        * Per Didier, add header to reassure Ubuntu developers that they can
+          indeed upload directly to the archive. (706cc37)
+
+2013-09-23 Timo Jyrinki
+
+        * Sync also 0.52+13.10.20130920-0ubuntu1 changelog. (038d2c8)
+        * Sync also 0.52+13.10.20130920-0ubuntu1 changelog. (bd9d843)
+        * Sync changelog from manual upload (eb54b66)
+        * Sync changelog from manual upload (2db6051)
+
+2013-09-20 Timo Jyrinki
+
+        * Try to fix changelog date line (6c35341)
+        * Try to fix changelog date line (7eb613a)
+        * Releasing 0.52+13.10.20130919-0ubuntu1 (revision 177 from
+          lp:qtubuntu) (42e1311)
+        * Releasing 0.52+13.10.20130919-0ubuntu1 (revision 177 from
+          lp:qtubuntu) (19c7f18)
+
+2013-09-19 Ricardo Mendoza
+
+        * If window has a parent, send duplicate events to it. (b335a45)
+        * If window has a parent, send duplicate events to it. (6bf3b65)
+
+2013-09-19 Albert Astals
+
+        * Implement the backend for QDesktopServices::openUrl .
+          Fixes:
+          https://bugs.launchpad.net/bugs/1186556. (b2725cb)
+        * Implement the backend for QDesktopServices::openUrl .
+          Fixes:
+          https://bugs.launchpad.net/bugs/1186556. (f3cafbe)
+
+2013-09-18 Loïc Minier
+
+        * Add Vcs-Bzr field with lp:qtubuntu. (7b80b54)
+        * Add Vcs-Bzr field with lp:qtubuntu. (47cef25)
+
+2013-09-18 Ricardo Mendoza
+
+        * Only propagate if Qt::WindowTransparentForInput is set (4360c57)
+        * Only propagate if Qt::WindowTransparentForInput is set (a5b8521)
+        * If window has a parent, send duplicate input events to it as well
+          (d872b8e)
+        * If window has a parent, send duplicate input events to it as well
+          (6f50be9)
+
+2013-09-13 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130912.1-0ubuntu1 (revision 175 from
+          lp:qtubuntu). (a7bee5f)
+        * Releasing 0.52+13.10.20130912.1-0ubuntu1 (revision 175 from
+          lp:qtubuntu). (6185e1b)
+
+2013-09-12 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130912.1-0ubuntu1, based on r175 (ee5dc16)
+        * Releasing 0.52+13.10.20130912.1-0ubuntu1, based on r175 (aa6b3c8)
+
+2013-09-12 Gerry Boland
+
+        * Fix click package execution, and correct icon path. (46654d4)
+        * Fix click package execution, and correct icon path. (f770b49)
+        * desktop file icon may be an absolute path, maybe themed name, or
+          maybe relative to Path (f75e77a)
+        * desktop file icon may be an absolute path, maybe themed name, or
+          maybe relative to Path (e3cb43b)
+        * Enable click packages by searching also in
+          ~/.local/share/applications (30a0b56)
+        * Enable click packages by searching also in
+          ~/.local/share/applications (db08e28)
+
+2013-09-11 Michael Zanetti
+
+        * register application interface types with QML. (652c750)
+        * register application interface types with QML. (c2b7114)
+        * register application interface types (3c064fc)
+        * register application interface types (18cf65a)
+
+2013-09-11 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130910.7-0ubuntu1 (revision 172 from
+          lp:qtubuntu). (c5b7d3a)
+        * Releasing 0.52+13.10.20130910.7-0ubuntu1 (revision 172 from
+          lp:qtubuntu). (1da87ae)
+
+2013-09-10 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130910.7-0ubuntu1, based on r172 (4848a70)
+        * Releasing 0.52+13.10.20130910.7-0ubuntu1, based on r172 (e467d55)
+
+2013-09-10 Gerry Boland
+
+        * Implement ApplicationManager API as defined in unity-api. This
+          requires renaming QML plugin to Unity.Application,
+          removing the ApplicationListModel class and supplying just
+          one model of applications running. (8cf9cda)
+        * Implement ApplicationManager API as defined in unity-api. This
+          requires renaming QML plugin to Unity.Application,
+          removing the ApplicationListModel class and supplying just
+          one model of applications running. (a843d89)
+
+2013-09-09 Gerry Boland
+
+        * After fix in unity-api, no need to explicitly define inherited enum
+          (22a1084)
+        * After fix in unity-api, no need to explicitly define inherited enum
+          (0dc337e)
+
+2013-09-06 Gerry Boland
+
+        * Merge trunk and fix conflicts (2c805d3)
+        * Merge trunk and fix conflicts (f589971)
+        * Add fake OSKController component, for compatibility with unity-mir.
+          (fa5279d)
+        * Add fake OSKController component, for compatibility with unity-mir.
+          (c30b59c)
+
+2013-09-05 Gerry Boland
+
+        * Fix incorrect debug comments (b46b02b)
+        * Fix incorrect debug comments (29d864d)
+        * Add fake OSKController component, for compatibility with unity-mir
+          (52c3581)
+        * Add fake OSKController component, for compatibility with unity-mir
+          (87d891b)
+        * Do not pollute headers by using a namespace (76b5e70)
+        * Do not pollute headers by using a namespace (961cf3d)
+        * Fix bug where application that opens via command line, and then
+          killed, notifies shell correctly of close and focused app
+          changed (4d2943b)
+        * Fix bug where application that opens via command line, and then
+          killed, notifies shell correctly of close and focused app
+          changed (73c8e65)
+        * Fix bug where focused app placed wrongly in stack. Removed debug
+          statements (f04d29e)
+        * Fix bug where focused app placed wrongly in stack. Removed debug
+          statements (4aff6aa)
+
+2013-09-04 Gerry Boland
+
+        * What I have so far, bug tracking in progress (372231b)
+        * What I have so far, bug tracking in progress (83f0e0f)
+        * Update tests to reflect module rename, fix debug comment (45a85db)
+        * Update tests to reflect module rename, fix debug comment (8677b68)
+        * Fix compile error when debug mode enabled (b15ec22)
+        * Fix compile error when debug mode enabled (47e33ca)
+
+2013-09-03 Gerry Boland
+
+        * Using new Unity-Api api (f16f014)
+        * Using new Unity-Api api (7964ea6)
+
+2013-09-01 Gerry Boland
+
+        * Implement the ApplicationInterface, so remove ApplicationListModel
+          (4ae674e)
+        * Implement the ApplicationInterface, so remove ApplicationListModel
+          (3f3eddc)
+        * Need to moc header files supplied by unity-shell-application. Use
+          C++11 and overrides (a688d94)
+        * Need to moc header files supplied by unity-shell-application. Use
+          C++11 and overrides (0eed5f2)
+
+2013-08-30 Gerry Boland
+
+        * Split DesktopData into separate files. Replace 'handle' with 'pid'
+          and fix compilation problems (f74abcc)
+        * Split DesktopData into separate files. Replace 'handle' with 'pid'
+          and fix compilation problems (2241ffe)
+        * Convert Application to use unity-api ApplicationInfoInterface
+          (d7c70e9)
+        * Convert Application to use unity-api ApplicationInfoInterface
+          (3940cd5)
+        * Rename plugin from Ubuntu.Application to Unity.Application
+          (37ac028)
+        * Rename plugin from Ubuntu.Application to Unity.Application
+          (7422141)
+
+2013-08-23 Albert Astals
+
+        * Do need this with the last version if the papi.url (c95eef5)
+        * Do need this with the last version if the papi.url (835d11a)
+        * Implement the backend for QDesktopServices::openUrl (5def3a7)
+        * Implement the backend for QDesktopServices::openUrl (045e94f)
+
+2013-08-21 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130821-0ubuntu1 (revision 169 from
+          lp:qtubuntu). (d7b4a16)
+        * Releasing 0.52+13.10.20130821-0ubuntu1 (revision 169 from
+          lp:qtubuntu). (5a49737)
+        * Releasing 0.52+13.10.20130821-0ubuntu1, based on r169 (c8b4c02)
+        * Releasing 0.52+13.10.20130821-0ubuntu1, based on r169 (fcdef09)
+
+2013-08-21 Timo Jyrinki
+
+        * Remove extra dh_auto_configure from install phase. (LP: #1212131).
+
+          Fixes: https://bugs.launchpad.net/bugs/1212131. (925389d)
+        * Remove extra dh_auto_configure from install phase. (LP: #1212131).
+
+          Fixes: https://bugs.launchpad.net/bugs/1212131. (ea3278b)
+        * Remove extra dh_auto_configure from install phase. (LP: #1212131)
+          (bb9ad74)
+        * Remove extra dh_auto_configure from install phase. (LP: #1212131)
+          (938362d)
+
+2013-08-20 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130820-0ubuntu1 (revision 167 from
+          lp:qtubuntu). (83cbe54)
+        * Releasing 0.52+13.10.20130820-0ubuntu1 (revision 167 from
+          lp:qtubuntu). (f1e80ac)
+        * Releasing 0.52+13.10.20130820-0ubuntu1, based on r167 (b15b6ec)
+        * Releasing 0.52+13.10.20130820-0ubuntu1, based on r167 (c6c0c74)
+
+2013-08-20 Gerry Boland
+
+        * Allow setting title of QWindow to propagate through to
+          platform-api. (ba795e0)
+        * Allow setting title of QWindow to propagate through to
+          platform-api. (a1a2c32)
+        * Add const (136e098)
+        * Add const (17db9d1)
+        * Use UTF8 for strings, it is the 21st century after all (0300337)
+        * Use UTF8 for strings, it is the 21st century after all (320f497)
+        * Commend about "Window 1" (4be25ee)
+        * Commend about "Window 1" (c8c4fd5)
+        * Correct debug output line (5d7b1b3)
+        * Correct debug output line (a09296b)
+        * Allow setting title of QWindow to propagate through to platform-api
+          (975abfd)
+        * Allow setting title of QWindow to propagate through to platform-api
+          (a8cff48)
+
+2013-08-14 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130814.1-0ubuntu1 (revision 165 from
+          lp:qtubuntu). (396ab8d)
+        * Releasing 0.52+13.10.20130814.1-0ubuntu1 (revision 165 from
+          lp:qtubuntu). (46c30bb)
+        * Releasing 0.52+13.10.20130814.1-0ubuntu1, based on r165 (efb6181)
+        * Releasing 0.52+13.10.20130814.1-0ubuntu1, based on r165 (a2cb148)
+
+2013-08-13 Robert Carr
+
+        * Add support for building mirserver and mirclient backends to the
+          QPA. (ff6111f)
+        * Add support for building mirserver and mirclient backends to the
+          QPA. (ff224f2)
+
+2013-08-12 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130812.3-0ubuntu1 (revision 163 from
+          lp:qtubuntu). (3b8d052)
+        * Releasing 0.52+13.10.20130812.3-0ubuntu1, based on r163 (fab287b)
+
+2013-08-11 Michał Sawicz
+
+        * Respect Path= from .desktop files.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1204596. (fe2b45d)
+
+2013-08-08 Ricardo Mendoza
+
+        * Merge trunk (a5653f2)
+        * Merge trunk (96baf62)
+        * Merge lp:~robertcarr/qtubuntu/mir2 (4524dca)
+        * Merge lp:~robertcarr/qtubuntu/mir2 (4fe2681)
+
+2013-08-03 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130803-0ubuntu1 (revision 161 from
+          lp:qtubuntu). (0e7b1d2)
+        * Releasing 0.52+13.10.20130803-0ubuntu1, based on r161 (f63845f)
+
+2013-08-02 Ricardo Mendoza
+
+        * Add method to disable/enable sensors opened from the QPA
+          automatically.;  Make use of the hook to disable/enable
+          when the application active status changes. (192c9b0)
+        * Always toggle off initially (9cff5b6)
+        * Broken commit, missing stuff (5b85e69)
+        * Toggle sensors only for non-shell surfaces (c560875)
+        * Disable sensors when surface is hidden (1febd34)
+        * Add a toggleSensors(bool) method to control the sensors used by
+          QtUbuntu. Make use of this to enable/disable sensors
+          according to the applications active status. (fe1d57c)
+
+2013-07-31 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130731-0ubuntu1 (revision 159 from
+          lp:qtubuntu). (e3e85e4)
+        * Releasing 0.52+13.10.20130731-0ubuntu1, based on r159 (2e9b6b2)
+
+2013-07-30 Ricardo Mendoza
+
+        * Add mapping for some missing special characters.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1203212. (0c6e43d)
+        * Invert parenthesis (aa82985)
+        * Add mapping for some special characters (8c44ba5)
+
+2013-07-30 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130730-0ubuntu1 (revision 157 from
+          lp:qtubuntu). (dda6d67)
+        * Releasing 0.52+13.10.20130730-0ubuntu1, based on r157 (45a1a8a)
+
+2013-07-29 Gustavo Pichorim Boiko
+
+        * Add values for the new applications that were created as a result
+          of the splitting of the phone-app. (db375ae)
+
+2013-07-29 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130729-0ubuntu1 (revision 155 from
+          lp:qtubuntu). (a35c6cd)
+        * Releasing 0.52+13.10.20130729-0ubuntu1, based on r155 (8cd4007)
+
+2013-07-26 Gustavo Pichorim Boiko
+
+        * Fix the enum value. (8fc0b18)
+        * Add values for the new applications that were created as a result
+          of the splitting of the phone-app. (f66a9b0)
+
+2013-07-26 Ricardo Mendoza
+
+        * Make the lifecycle signals deliver the ApplicationActive and
+          ApplicationDeactivate events to the running application.
+
+          Fixes: https://bugs.launchpad.net/bugs/1183866. (d120273)
+        * No need to go through QUbuntuIntegration, call into the
+          QCoreApplication directly (4ba81a2)
+
+2013-07-25 Ricardo Mendoza
+
+        * Plug the resume/about_to_stop signals to the application.Active
+          properties (46c019d)
+
+2013-07-25 Michał Sawicz
+
+        * Respect Path= from .desktop files. (b25298e)
+
+2013-07-23 Robert Carr
+
+        * Remove moc files (3311e9c)
+        * Remove moc files (8f2d5c1)
+        * Merge trunk (aa18d64)
+        * Merge trunk (1ae5fae)
+
+2013-07-23 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130723-0ubuntu1 (revision 153 from
+          lp:qtubuntu). (32b83b2)
+        * Releasing 0.52+13.10.20130723-0ubuntu1, based on r153 (055ba5d)
+
+2013-07-22 Michał Sawicz
+
+        * Do not reverse arguments from destkop files.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1200437. (ed058ce)
+
+2013-07-20 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130720-0ubuntu1 (revision 151 from
+          lp:qtubuntu). (5ecca78)
+        * Releasing 0.52+13.10.20130720-0ubuntu1, based on r151 (997791d)
+
+2013-07-19 Ricardo Mendoza
+
+        * Send colon unicode when hitting key with modifier. (9ffd048)
+        * Correctly send the colon down the pipe (530f8e3)
+
+2013-07-18 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130718-0ubuntu1 (revision 149 from
+          lp:qtubuntu). (d5904a6)
+        * Releasing 0.52+13.10.20130718-0ubuntu1, based on r149 (60fcb01)
+
+2013-07-16 Ricardo Mendoza
+
+        * Match versions (8bb833a)
+        * Match versions (9a5e8d7)
+        * Trunk (dcc9f05)
+        * Trunk (c33435c)
+        * Remove explicit dependencies (35d4e16)
+        * Remove explicit dependencies (0eeeace)
+        * Change dep to use the real platform-api package instead of the
+          transitional one. (cf0501c)
+        * Change platform-api dep to match real package (51b4478)
+
+2013-07-12 Michał Sawicz
+
+        * Do not reverse arguments from destkop files. (3b8add3)
+
+2013-07-11 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130711-0ubuntu1 (revision 147 from
+          lp:qtubuntu). (68acb9e)
+        * Releasing 0.52+13.10.20130711-0ubuntu1, based on r147 (5acb297)
+
+2013-07-10 Ricardo Mendoza
+
+        * Build bump (de7c330)
+        * Build bump (dc49988)
+
+2013-07-10 Antti Kaijanmäki
+
+        * ApplicationManager: Set APP_ID env variable on started processes.
+          (a5147e7)
+        * Set APP_ID env variable on started processes. (3cb5b64)
+
+2013-07-03 Automatic PS uploader
+
+        * Releasing 0.52+13.10.20130703-0ubuntu1 to ubuntu. (f2d5d6d)
+        * Releasing 0.52+13.10.20130703-0ubuntu1, based on r145 (5602132)
+
+2013-07-03 Didier Roche
+
+        * change qtubuntu -> qtubuntu-android and provides qtubuntu and
+          qtubuntu-shell. Building on where the android libhybris
+          binding really worked, armhf only. (53082a5)
+
+2013-07-02 Robert Carr
+
+        * Remove generated file (4d9ef8e)
+        * Remove generated file (6b59095)
+
+2013-06-28 Didier Roche
+
+        * let's build on every archs for now, a x86 android port is probable
+          (8606448)
+        * replace (don't conflict) against qtubuntu as we want to be able to
+          install the mocks with qtubuntu-android when needed
+          (41f80fb)
+        * add description (d28dbfb)
+        * rename the install file (8eb4687)
+        * change qtubuntu -> qtubuntu-android and provides qtubuntu and
+          qtubuntu-shell. Building on where the android libhybris
+          binding really worked, armhf only (c362745)
+
+2013-06-24 Robert Carr
+
+        * More cleanup (41c3862)
+        * More cleanup (45030f2)
+        * Cleanup' (af086bc)
+        * Cleanup' (6cd8868)
+        * input.h: Clean up access (aef15be)
+        * input.h: Clean up access (45c5ecc)
+        * Remove qegl (dbccdef)
+        * Remove qegl (02464b4)
+        * Add some mir input support (ec841c7)
+        * Add some mir input support (7636611)
+
+2013-06-21 Robert Carr
+
+        * Directory reorg (17fdff1)
+        * Directory reorg (babf822)
+        * More work on refactoring (98d5cbc)
+        * More work on refactoring (53dd254)
+        * Begin input refactoring (d61ae54)
+        * Begin input refactoring (bcd8ca4)
+        * dispatchKeyEvent can be virtual (e741b48)
+        * dispatchKeyEvent can be virtual (d157278)
+        * More source reorganizing (61607c2)
+        * More source reorganizing (417c891)
+        * Revert input changes (6e89683)
+        * Revert input changes (dc288d2)
+        * Rename ubuntu plugin to mirclient (ae7c641)
+        * Rename ubuntu plugin to mirclient (0f5dd1e)
+
+2013-06-20 Ricardo Mendoza
+
+        * Dont build in qeglconvenience (e52c637)
+        * Dont build in qeglconvenience (4e0acee)
+
+2013-06-19 Ricardo Mendoza
+
+        * Add deps (e8e89c7)
+        * Add deps (85ec0ed)
+        * Add deps (2ac70ad)
+        * Add deps (735ee0d)
+        * Remove remote_pid call (bf56194)
+        * Remove remote_pid call (d170994)
+        * Enable building Mir plugins (16359fe)
+        * Enable building Mir plugins (d497de8)
+
+2013-06-19 Robert Carr
+
+        * Only link qeglconvenience.cpp on mir (507cc88)
+        * Only link qeglconvenience.cpp on mir (6c00100)
+        * Update deploy.sh paths (1926adb)
+        * Update deploy.sh paths (2b6be65)
+        * Remove stubs (5de7e86)
+        * Remove stubs (5fa31a5)
+        * Add mir session property stubs until papi changes land (63a0255)
+        * Add mir session property stubs until papi changes land (00b0f74)
+        * Merge trunk (a698784)
+        * Merge trunk (4bb92e2)
+
+2013-06-18 Robert Carr
+
+        * XKBCommon build dep (46b6910)
+        * XKBCommon build dep (544c27a)
+        * Bump papi dependency (c29bfd4)
+        * Bump papi dependency (a628635)
+        * Remove stencil hack (c58b077)
+        * Remove stencil hack (8e107f9)
+        * Revert deb changes (46caeea)
+        * Revert deb changes (7187b8e)
+
+2013-06-17 Automatic PS uploader
+
+        * Releasing 0.51daily13.06.17-0ubuntu1 to ubuntu. (9fc15d8)
+        * Releasing 0.51daily13.06.17-0ubuntu1, based on r143 (a32ef3e)
+
+2013-06-14 Robert Carr
+
+        * Merge lp:~gerboland/qtubuntu/mir2-merge-and-dep-fix (54edc23)
+        * Merge lp:~gerboland/qtubuntu/mir2-merge-and-dep-fix (3fe61a5)
+
+2013-06-14 Gerry Boland
+
+        * [debian] Add libxkbcommon-dev build dependency (7849976)
+        * [debian] Add libxkbcommon-dev build dependency (ba55a60)
+        * Merge trunk, commenting out code that currently fails (52844b3)
+        * Merge trunk, commenting out code that currently fails (842e0db)
+
+2013-06-14 Timo Jyrinki
+
+        * Don't install test files (merge
+          lp:~ken-vandine/qtubuntu/packaging_fixes), update
+          Standards-Version. (ae7b37a)
+        * And now that the test files aren't installed anymore, don't add the
+          qtubuntu-examples package. (b20feaa)
+        * Merge with trunk (d2f29d1)
+        * Enable multi-arch, split examples package, use architecture: any.
+          (670d161)
+        * Update Standard-Version (no changes) (c80c343)
+        * don't install test files (03fddeb)
+
+2013-06-14 Gerry Boland
+
+        * Merge qtubuntu/mir2 (0fe305a)
+        * Merge qtubuntu/mir2 (72ade0d)
+
+2013-06-13 Ken VanDine
+
+        * don't install test files (0582aca)
+
+2013-06-12 Timo Jyrinki
+
+        * Change architecture:s to Any. PowerPC is not stalling us anymore.
+          (a723225)
+        * Enable multi-arch, split examples package. (0390183)
+
+2013-06-11 Robert Carr
+
+        * Make build of various qpas optional hybris is default (2f94eda)
+        * Make build of various qpas optional hybris is default (9ce9b26)
+
+2013-06-11 Automatic PS uploader
+
+        * Releasing 0.51daily13.06.11.1-0ubuntu1 to ubuntu. (c777a52)
+        * Releasing 0.51daily13.06.11.1-0ubuntu1, based on r140 (72a2396)
+
+2013-06-11 Ricardo Mendoza
+
+        * Take over signalling of processes from the Android side app
+          manager. (72414cc)
+        * Lock down to API version (d5470cb)
+
+2013-06-11 Automatic PS uploader
+
+        * Releasing 0.51daily13.06.11-0ubuntu1 to ubuntu. (8f630d0)
+        * Releasing 0.51daily13.06.11-0ubuntu1, based on r138 (1258f85)
+
+2013-06-11 Ricardo Mendoza
+
+        * Pass remote PID for when running across container boundaries.
+          (867cc9d)
+
+2013-06-10 Robert Carr
+
+        * Fix mirclient (e1df9b5)
+        * Fix mirclient (57b032a)
+        * Delete some code (de78c0d)
+        * Delete some code (46ba6a5)
+        * Build mirclient and server sos seperately (2abe0b5)
+        * Build mirclient and server sos seperately (a5a59f1)
+        * No need to link base against app api (0a18163)
+        * Merge trunk (8271aca)
+
+2013-06-07 Gerry Boland
+
+        * [debian] Only depend on hybris on armhf platform (8087ed7)
+
+2013-06-07 Automatic PS uploader
+
+        * Releasing 0.51daily13.06.05.1-0ubuntu1 to ubuntu. (2fdb9b7)
+
+2013-06-06 Robert Carr
+
+        * Input hack for now (a75579d)
+
+2013-06-06 Ricardo Mendoza
+
+        * Take over signalling of processes (c3892cf)
+
+2013-06-06 Robert Carr
+
+        * Add QEglConvenicnce impl (9e329d2)
+        * Comment unused session stuff (f9bc2ac)
+        * Initial start on build (f23d397)
+
+2013-06-05 Ricardo Mendoza
+
+        * Pass remote Pid when starting session in order to support
+          cross-container operation (ba5307e)
+
+2013-06-05 Automatic PS uploader
+
+        * Releasing 0.51daily13.06.05.1-0ubuntu1, based on r136 (9399d4c)
+
+2013-06-02 Automatic PS uploader
+
+        * Releasing 0.51daily13.06.02ubuntu.unity.next-0ubuntu1 to ubuntu.
+          (74e1474)
+        * Releasing 0.51daily13.06.02ubuntu.unity.next-0ubuntu1, based on
+          r135 (1c2ae2d)
+
+2013-05-31 Ricardo Mendoza
+
+        * Fix orientation launching for sidestage apps. (a42550f)
+        * Fix orientation in applications launched in the sidestage (9f95d12)
+
+2013-05-31 Automatic PS uploader
+
+        * Releasing 0.51daily13.05.31ubuntu.unity.next-0ubuntu1 to ubuntu.
+          (ce81673)
+        * Releasing 0.51daily13.05.31ubuntu.unity.next-0ubuntu1, based on
+          r133 (d5c1ea7)
+
+2013-05-30 Ricardo Mendoza
+
+        * Hide input panel when application is unfocused.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1183113. (9bde6d1)
+        * Hide input panel when application is unfocused (28741a0)
+
+2013-05-30 Automatic PS uploader
+
+        * Releasing 0.51daily13.05.30ubuntu.unity.next-0ubuntu1 to ubuntu.
+          (204a6db)
+        * Releasing 0.51daily13.05.30ubuntu.unity.next-0ubuntu1, based on
+          r131 (0cabcb5)
+
+2013-05-30 Ricardo Mendoza
+
+        * Migrate QtUbuntu to make use of the new platform API definitions.
+          (cd10c29)
+
+2013-05-29 Ricardo Mendoza
+
+        * Fill in blank for old API description, dont use magic numbers
+          (073b586)
+        * Fix clash (dc42f63)
+        * Cleanup comments (d60e5b3)
+        * Remove stageHint and FormFactorHint helpers from the AM module
+          (ef78723)
+
+2013-05-28 Ricardo Mendoza
+
+        * Revert export of Application (0fbbf93)
+
+2013-05-21 Ricardo Mendoza
+
+        * Migrate to new Platform API definitions (d0b9759)
+
+2013-04-29 Automatic PS uploader
+
+        * Releasing 0.51daily13.04.29ubuntu.unity.next-0ubuntu1 to ubuntu.
+          (a255c3d)
+        * Releasing 0.51daily13.04.29ubuntu.unity.next-0ubuntu1, based on
+          r129 (5bb3446)
+
+2013-04-26 Kaleo
+
+        * Based native orientation selection on the available stage size.
+
+          Fixes: https://bugs.launchpad.net/bugs/1172883. (81b068c)
+
+2013-04-26 Automatic PS uploader
+
+        * Releasing 0.51daily13.04.26ubuntu.unity.next-0ubuntu1 to ubuntu.
+          (1143a22)
+        * Releasing 0.51daily13.04.26ubuntu.unity.next-0ubuntu1, based on
+          r127 (6d9f328)
+
+2013-04-25 Kaleo
+
+        * Orientation reporting to depend on the stage. (be151cb)
+
+2013-04-25 Daniel d'Andrada
+
+        * Export Application as ApplicationInfo to avoid clashing with
+          QtQuick.Application. (7b83958)
+        * Export Application as ApplicationInfo to avoid clashing with
+          QtQuick.Application (1c681c8)
+
+2013-04-12 Automatic PS uploader
+
+        * Releasing 0.51daily13.04.12ubuntu.unity.next-0ubuntu1 to ubuntu.
+          (bf52dcf)
+        * Releasing 0.51daily13.04.12ubuntu.unity.next-0ubuntu1, based on
+          r125 (b9f3a7a)
+
+2013-04-10 Michael Terry
+
+        * Add missing libxrender-dev Build-Depends needed on i386 and amd64.
+          (411f0d4)
+
+2013-04-09 Michael Terry
+
+        * Fix ftbfs by adding missing libxrender-dev build-depends (a5a6ff2)
+
+2013-04-08 Michael Terry
+
+        * Widen qtubuntu's architecture support. (141126f)
+        * Add daily-release bootstrap marker. (abeae99)
+        * go back to old platform-api name for now; it complicates
+          daily-release landing if we do both at same time (6dbafd4)
+
+2013-04-05 Michael Terry
+
+        * Widen qtubuntu's architecture support and fix platform-api package
+          name (cfe4bf4)
+        * merge from trunk (a2aaded)
+        * Add daily-release bootstrap marker (923fa51)
+
+2013-04-04 Ricardo Mendoza
+
+        * Add passing execution flags to ApplicationManager::startProcess
+          Release 0.50. (0f19162)
+
+2013-04-03 Ricardo Mendoza
+
+        * Add to correct app list (cb46497)
+        * release 0.50 (029ecd9)
+        * Code cleanup (1879b5e)
+        * Add empty flag, register in ApplicationManager (184dd26)
+        * Pass execution flags (bdab2b3)
+
+2013-03-22 Michael Terry
+
+        * Modernize debian packaging and fix a copyright typo. (303a054)
+
+2013-03-12 Michael Terry
+
+        * Update some packaging to more recent standards; fix a copyright
+          typo (52c9437)
+
+2013-03-01 Jim Hodapp
+
+        * Releasing live orientation support for client apps. (0d6ffff)
+        * Releasing live orientation support for client apps. (3dfd02a)
+        * Implements live orientation support for client applications using
+          the QtSensors OrientationSensor backend.;  Add
+          qtsensors5-dev as a package build dependency.;  Update the
+          binary package dependencies to include the sensor related
+          libraries. (1460bcd)
+        * Code [style] cleanup per a merge request review by loicm. (bc10413)
+
+2013-02-28 Jim Hodapp
+
+        * Fix compile error when setting debug config via: qmake
+          CONFIG+=debug (a39553d)
+
+2013-02-27 Jim Hodapp
+
+        * Don't need to include QObject header file in base/screen.h
+          (88600b1)
+
+2013-02-26 Jim Hodapp
+
+        * Update the binary package dependencies to include the sensor
+          related libraries. (28a8148)
+        * Add qtsensors5-dev as a package build dependency. (6e371d3)
+        * [merge] Added EGL info logging. (93eff52)
+        * Implements live orientation support for client applications using
+          the QtSensors OrientationSensor backend. (ae49bd3)
+
+2013-02-26 Loïc Molinari
+
+        * Added EGL info logging. (bb2045c)
+        * Fixed glitch in licensing text. (c0f5f45)
+
+2013-02-25 Kaleo
+
+        * ApplicationManager::startProcess should make applications MainStage
+          by default, not SideStage. (e10f34f)
+        * ApplicationManager::startProcess should make applications MainStage
+          by default, not SideStage. (5a5d549)
+
+2013-02-25 Ricardo Salveti de Araujo
+
+        * ApplicationImage: added an internal cache of QImages and a new
+          method to use it instead of taking screenshots:
+          updateFromCache(). (500146d)
+
+2013-02-24 Ricardo Salveti de Araujo
+
+        * Merging trunk (32a4e28)
+
+2013-02-24 Loïc Molinari
+
+        * Forced opaque surface flag for non-system sessions. (b884618)
+
+2013-02-24 Kaleo
+
+        * ApplicationImage: added an internal cache of QImages and a new
+          method to use it instead of taking screenshots:
+          updateFromCache(). (1862b09)
+
+2013-02-23 Kaleo
+
+        * Fixed logging and fixed resetting image and sourceRect upon new
+          source. (00d5c52)
+        * updateFromCache does not need to return bool. (6f6e14f)
+        * ApplicationImage: added an internal cache of QImages and a new
+          method to use it instead of taking screenshots:
+          updateFromCache(). (3c9ffd6)
+
+2013-02-20 Kaleo
+
+        * ApplicationManager: added 2 properties 'keyboardVisible' and
+          'keyboardHeight'.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1129857. (d253a44)
+        * Made it a release. (374221a)
+
+2013-02-20 Loïc Molinari
+
+        * Added a bunch of FIXMEs. (c7324fa)
+
+2013-02-19 Kaleo
+
+        * ApplicationManager: added 2 properties 'keyboardVisible' and
+          'keyboardHeight' (2d02084)
+
+2013-02-19 Loïc Molinari
+
+        * Fixed build with new Ubuntu Platform API. (321562a)
+        * Forced opaque surface flag for non-system sessions. (01c2a0b)
+        * Fixed build with new Ubuntu Platform API. (63166b1)
+
+2013-02-16 Kaleo
+
+        * Added support for side stage. (e6a95f9)
+        * ApplicationImage: new 'ready' property notifying when the image is
+          taken and ready to be shown. (1867f76)
+
+2013-02-15 Kaleo
+
+        * Fixed top strut to be 3gu + 2dp. It was the incorrect value.
+          (10023e4)
+
+2013-02-14 Loïc Molinari
+
+        * Fixed glitch in licensing text. (cf25779)
+
+2013-02-14 Kaleo
+
+        * Updated changelog (198e147)
+        * Merged from trunk (a2aaa17)
+        * Merged
+          lp:~rocket-scientists/aal+/qtubuntu-application_image_fillmode
+          (8b869da)
+        * Support the case when
+          ubuntu_ui_session_snapshot_running_session_with_id returns
+          an invalid buffer. (1effd69)
+        * Added new InputFilterArea QML item. (431a929)
+        * Added FIXME. (3358d1b)
+        * releasing version 0.45 (5c65eed)
+        * Merged with trunk (4bd6e2b)
+
+2013-02-13 Kaleo
+
+        * Added comment. (7891e14)
+        * Let the code breathe. (aff57e0)
+        * Removed duplicated connection. (67e0ed7)
+        * Removed extra debug. (eb80bcf)
+        * More efficient implementation. (07d7e9e)
+        * cleaner code (047b139)
+        * Example clean (7624462)
+        * Listen to geometry changes among all the ascendants. (f48ee49)
+        * Really fixed test. (da50302)
+        * Fixed example. (276cb57)
+        * unset trap upon deletion. (d2e1d0d)
+        * added test animation (29e4984)
+        * Reset the handle when unsetting the trap. (9b50eb4)
+        * More useful test. (71c9d43)
+        * Cleaned up example. (955bd5b)
+        * temporary test. (62eb85f)
+        * Do not rely on x() y() width() height() that are relative to the
+          parent. (9ab7743)
+        * Do not reset the input trap for the same geometry. (b25b9fc)
+        * Do not map to scene the geometry. (0638ece)
+        * Send integers not double. (2d91094)
+        * Optimise when geometry changes often. (933f21b)
+        * missing include (17554b7)
+        * More efficient. (ed7089f)
+        * Added more debugging. (d83a72c)
+        * ralala (0de9ef1)
+        * Better input filter test. (7772677)
+
+2013-02-13 Loïc Molinari
+
+        * Added EGL info logging. (1c942bb)
+
+2013-02-13 Kaleo
+
+        * Adapted for real API. (667dfe2)
+
+2013-02-12 Loïc Molinari
+
+        * Merged main branch. (c1da17f)
+        * Fixed remaining licensing and packaging issues (thanks sergiusens).
+          (c2e3af3)
+        * Replaced Ubuntu Application occurences by Ubuntu Platform and
+          cleaned up README. (54432bb)
+        * Replaced quoted form includes with proper angle-bracket form.
+          (92abe0d)
+        * Replaced quoted form includes with proper angle-bracket form.
+          (b12d0eb)
+
+2013-02-12 Kaleo
+
+        * Use float instead of qreal. (3c20fb4)
+        * Simplified PreserveAspectCrop computations. (d196510)
+
+2013-02-12 Loïc Molinari
+
+        * Replaced Ubuntu Application occurences by Ubuntu Platform and
+          cleaned up README. (741eb0d)
+
+2013-02-12 Kaleo
+
+        * ApplicationImage: added new 'fillMode' property with 2 possible
+          values: Stretch and PreserveAspectCrop. (f5daa96)
+
+2013-02-12 Loïc Molinari
+
+        * Fixed licensing and packaging issues before release. (8f0172a)
+        * Fixed default qmlscene-ubuntu role. (3ecdcb4)
+        * Fixed unit conversion code. (26b6e2b)
+        * Bumped package version. (0d144ef)
+        * Simplified Application::Stage enum removing the need of platform
+          headers. (b52e947)
+        * Updated tests. (a39fee7)
+        * Merged main branch. (9f1f223)
+
+2013-02-12 Kaleo
+
+        * Merged from trunk. (7267996)
+        * Adapted to new API. (8a68bf6)
+        * releasing version 0.44. (1b8c2b7)
+        * releasing version 0.44 (38616d4)
+        * Fix compilation with workaround. (dbb5861)
+
+2013-02-12 Loïc Molinari
+
+        * Merged main branch. (e6ba85a)
+
+2013-02-11 Kaleo
+
+        * Added manual test. (f7338ad)
+        * Fixed debug log. (3f1b64d)
+
+2013-02-11 Loïc Molinari
+
+        * Moved fullscreen request after surface creation. (2e22aaf)
+
+2013-02-11 Kaleo
+
+        * Merged trunk (e2ce6a2)
+
+2013-02-11 Loïc Molinari
+
+        * Moved fullscreen request after surface creation. (e382c83)
+
+2013-02-11 Kaleo
+
+        * ApplicationImage: crop buffer to surface's source size. (2cd701d)
+
+2013-02-11 Loïc Molinari
+
+        * Added support to retrieve stage from applications. (816aa31)
+        * Added support for new Ubuntu Platform fullscreen mechanism.
+          (aa1c4f8)
+        * Adapted Application.qml to side stage and tablet. (0a6b39c)
+        * Removed broken ASSERTs. (4682fbf)
+        * Fixed focusing logic. (f09a96e)
+        * Adapted Application.qml size to tablet. (8c2815a)
+        * Fixed swapped args. (8660548)
+
+2013-02-11 Kaleo
+
+        * merge lp:~loic.molinari/aal+/qtubuntu-side-stage-geometry (766f8fd)
+        * merge lp:~loic.molinari/aal+/qtubuntu-side-stage-width (7352f1c)
+        * merged
+          lp:~loic.molinari/aal+/qtubuntu-side-stage-applications-api-break
+          (0589017)
+        * merged lp:~loic.molinari/aal+/qtubuntu-correct-grid-units (f181a95)
+
+2013-02-11 Loïc Molinari
+
+        * Swtiched to new Ubuntu Platform API for querying stage. (c04f789)
+        * Added support new Ubuntu Platform fullscreen mechanism. (5aaa970)
+        * Added support for side stage geometry. (e5353c5)
+        * Fixed default qmlscene-ubuntu role. (01b680f)
+        * Added correct grid unit computation. (114bcca)
+        * Added support for side stage applications. (66f7656)
+
+2013-02-08 Ricardo Mendoza
+
+        * Update applications list in the right moment. (2a0a1be)
+        * Update applications list in the right order to prevent missed
+          updates (93fda56)
+
+2013-02-08 Kaleo
+
+        * Added new InputFilterArea. (d7d2d5b)
+
+2013-02-08 Loïc Molinari
+
+        * Added support to retrieve side stage width from application
+          manager. (01aed8c)
+        * Added start/stop process support to application module with direct
+          insertion/deletion in data models. (603ca71)
+
+2013-02-08 Ricardo Mendoza
+
+        * Added start/stop process support to application module with direct
+          insertion/deletion in data models. (5dde285)
+
+2013-02-08 Loïc Molinari
+
+        * Adapted to Ubuntu Platform API change. (b525432)
+        * Fixed segfault and added FIXMEs regarding commit 96. (253b198)
+        * Fixed segfault and added FIXMEs regarding commit 96. (fc91709)
+        * Bumped package version. (b6a3238)
+        * Fixed log. (62546d9)
+        * Adapted to Ubuntu Platform API change. (673f630)
+
+2013-02-07 Loïc Molinari
+
+        * Merged main branch. (9438f87)
+
+2013-02-07 Kaleo
+
+        * ApplicationImage optimisations: - removed one copy by having
+          QPainter drawing directly to a texture - faster
+          compositing using Source composition mode. (d8ce5b7)
+
+2013-02-07 Loïc Molinari
+
+        * Added clipboard support to QPA plugins. (caa646f)
+
+2013-02-07 Kaleo
+
+        * ApplicationImage optimisations: - removed one copy by having
+          QPainter drawing directly to a texture - faster
+          compositing using Source composition mode (66838f1)
+
+2013-02-07 Loïc Molinari
+
+        * Fixed type issues. (713f2b4)
+
+2013-02-07 Jim Hodapp
+
+        * Implemented native orientation for applications to query through
+          the native platform interface. (9e979f4)
+
+2013-02-07 Ricardo Salveti de Araujo
+
+        * Merging trunk and bumping version (1268469)
+
+2013-02-06 Ricardo Salveti de Araujo
+
+        * Updating build-dependency to use the new ubuntu-platform-api
+          package. (035c9bb)
+        * We can now just depend on libubuntu-platform-api1-dev for the
+          Ubuntu Platform API (932d174)
+
+2013-02-06 Loïc Molinari
+
+        * Merged main branch. (b8c958e)
+        * Switched to QString contructor ensuring string copy. (16dcea4)
+
+2013-02-06 Ricardo Salveti de Araujo
+
+        * releasing version 0.40 (98b87df)
+        * Updating build-dependency to use the new ubuntu-platform-api
+          package (4f608e6)
+
+2013-02-06 Jim Hodapp
+
+        * Bump version. (4c68021)
+        * [merge] Merged with upstream. (ffc34f4)
+        * Implemented native orientation for applications to query through
+          the native platform interface. (d54f642)
+
+2013-02-06 Loïc Molinari
+
+        * Fixed module deployment paths. (ba834df)
+        * Fixed deploy.sh module installation paths. (03fbd8b)
+        * Added start/stop process support to application module with direct
+          insertion/deletion in data models. (e189eb3)
+
+2013-02-05 Loïc Molinari
+
+        * Added check preventing NULL pointer dereference. (a6b0eb9)
+        * Plugged right clipboards in the plugins. (99f7bd8)
+        * Fixed potential crash when buffer size too low. (2c453e6)
+        * Fixed compilation issue. (9a8ba0b)
+        * Removed QtWidgets dependency. (2a0498a)
+        * Merged main branch. (050a6e3)
+        * Added clipboard support. (ece2d69)
+
+2013-02-01 Ricardo Salveti de Araujo
+
+        * Adding qtubuntu files to the qtubuntu package (since the install
+          was empty). (d496023)
+
+2013-01-31 Ricardo Salveti de Araujo
+
+        * releasing version 0.39 (67cfbf5)
+
+2013-01-31 Loïc Molinari
+
+        * Added correct licensing.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1097075. (d24ec3f)
+
+2013-01-31 Ricardo Salveti de Araujo
+
+        * Merging trunk (3b86f9d)
+
+2013-01-31 Loïc Molinari
+
+        * Renamed QtHybris to QtUbuntu, and also porting to Qt5. (ab91081)
+
+2013-01-31 Ricardo Salveti de Araujo
+
+        * Renaming QHybrisWindow::setWindowState to
+          QUbuntuWindow::setWindowState (2d6f790)
+        * Removing conflict ubuntulegacy/window.cc (046ecf4)
+        * Restoring changelog removal from Bill properly (ce73c2b)
+        * Restoring changelog removal from Bill (63042f9)
+        * Merging Qt5 final based branch, now that we moved to qt5 final
+          (deb58b2)
+        * Making a transitional dummy package to avoid breaking the build
+          (d81d3eb)
+
+2013-01-29 Bill Filler
+
+        * merged from lp:~rocket-scientists/aal+/qthybris-qt5-update
+          (ade74f2)
+        * releasing version 0.38 (d9cabd3)
+
+2013-01-28 Loïc Molinari
+
+        * Ported README and deploy script to qt5-proper. (a6c1732)
+        * Adapted to API change in Ubuntu Application API. (b688583)
+
+2013-01-23 Bill Filler
+
+        * bump version to supercede what's in oem-archive:manhattan;  test
+          against Qt5 final (276203d)
+
+2013-01-18 Loïc Molinari
+
+        * Fixed build-depends. (0b0879e)
+        * Fixed debian files and README. (6757bc8)
+        * Added correct licensing. (ecab8a8)
+
+2013-01-17 Loïc Molinari
+
+        * Renamed QtHybris to QtUbuntu. (4d333ea)
+
+2013-01-16 Loïc Molinari
+
+        * Ported to last Qt5 release. (9d5d1bf)
+
+2013-01-15 Ricardo Salveti de Araujo
+
+        * Make sure to request alpha support for the surfaceFormat .
+          (154c768)
+        * releasing version 0.36 (450c6f7)
+        * Make sure to request alpha support for the surfaceFormat (b7d3052)
+
+2013-01-10 Bill Filler
+
+        * fix for hardcoded resolution. (50fc7df)
+        * releasing version 0.35 (d103df6)
+
+2013-01-10 Loïc Molinari
+
+        * Retrieved screen resolution from Ubuntu Application API.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1097798. (adc3cf6)
+        * Logged screen resolution. (a523e65)
+        * Retrieved screen resolution from Ubuntu Application API. (9521cf1)
+
+2012-12-20 Loïc Molinari
+
+        * Bumped package version. (9f00a42)
+        * Bumped package version. (ed75296)
+        * Removed app from data model before emitting
+          focusedApplicationChanged. (378805d)
+        * Removed app from data model before emitting
+          focusedApplicationChanged. (0cbfe72)
+
+2012-12-19 Loïc Molinari
+
+        * removed useless headers. (fbc672f)
+        * Merged main branch. (bf99055)
+        * Updated focusedApplication property on session die. (bde2e52)
+        * Updated focusedApplication property on session die. (05133d6)
+        * Added support for retrieving currently focused application.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1089099. (e5d6888)
+        * Merged main branch. (512d71e)
+        * Added direct list insertion/removal when starting/stopping
+          processes. (bf67944)
+        * Made startProcess spawn detached processes. (d36b0d4)
+
+2012-12-18 Loïc Molinari
+
+        * Adapted to new session request system. (ec443e0)
+        * Merged main branch. (8e50e69)
+        * Bumped package version. (9b4cb23)
+        * Fixed typo. (101fe8f)
+        * Fixed bad naming. (d95280c)
+        * Fixed the build. (cb0c6b2)
+        * Addded small example. (893215a)
+        * Adapted to new session request system. (58504ce)
+
+2012-12-17 Ricardo Salveti de Araujo
+
+        * Force the build to generate debug symbols, so we can have -dbgsym
+          packages. (277734a)
+        * releasing version 0.32 (35a3927)
+        * Force the build to generate debug symbols, so we can have -dbgsym
+          packages (9186fb3)
+
+2012-12-17 Loïc Molinari
+
+        * Merged main branch. (241ebdf)
+        * Fixed build issues. (e1e46f9)
+        * Added support for surface flags.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1089962. (9669e1f)
+        * Merged main branch. (c81029e)
+        * Added --opaque switch to the qmlscene-hybris. (29624fe)
+        * Merged main branch. (938080b)
+        * Added support for starting/stopping processes. (bc68a6b)
+        * Merged main branch. (154eb90)
+
+2012-12-17 Daniel d'Andrada
+
+        * Enable parallel building of the package (f7021db)
+
+2012-12-14 Loïc Molinari
+
+        * Fixed the build. (e64ecf2)
+        * Bumped package version. (db62988)
+        * Fixed the build. (ac56817)
+        * Added support for retrieving currently focused application.
+          (7660155)
+        * Added support for the opaque surface flag. (08d2f35)
+        * Updated startProcess prototype. (778ee5f)
+        * Ignored unsupported special field codes from desktop file exec
+          entry. (78228d8)
+
+2012-12-14 Daniel d'Andrada
+
+        * Enable parallel building of the package (1011759)
+
+2012-12-14 Loïc Molinari
+
+        * Fixed typo, thanks to Christian Dywan. (84ff6b1)
+        * Added back startWatcher to avoid API break. (32be179)
+        * Ensured API doesn't break. (15107d0)
+        * Merged main branch. (5ca5f89)
+
+2012-12-13 Kaleo
+
+        * Added 'desktopFile' property to Application class. (d824172)
+        * releasing version 0.29 (d6c1003)
+
+2012-12-13 Loïc Molinari
+
+        * Bumped package version. (aabcc3c)
+        * Cleaned up code. (99568fe)
+
+2012-12-13 Kaleo
+
+        * Added 'desktopFile' property to Application class. (a623c2a)
+
+2012-12-13 Loïc Molinari
+
+        * Merged main branch. (1d4349a)
+        * Added support for starting/stopping process. (86b58bf)
+        * Removed startWatcher method. (accf457)
+
+2012-12-13 Kaleo
+
+        * ApplicationImage: declare it as an opaque item. (0e07dbb)
+        * Set fill color to be black and fully opaque. (e8cf01b)
+        * ApplicationImage: declare it as an opaque item. (c367976)
+
+2012-12-13 Loïc Molinari
+
+        * Added ubuntu_ui_session_unfocus_running_sessions() binding.
+          (8b0634c)
+
+2012-12-12 Loïc Molinari
+
+        * Bumped package version. (51a1996)
+        * Added ubuntu_ui_session_unfocus_running_sessions binding. (247a165)
+        * Updated README with regards to the new bindings. (5e59ee1)
+        * Renamed 'ubuntuSessionType' property to 'session' and fixed README.
+          (05f6d69)
+        * Added support NULL sources in ApplicationImage. (4b880c0)
+
+2012-12-12 Kaleo
+
+        * Merged from trunk. (f66ccf5)
+
+2012-12-12 Loïc Molinari
+
+        * Fixed touch input dispatching for system sessions.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1088514. (1f20e38)
+        * Updated README with regards to the new bindings. (b9ee8d7)
+        * Fixed typo. (4dafd16)
+        * Adapted README to new property names. (7c95492)
+        * Renamed 'ubuntuSessionType' property to 'session' (f401f8d)
+        * Fixed typo. (88bac37)
+        * Bumped package version. (7cb3a76)
+        * Fixed touch input dispatching for system sessions. (408901d)
+
+2012-12-11 Loïc Molinari
+
+        * Adapted to Ubuntu application change API change. (93f6fc3)
+        * Bumped package version. (a993cf1)
+        * Added support NULL sources in ApplicationImage. (52c33ff)
+        * Bumped package version. (51a253a)
+        * Adapted to aal+ API change. (89be328)
+
+2012-12-10 Kaleo
+
+        * Changed hardcoded top strut from 54 to 59 pixels. (fb2e38b)
+        * Merged from trunk (10da0e3)
+        * releasing version 0.23 (3abc153)
+        * Changed hardcoded top strut from 54 to 59. (d771e5f)
+        * Added functionalities to ApplicationListModel: - get(int row)
+          method - move(int from, int to) method - 'count' property
+          (efbcee2)
+        * releasing version 0.23 (685ea0b)
+        * Merged trunk (872186c)
+        * Fixed indentation to be 2 spaces in C++ (06e8546)
+        * Use emit instead of Q_EMIT. (604dd3f)
+
+2012-12-10 Loïc Molinari
+
+        * Added QQuickWindow extension for easy role setting from QML.
+          (5acd1a6)
+
+2012-12-10 Kaleo
+
+        * More reliable ApplicationListModel::move (3a65155)
+
+2012-12-10 Loïc Molinari
+
+        * Fixed issues. (56ba646)
+
+2012-12-10 Kaleo
+
+        * examples/Application.qml: improved example (caa4286)
+        * Removed now incorrect assertion. (0c522c3)
+        * examples/Application.qml: added button to move application in list.
+          (0f7e282)
+        * Merged from trunk (d43c509)
+        * examples/Application.qml: Removed spurious reference to rect.
+          (f48a1f8)
+        * examples/Application.qml: display number of applications running
+          (ApplicationsListModel.count). (622fedd)
+        * examples/Application.qml: Removed spurious reference to rect.
+          (6943087)
+        * Simplified ApplicationListModel::remove by using QList::indexOf
+          (855c03e)
+        * Added ApplicationListModel::move method. (9296dd2)
+        * Added ApplicationListModel::count property. (7207c65)
+        * Added ApplicationListModel::get method. (ceaf4c9)
+
+2012-12-10 Loïc Molinari
+
+        * Bumped package version. (f88b18c)
+        * Added QQuickWindow extension for easy role setting from QML.
+          (0dcdc18)
+
+2012-12-09 Loïc Molinari
+
+        * Added support for application snapshotting (heads up to kaleo for
+          the initial work). (b393b23)
+
+2012-12-07 Loïc Molinari
+
+        * Bumped changelog version. (2b74ca1)
+        * Added support for application snapshotting. (a1f375c)
+        * Fixed memory leak. (7cb16d8)
+        * Fixed memory leak. (4c7fb9a)
+
+2012-12-06 Loïc Molinari
+
+        * Added support for maximization and hard-coded strut for the phone.
+          (c3edefe)
+        * Pushed to release. (5c64ede)
+        * Added window resizing restriction for non-system sessions.
+          (84115e9)
+        * Don't delay surface creation until setVisible. (d64dbdc)
+        * Reworked window state settings. (916a53c)
+        * Bumped package version. (3910846)
+        * Added support for maximization and hard-coded strut for the phone.
+          (9f67c19)
+        * Added support for application management. (d3fd302)
+        * Bumped package version. (514b02a)
+        * Added support application management. (42d326a)
+
+2012-12-05 Loïc Molinari
+
+        * Lowercased UbuntuSessionType and UbuntuSurfaceRole dynamic
+          properties. (8c4f12f)
+
+2012-12-05 Renato Araujo Oliveira Filho
+
+        * releasing version 0.19. (1d42c17)
+        * releasing version 0.19 (a3f41fc)
+        * Implemented support for a basic theme based on generic unix theme
+          implementation.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1085237. (30777a8)
+
+2012-12-04 Renato Araujo Oliveira Filho
+
+        * Added documention for QTHYBRIS_ICON_THEME. Added debug messages for
+          QHybrisTheme class. (e89956e)
+        * Revert last commit. (cad6d75)
+        * Changed from name static char to a static function. (0ae6c64)
+
+2012-12-04 Loïc Molinari
+
+        * Lowercased UbuntuSessionType and UbuntuSurfaceRole dynamic
+          properties. (72da4f1)
+
+2012-12-04 Renato Araujo Oliveira Filho
+
+        * Get the icon theme name from QHYBRIS_ICON_THEME enviroment
+          variable. (112450b)
+
+2012-12-03 Renato Araujo Oliveira Filho
+
+        * Implemented support for a basic theme based on generic unix theme
+          implementation. (c9dd08c)
+
+2012-11-30 Loïc Molinari
+
+        * Added QML application module. (cb20d03)
+        * Ensured application module is correctly installed. (ac45703)
+        * Updated packaging info. (d251864)
+        * Merged main branch. (f120d28)
+        * Added Application module. (a38dfb0)
+        * Fixed broken context handling. (d1bcda8)
+        * Bumped package version. (a946235)
+        * Made coding style consistent with rest of the code. (356b651)
+        * Fixed broken context handling. (dfe4d0d)
+
+2012-11-29 mfrey@canonical.com
+
+        * Added support for hiding/showing native windows. (f9f2e6f)
+        * Added support for hiding/showing native windows. (9050df7)
+
+2012-11-29 Loïc Molinari
+
+        * Ensured window states are set at creation. (845f0d5)
+        * Bumped package version. (423528a)
+        * Ensured window states are set at creation. (afb1856)
+
+2012-11-29 Thomas Moenicke
+
+        * move surface to it's given x/y position according to the platform
+          window coordinates . (4af2b9c)
+        * bumped version (1e3c6a5)
+        * bump Changelog (b5d73c3)
+        * check if moving window is actually needed (b2411a1)
+
+2012-11-28 Thomas Moenicke
+
+        * move surface to it's given x/y position according to the platform
+          windows coordinates (8a9a209)
+
+2012-11-27 Loïc Molinari
+
+        * Ported to new libUbuntuApplication credentials API. (30d9ea9)
+        * Added support to specify surface roles. (9c6d7d1)
+
+2012-11-26 Loïc Molinari
+
+        * Fixed one more compilation issue. (4fec3e5)
+        * Fixed constness build error. (e197ac1)
+        * Improved architecture for session initialization. (2fcb3c7)
+        * Bumped debian version. (963d952)
+        * Added support for the new credential system. (af13711)
+        * Added support to specify surface roles. (b330c78)
+
+2012-11-12 Sergio Schvezov
+
+        * Releasing;  Removed not reached asserts for unknown input events,
+          closes: bug#1075185.;  Added support for key event's
+          unicode representation, closes: bug#1074041.;  Added
+          support for input context plugins. (10fa9cd)
+        * Updating changelog to use LP syntax for bugs (b911521)
+
+2012-11-09 Sergio Schvezov
+
+        * Removed not reached asserts for unknown input events, closes:
+          bug#1075185.;  Added support for key event's unicode
+          representation, closes: bug#1074041.;  Added support for
+          input context plugins. (52fcca7)
+
+2012-11-09 Loïc Molinari
+
+        * Removed not reached asserts for unknown input events.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1075185. (25fd194)
+        * Added support for input context plugins. (9bd8e0a)
+        * Added support for key event's unicode representation.
+          Fixes:
+          https://bugs.launchpad.net/bugs/1074041. (3d8d437)
+        * Added support for input context plugins. (963d893)
+        * Added support for key event's unicode representation. (03be5da)
+        * Removed not reached asserts for unknown input events. (05edfd0)
+
+2012-11-09 mfrey@canonical.com
+
+        * Fixed incorrect event time stamps. (3e47131)
+
+2012-11-08 mfrey@canonical.com
+
+        * Fixed incorrect event time stamps. Makes kinetic scrolling work.
+          (82a7389)
+
+2012-11-08 Loïc Molinari
+
+        * Fixed incorrect event time stamps. (7c8e6b2)
+        * Removed event logging. (482e376)
+        * Fixed bad event time stamps. (a69e9ad)
+
+2012-11-07 Bill Filler
+
+        * release latest rebuilt against latest qt5 beta1. (4627141)
+        * releasing (c08d7d3)
+
+2012-11-07 Sergio Schvezov
+
+        * Adding new dependencies brought in by Qt5 updates . (7c3d59c)
+        * Bumping;  Adding new dependencies brought in by Qt5 updates
+          (411b90d)
+
+2012-10-28 Loïc Molinari
+
+        * Added more cross-compilation and deployment explanations to the
+          README. (650e8cf)
+        * Merged main branch. (be7e19f)
+        * Added environment variable disabling threaded OpenGL rendering.
+          (56e446a)
+        * Fixed typo in the README. (a7111fd)
+        * Fixed compilation error. (0e165da)
+        * Added env var disabling threaded OpenGL rendering. (a550c05)
+
+2012-10-27 Loïc Molinari
+
+        * Added env var setup. (34d1ea5)
+        * Added cross-compile and deploy notes to the README. (698d4a1)
+
+2012-10-26 Loïc Molinari
+
+        * Bumped package version. (cb49458)
+        * Switched to fontconfig database support. (b7d5d43)
+        * Adapted deploy script to current phablet setup. (3c555cb)
+        * Bumped package version. (41e95f9)
+        * Switched to fontconfig database support. (2b3ab4d)
+        * Adapted ignores. (d782f3a)
+        * Adapted deploy script to current phablet setup. (1474b9b)
+        * Added Ubuntu application UI support. Approved by Michael Frey, PS
+          Jenkins bot. (eca325d)
+        * Added more compilation flags and defines. (58db25b)
+        * Enabled multiple window support. (a67c437)
+
+2012-10-25 Loïc Molinari
+
+        * Moved event dispatch to main thread. (763b748)
+        * Updated ignore file. (25cefd6)
+        * Made build files dependant. (10ee1b3)
+
+2012-10-24 Loïc Molinari
+
+        * Reverted touch device deletion as it STILL crashes. (f1ad196)
+        * Cosmetic fix. (7532329)
+        * Freed the touch device as it doesn't crash anymore. (2cee279)
+        * Fixed small memory leak. (33fda70)
+        * Added a Running section to the README. (4a32f81)
+        * Changed hybris legacy classes prefix. (6d9ff99)
+        * Fixed linker option passed as compiler option. (ed779f6)
+        * Added some more fixes. (52c517b)
+        * Added Ubuntu application UI support. (a641997)
+
+2012-10-22 Loïc Molinari
+
+        * Switched hybrisqmlscene to transparent clear color. (d8e5492)
+
+2012-10-16 Loïc Molinari
+
+        * Added native interface support. Approved by Michael Frey, PS
+          Jenkins bot. (4139aab)
+        * Uncommented code that needed previous merge. (e40e993)
+        * Merged main branch. (1735263)
+        * Added support for more windowing operations along with the
+          necessary architecture rework. Approved by PS Jenkins bot,
+          Michael Frey. (6c271bd)
+        * Initialized hybris from the plugin. Approved by Michael Frey, PS
+          Jenkins bot. (887929a)
+        * Bumped package version. (18943dd)
+        * Removed windowing tasks in TODO. (c127672)
+        * Added native interface support. (6c68707)
+        * Initialized hybris from the plugin. (5072e0d)
+        * Fixed some window handling bugs. (62abb84)
+        * Added a show fullscreen option to hybris-qmlscene. (ed7d9f0)
+        * Fixed unused parameter warning. (2ebf0c8)
+
+2012-10-15 Loïc Molinari
+
+        * Added support for more windowing operations along with the
+          necessary architecture rework. (dac3ea9)
+
+2012-10-11 Loïc Molinari
+
+        * Completed key codes lookup table. Approved by Michael Frey,
+          jenkins. (ce8bf81)
+        * Completed key code lookup table. (8870b7e)
+
+2012-10-10 Ricardo Mendoza
+
+        * Build for armhf as well. Approved by Loïc Molinari. (8a0e041)
+        * Enable building under armhf (6d3990a)
+
+2012-10-10 Loïc Molinari
+
+        * Added import path support to hybris-qmlscene. Approved by jenkins,
+          Florian Boucault. (964b5b0)
+        * Merged main branch. (3ae5102)
+        * Added constness fixes and ignored moc files. Approved by Florian
+          Boucault. (d068ba0)
+        * Tweaked input delay default value after having experienced crashes
+          with some apps. Approved by Florian Boucault. (aa2c250)
+        * Use NULL instead of 0. (a6788c8)
+        * Consistency fix. (647c747)
+        * Tweaked input delay default value after having experienced crashes
+          with some apps. (19d9be4)
+        * Ignored moc files. (0a84f71)
+        * Constness fixes. (1b3adf0)
+        * Added import path support to hybris-qmlscene. (aac8515)
+
+2012-10-09 Loïc Molinari
+
+        * Fixed a multitouch tracking bug, added more key codes and used
+          standard enums instead of hard-coded values. Approved by
+          jenkins, Florian Boucault. (c7231c3)
+
+2012-10-10 Loïc Molinari
+
+        * Removed duplicated code. (7f62198)
+
+2012-10-09 Loïc Molinari
+
+        * Improved key input support. (2f3f37f)
+        * Fixed multitouch tracking. (7300fb4)
+        * Added *NOT_REACHED macros. (ed26c24)
+        * Bumped package version. Approved by Michael Frey, jenkins.
+          (95b96e5)
+        * Added more control over input initialization. Approved by jenkins,
+          Michael Frey. (f1b7bac)
+        * Bumped package version. (488194b)
+        * Added more control over input initialization. (992a4a1)
+
+2012-10-08 Loïc Molinari
+
+        * Global code cleanup. Approved by Florian Boucault, jenkins.
+          (8069944)
+        * Global code cleanup. (572c582)
+
+2012-10-05 Loïc Molinari
+
+        * Added various trivial fixes. Approved by jenkins, Michael Frey.
+          (34b7752)
+        * Added key handling support. Approved by Michael Frey. (57f8b69)
+        * Reverted input example to previous touch positions. (42f763b)
+        * Renamed the MultiTouch.qml example to inpuInput.qml. (306fea4)
+        * Removed key support from TODO. (a507063)
+        * Merged main branch. (39d6d65)
+        * Added key handling support. (23376da)
+        * Added a directory with scripts for deploying ans setting up
+          QtHybris on Maguro. Approved by Michael Frey. (4c494ea)
+        * Added a QHybrisContext class and diplayed more informations about
+          EGL and Opengl ES to ease debugging. Approved by Michael
+          Frey, jenkins. (8d0fb29)
+        * Removed a task waiting to be merged in another MR. (cdab0be)
+        * Added a QHybrisContext class and diplayed more informations about
+          EGL and Opengl ES to ease debugging. (3984753)
+        * Fixed input stack deadlock by delaying initialization. Approved by
+          jenkins, Michael Frey. (104456a)
+        * Added one more task to the TODO. (c3dcf8a)
+        * Updated the TODO list. (b7da997)
+        * Renamed environment variables. (3a70cb7)
+        * Fixed typo in a comment. (c99eaaa)
+        * Added missing build depends. Approved by Florian Boucault.
+          (e41a8dd)
+        * Required the -dev packages as build-deps. (55d5348)
+        * Added missing build-depends (1b0ca37)
+        * Fixed input stack deadlock by delaying initialization. (41f1b12)
+
+2012-10-04 Loïc Molinari
+
+        * Added script directory with scripts to deploy and set the Maguro
+          environment. (690173b)
+
+2012-10-03 Ricardo Mendoza
+
+        * - Merge packaging branch into trunk - Various lib path fixes.
+          Approved by . (761bf96)
+        * Add libglib2.0-dev and zlib1g-dev build-deps (d9a1d7b)
+        * Depend on libhybris-dev (9afc264)
+        * Add INCLUDEPATH for hybris headers (e208f41)
+        * Add packaging rules and point lib includes to correct paths for qt5
+          packages (d33c86c)
+
+2012-10-03 Loïc Molinari
+
+        * Switched to release build mode. (9362b7d)
+        * Added touchscreen support. (4ca46af)
+        * Disabled message swallowing in hybris-qmlscene. (77c5a6a)
+
+2012-10-01 Loïc Molinari
+
+        * Removed debugging. (19ff023)
+        * Removed packaging from TODO thanks to ricmm. (909da0d)
+        * Added a FIXME as a reminder for adding opacity and stacking
+          support. (5ae7ed7)
+
+2012-09-28 Loïc Molinari
+
+        * Freed the sf compat handles at destruction. (0557b03)
+        * Randomized moving logo animations. (05caf38)
+        * Added a warping logo example. (9c4480c)
+
+2012-09-27 Loïc Molinari
+
+        * Tweaked moving logo example values. (1188657)
+        * Added a deployment script. (4894f85)
+        * Added examples. (02e8984)
+        * Added initial surface flinger compat support. (ff8d3f6)
+
+2012-09-26 Loïc Molinari
+
+        * Added a COPYING. (40a6400)
+        * Added a TODO. (54ef396)
+        * Added informations to the README. (8a65547)
+        * Ignored auto-generated files. (9ae779f)
+        * Initial import. (edb254d)

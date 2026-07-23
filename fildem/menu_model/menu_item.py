@@ -3,9 +3,71 @@
 import dbus
 
 
+def clean_label(label):
+	label = str(label or '')
+	label = label.replace('__', '\0').replace('_', '').replace('\0', '_')
+	label = label.replace('&&', '\0').replace('&', '').replace('\0', '&')
+	return label
+
+
 def format_label(parts):
 	separator = u'\u0020\u0020\u00BB\u0020\u0020'
 	return separator.join(parts)
+
+
+def stringify_variant(value):
+	try:
+		if isinstance(value, (dbus.String, dbus.ObjectPath, dbus.Signature)):
+			return str(value)
+		if isinstance(value, dbus.Boolean):
+			return bool(value)
+		if isinstance(value, (dbus.Byte, dbus.Int16, dbus.Int32, dbus.Int64,
+				dbus.UInt16, dbus.UInt32, dbus.UInt64)):
+			return int(value)
+		if isinstance(value, dbus.Double):
+			return float(value)
+		if isinstance(value, (dbus.Array, list, tuple)):
+			return [stringify_variant(item) for item in value]
+		if isinstance(value, (dbus.Dictionary, dict)):
+			return {str(key): stringify_variant(item) for key, item in value.items()}
+	except Exception:
+		pass
+	return value
+
+
+def first_string(*values):
+	for value in values:
+		value = stringify_variant(value)
+		if isinstance(value, str) and value:
+			return value
+		if isinstance(value, dict):
+			for key in ('name', 'icon-name', 'names'):
+				nested = first_string(value.get(key))
+				if nested:
+					return nested
+		if isinstance(value, list):
+			nested = first_string(*value)
+			if nested:
+				return nested
+	return ''
+
+
+def format_accelerator(accel):
+	accel = stringify_variant(accel)
+	if not accel:
+		return ''
+	if isinstance(accel, str):
+		return accel
+	if isinstance(accel, list):
+		# GTK GMenuModel usually provides shortcuts as an array of arrays, e.g.
+		# [["<Control>", "S"]] or [["Control", "S"]].
+		if accel and isinstance(accel[0], list):
+			accel = accel[0]
+		return ''.join(
+			'<' + str(part) + '>' if index != len(accel) - 1 else str(part)
+			for index, part in enumerate(accel)
+		)
+	return str(accel)
 
 
 class DbusGtkMenuItem(object):
@@ -15,12 +77,19 @@ class DbusGtkMenuItem(object):
 		self.separator = False
 		self.action = str(item.get('action', ''))
 		self.accel = str(item.get('accel', '')) # <Primary><Shift><Alt>p
-		self.shortcut = str(item.get('shortcut', ''))
-		self.label = item.get('label', '')
+		self.shortcut = format_accelerator(item.get('shortcut', ''))
+		self.label = clean_label(item.get('label', ''))
 		self.text = format_label(self.path + [self.label])
 		self.enabled = enabled
 		self.toggle_type = ''
 		self.toggle_state = False
+		self.icon_name = first_string(
+			item.get('icon-name', ''),
+			item.get('verb-icon', ''),
+			item.get('icon', ''),
+			item.get('stock-id', ''),
+		)
+		self.icon_data = stringify_variant(item.get('icon-data', []))
 		# :submenu
 		# two index that indicate the group
 		# dbus.String(':submenu'): dbus.Struct((dbus.UInt32(11), dbus.UInt32(0))
@@ -51,34 +120,30 @@ class DbusAppMenuItem(object):
 		self.action = int(item[0])
 		self.accel = self.get_shorcut(item[1])
 		self.separator = item[1].get('type', '') == 'separator'
-		self.label = item[1].get('label', '')
+		self.label = clean_label(item[1].get('label', ''))
 		self.text = format_label(self.path + [self.label])
 		self.enabled = item[1].get('enabled', True)
 		self.visible = item[1].get('visible', True)
 		self.toggle_state = item[1].get('toggle-state', 0) == 1
 		self.toggle_type = item[1].get('toggle-type', '') # 'radio' or 'checkmark'
-		self.icon_data = item[1].get('icon_data', bytearray())
+		self.icon_name = first_string(
+			item[1].get('icon-name', ''),
+			item[1].get('icon', ''),
+			item[1].get('stock-id', ''),
+		)
+		self.icon_data = stringify_variant(item[1].get('icon-data', item[1].get('icon_data', [])))
 		# Only used on Gtkapps
 		self.section = None
 		self.children = []
 
 	def get_shorcut(self, item):
-		shortcut = item.get('shortcut', '')
-		if len(shortcut) == 0:
-			return shortcut
-
-		shortcut = shortcut[0]
-		ret = ''
-		for i, v in enumerate(shortcut):
-			# The last one should be on caps?
-			ret += '<' + v + '>' if (i != len(shortcut) - 1) else v
-		return ret
+		return format_accelerator(item.get('shortcut', ''))
 
 	def update_props(self, props):
 		if 'children-display' in props:
 			return
 		self.enabled = props.get('enabled', self.enabled)
-		self.label = props.get('label', self.label)
+		self.label = clean_label(props.get('label', self.label))
 		self.toggle_state = bool(props.get('toggle-state', self.toggle_state))
 		self.toggle_type = props.get('toggle-type', self.toggle_type)
 		self.visible = props.get('visible', self.visible)
