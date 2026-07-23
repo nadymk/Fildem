@@ -83,7 +83,13 @@ export class NativeMenuManager {
                 // GNOME 50 can toggle the arrow without opening a nested
                 // menu when the model is populated before the parent menu is
                 // mapped. Explicitly open it after activation.
-                submenu.connect('activate', () => submenu.menu.open());
+                submenu.connect('activate', () => {
+                    submenu.menu.open();
+                    // Keep the nested actor above the parent popup. This is
+                    // a diagnostic for GNOME 50's nested-popup stacking.
+                    if (submenu.menu.actor?.raise_top)
+                        submenu.menu.actor.raise_top();
+                });
                 menu.addMenuItem(submenu);
                 continue;
             }
