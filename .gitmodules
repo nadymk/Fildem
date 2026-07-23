@@ -1,3 +1,6 @@
 [submodule "third_party/global-menu-for-gnome"]
 	path = third_party/global-menu-for-gnome
 	url = https://github.com/ShiroOSL/global-menu-for-gnome.git
+[submodule "third_party/vala-panel-appmenu"]
+	path = third_party/vala-panel-appmenu
+	url = https://gitlab.com/vala-panel-project/vala-panel-appmenu.git
