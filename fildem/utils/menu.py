@@ -151,6 +151,7 @@ class DbusMenu:
 		root = self.tree[self.tree.root] if self.tree.root else None
 		tree = [node_data(child) for child in self.tree.children(root.identifier)] if root else []
 		print('Fildem sending native tree:', len(tree), flush=True)
+		print('Fildem native hierarchy:', [(item['label'], len(item['children'])) for item in tree], flush=True)
 		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')
 		proxy.EchoSendMenuTree(json.dumps(tree, separators=(',', ':')))
 

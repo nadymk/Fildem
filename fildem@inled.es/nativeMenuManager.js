@@ -80,6 +80,10 @@ export class NativeMenuManager {
             if (item.children?.length) {
                 const submenu = new PopupMenu.PopupSubMenuMenuItem(this._label(item.label));
                 this._populate(item.children, submenu.menu);
+                // GNOME 50 can toggle the arrow without opening a nested
+                // menu when the model is populated before the parent menu is
+                // mapped. Explicitly open it after activation.
+                submenu.connect('activate', () => submenu.menu.open());
                 menu.addMenuItem(submenu);
                 continue;
             }
