@@ -4,7 +4,7 @@ Version: 0.6.7
 Architecture: all
 Maintainer: Inled <jaime@inled.es>
 Original-Maintainer: Inled <jaime@inled.es>
-Depends: libbamf3-dev, bamfdaemon, libkeybinder-3.0-dev, appmenu-gtk2-module, appmenu-gtk3-module, unity-gtk-module-common, python3-gi, python3:any
+Depends: libbamf3-dev, bamfdaemon, libkeybinder-3.0-dev, unity-gtk2-module, appmenu-gtk3-module, appmenu-gtk-module-common, python3-gi, python3:any
 Section: python
 Priority: optional
 Homepage: https://github.com/InledGroup/Fildem

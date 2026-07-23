@@ -13,7 +13,7 @@ pkexec apt install -y python3-gi python3-dbus bamfdaemon libbamf3-dev libkeybind
 
 echo "📦 Attempting to install legacy compatibility packages (optional)..."
 # We try to install GTK2 and Unity modules but don't fail if they don't exist
-pkexec apt install -y appmenu-gtk2-module unity-gtk-module-common 2>/dev/null || echo "⚠️  Note: Some legacy packages (GTK2/Unity) are not available on your system. They will be skipped."
+pkexec apt install -y unity-gtk2-module appmenu-gtk-module-common 2>/dev/null || echo "⚠️  Note: Some legacy GTK2 packages are not available on your system. They will be skipped."
 
 echo "⚙️ Installing Python companion (Fildem Service)..."
 # Enter project directory before running setup.py so it finds README.md

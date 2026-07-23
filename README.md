@@ -25,7 +25,7 @@ The companion app is required for the extension to receive menus from active win
 
 #### Dependencies (Ubuntu/Debian)
 ```bash
-sudo apt install python3-gi python3-dbus bamfdaemon libbamf3-dev libkeybinder-3.0-dev appmenu-gtk2-module appmenu-gtk3-module unity-gtk-module-common
+sudo apt install python3-gi python3-dbus bamfdaemon libbamf3-dev libkeybinder-3.0-dev unity-gtk2-module appmenu-gtk3-module appmenu-gtk-module-common
 ```
 
 #### Quick Installation (Recommended)
