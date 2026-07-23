@@ -10,9 +10,7 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const BUS = 'es.inled.fildem';
 const PATH = '/es/inled/fildem';
-// Fildem's historical MyService methods/signals use the registrar interface
-// name even though they live on the es.inled.fildem object.
-const IFACE = 'com.canonical.AppMenu.Registrar';
+const IFACE = 'es.inled.fildem';
 
 class NativeMenuManager {
     constructor() {
