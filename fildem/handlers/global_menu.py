@@ -99,7 +99,7 @@ class Menu(Gtk.Menu):
 
 		menu_item.set_accel_path('<MyApp>/Options')
 		if self.callback is None:
-			menu_item.set_property('action_name', 'app.' + str(item.action))
+			menu_item.set_property('action_name', 'app.' + str(item.action).replace('.', '_'))
 		else:
 			menu_item.connect('activate', self.callback)
 
@@ -319,7 +319,7 @@ class GlobalMenu(Gtk.Application):
 		Adds an action of the foreign app. Do not add actions
 		of the app here
 		"""
-		name = str(item.action)
+		name = str(item.action).replace('.', '_')
 		path = item.path
 		self.actions.append(name)
 		action = Gio.SimpleAction.new(name, None)
@@ -363,4 +363,5 @@ class GlobalMenu(Gtk.Application):
 			self.window.open_menu_by_name(menu)
 		else:
 			self.window.open_menu_by_character(menu)
-		self.window.make_transparent()
+		if not self.window.wayland:
+			self.window.make_transparent()

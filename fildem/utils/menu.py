@@ -34,6 +34,12 @@ class DbusMenu:
 		self._update()
 
 	def on_window_switched(self, window):
+		# The menu UI is a separate GTK helper window. On Wayland/Xwayland it
+		# does not reliably receive focus-out when GNOME switches applications,
+		# so close it explicitly before rebuilding the active app's menu.
+		if self.app is not None:
+			self.app.quit()
+			self.app = None
 		self.reset_timeout()
 		self.window = window
 		self._init_window()
@@ -56,6 +62,7 @@ class DbusMenu:
 		signal = proxy.connect_to_signal("HudActivated", self.on_hud_activated)
 
 	def on_menu_activated(self, menu: str, x: int):
+		print('Fildem menu signal:', repr(menu), x, flush=True)
 		if menu == '__fildem_move':
 			self._move_menu(x)
 			return

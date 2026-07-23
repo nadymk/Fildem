@@ -33,6 +33,7 @@ class DbusGtkMenu(object):
 
 	def activate(self, selection):
 		action = self.actions.get(selection, '')
+		print('Fildem activate:', repr(selection), '->', repr(action), flush=True)
 
 		if 'app.' in action:
 			self.send_action(action, 'app.', self.app_path)
@@ -42,10 +43,13 @@ class DbusGtkMenu(object):
 			self.send_action(action, 'unity.', self.menubar_path)
 
 	def send_action(self, name, prefix, path):
-		obj       = self.session.get_object(self.bus_name, path)
-		interface = dbus.Interface(obj, dbus_interface='org.gtk.Actions')
-
-		interface.Activate(name.replace(prefix, ''), [], dict())
+		try:
+			obj       = self.session.get_object(self.bus_name, path)
+			interface = dbus.Interface(obj, dbus_interface='org.gtk.Actions')
+			print('Fildem sending action:', self.bus_name, path, name, flush=True)
+			interface.Activate(name.replace(prefix, ''), [], dict())
+		except Exception as e:
+			print('Fildem action failed:', repr(e), flush=True)
 
 	def get_results(self):
 		paths = [self.appmenu_path, self.menubar_path]
@@ -86,11 +90,16 @@ class DbusGtkMenu(object):
 					menu_item.set_toggle(description[1])
 
 				menu_path = labels + [menu_item.label]
-
-				self.tree.create_node(menu_item.label, menu_item.action, treelib_parent, data=menu_item)
+				# Some GTK menu entries (notably LibreOffice on newer GTK/appmenu
+				# stacks) have no action name. treelib requires every node ID to be
+				# non-empty and unique, so use a local structural ID for those nodes.
+				node_id = menu_item.action or ('menu-' + str(section[0]) + '-' + str(section[1]) + '-' + str(len(self.tree.all_nodes())))
+				if node_id in self.tree:
+					node_id += '-' + str(len(self.tree.all_nodes()))
+				self.tree.create_node(menu_item.label, node_id, treelib_parent, data=menu_item)
 
 				if ':submenu' in menu:
-					self.collect_entries(menu[':submenu'], menu_path, menu_item.action)
+					self.collect_entries(menu[':submenu'], menu_path, node_id)
 				elif 'action' in menu:
 					self.actions[menu_item.text] = menu_item.action
 

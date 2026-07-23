@@ -213,7 +213,10 @@ class MenuButton extends PanelMenu.Button {
         });
         this.box.add_child(this.labelWidget);
         this.add_child(this.box);
-        this.connect('button-release-event', this.onButtonEvent.bind(this));
+        const handler = this.onButtonEvent.bind(this);
+        this.connect('button-press-event', handler);
+        this.box.connect('button-press-event', handler);
+        this.labelWidget.connect('button-press-event', handler);
     }
 
     _onStyleChanged(actor) {
@@ -227,6 +230,7 @@ class MenuButton extends PanelMenu.Button {
         if (event.get_button() !== 1)
             return Clutter.EVENT_PROPAGATE;
 
+        log(`Panel click: ${this._label}`);
         this._menuBar.onButtonClicked(this._label);
         return Clutter.EVENT_STOP;
     }
