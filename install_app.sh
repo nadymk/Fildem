@@ -21,6 +21,7 @@ install_packages() {
     local pkg
 
     for pkg in "${requested[@]}"; do
+        [[ -n "$pkg" ]] || continue
         if has_package "$pkg"; then
             available+=("$pkg")
         else
@@ -46,6 +47,18 @@ detect_gtk_module_name() {
     done
 
     printf '%s\n' "appmenu-gtk-module"
+}
+
+detect_gtk3_backend_package() {
+    local candidate
+    for candidate in appmenu-gtk3-module unity-gtk3-module; do
+        if has_package "$candidate"; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    printf '%s\n' ""
 }
 
 ensure_gtk_module_setting() {
@@ -105,6 +118,8 @@ echo "📦 Updating package indices..."
 run_root apt update
 
 echo "📦 Installing companion dependencies..."
+gtk3_backend_pkg="$(detect_gtk3_backend_package)"
+
 install_packages \
     python3-gi \
     python3-dbus \
@@ -112,10 +127,9 @@ install_packages \
     libbamf3-dev \
     libkeybinder-3.0-dev \
     python3-setuptools \
-    appmenu-gtk3-module \
     appmenu-gtk-module-common \
-    unity-gtk3-module \
-    unity-gtk2-module
+    unity-gtk2-module \
+    "$gtk3_backend_pkg"
 
 echo "⚙️ Installing Python companion (Fildem Service)..."
 (

@@ -25,7 +25,7 @@ The companion app is required for the extension to receive menus from active win
 
 #### Dependencies (Ubuntu/Debian)
 ```bash
-sudo apt install python3-gi python3-dbus bamfdaemon libbamf3-dev libkeybinder-3.0-dev python3-setuptools appmenu-gtk3-module appmenu-gtk-module-common unity-gtk3-module unity-gtk2-module
+sudo apt install python3-gi python3-dbus bamfdaemon libbamf3-dev libkeybinder-3.0-dev python3-setuptools appmenu-gtk-module-common unity-gtk2-module appmenu-gtk3-module
 ```
 
 #### Quick Installation (Recommended)
@@ -35,7 +35,7 @@ If you want to install everything automatically (Extension + App + Service), run
 ./install.sh
 ```
 
-The installer will set up the Python companion in your user account, install the GNOME Shell extension, and configure the auto-start service.
+The installer will set up the Python companion in your user account, install the GNOME Shell extension, and configure the auto-start service. It automatically chooses the GTK3 module package that matches your system, so it won’t try to install conflicting `appmenu-gtk3-module` and `unity-gtk3-module` packages together.
 
 If you prefer a one-line install directly from GitHub, the installer will fall back to cloning the repository when the local scripts are not present:
 
