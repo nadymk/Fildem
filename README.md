@@ -25,17 +25,23 @@ The companion app is required for the extension to receive menus from active win
 
 #### Dependencies (Ubuntu/Debian)
 ```bash
-sudo apt install python3-gi python3-dbus bamfdaemon libbamf3-dev libkeybinder-3.0-dev unity-gtk2-module appmenu-gtk3-module appmenu-gtk-module-common
+sudo apt install python3-gi python3-dbus bamfdaemon libbamf3-dev libkeybinder-3.0-dev python3-setuptools appmenu-gtk3-module appmenu-gtk-module-common unity-gtk3-module unity-gtk2-module
 ```
 
 #### Quick Installation (Recommended)
-If you want to install everything automatically (Extension + App + Service), run the following command in your terminal:
+If you want to install everything automatically (Extension + App + Service), run the following command in your terminal from a cloned copy of this repository:
+
+```bash
+./install.sh
+```
+
+The installer will set up the Python companion in your user account, install the GNOME Shell extension, and configure the auto-start service.
+
+If you prefer a one-line install directly from GitHub, the installer will fall back to cloning the repository when the local scripts are not present:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/InledGroup/Fildem/main/install.sh | bash
 ```
-
-This command will download the installer, request superuser permissions for dependencies, and configure everything, including the auto-start service.
 
 #### Manual Installation (Step by step)
 
@@ -78,7 +84,7 @@ For the global menu to work, the Fildem service must be running. You can start i
 ```bash
 fildem
 ```
-*(It is recommended to add `fildem` to your GNOME startup applications).*
+*(The installer places `fildem` in `~/.local/bin` and configures the user systemd service to start it automatically.)*
 
 ### HUD (Heads-Up Display)
 The HUD allows you to search for menu actions by pressing a key combination.

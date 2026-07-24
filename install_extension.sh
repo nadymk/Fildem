@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UUID="fildem@inled.es"
 EXT_DIR="$HOME/.local/share/gnome-shell/extensions/$UUID"
 OLD_UUID="fildemGMenu@gonza.com"
@@ -16,7 +17,7 @@ fi
 
 echo "📂 Installing new extension ($UUID)..."
 mkdir -p "$EXT_DIR"
-cp -r fildem@inled.es/* "$EXT_DIR/"
+cp -a "$repo_dir/fildem@inled.es/." "$EXT_DIR/"
 
 echo "🛠️ Compiling GSettings schemas..."
 glib-compile-schemas "$EXT_DIR/schemas/"
