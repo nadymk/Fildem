@@ -20,6 +20,8 @@ class DbusGtkMenu(object):
 		self.descriptions = {}
 		self.tree         = Tree()
 		self._update_timer = 0
+		self.refresh_callback = None
+		self.toggle_overrides = {}
 		self.session      = session
 		self.bus_name     = window.get_utf8_prop('_GTK_UNIQUE_BUS_NAME')
 		# with app. prefix
@@ -41,23 +43,78 @@ class DbusGtkMenu(object):
 
 	def activate(self, selection):
 		action = self.actions.get(selection, '')
-		print('Fildem activate:', repr(selection), '->', repr(action), flush=True)
+		target = None
+		if isinstance(action, tuple):
+			action, target = action
+		print('Fildem activate:', repr(selection), '->', repr(action), repr(target), flush=True)
+		item = self._find_item(selection)
+		if item is not None and item.data is not None:
+			if item.data.toggle_type == 'radio':
+				self._set_radio_selection(item.data)
+			elif item.data.toggle_type == 'checkmark':
+				self._toggle_checkmark(item.data)
+		activated = self._activate(action, target)
+		if activated:
+			self.add_timer()
+			GLib.timeout_add(300, self._schedule_refresh)
+		return activated
 
+	def _find_item(self, selection):
+		for node in self.tree.all_nodes():
+			data = node.data
+			if data is None:
+				continue
+			if data.text == selection:
+				return node
+		return None
+
+	def _set_radio_selection(self, selected_item):
+		parent_path = tuple(selected_item.path)
+		for node in self.tree.all_nodes():
+			if node.data is None:
+				continue
+			if node.data.toggle_type != 'radio':
+				continue
+			if tuple(node.data.path) != parent_path:
+				continue
+			is_selected = node.data.text == selected_item.text
+			node.data.toggle_state = is_selected
+			self.toggle_overrides[node.data.action] = is_selected
+
+	def _toggle_checkmark(self, selected_item):
+		selected_item.toggle_state = not bool(selected_item.toggle_state)
+		self.toggle_overrides[selected_item.action] = bool(selected_item.toggle_state)
+
+	def _activate(self, action, target=None):
 		if 'app.' in action:
-			self.send_action(action, 'app.', self.app_path)
+			return self.send_action(action, 'app.', self.app_path, target)
 		elif 'win.' in action:
-			self.send_action(action, 'win.', self.win_path)
+			return self.send_action(action, 'win.', self.win_path, target)
 		elif 'unity.' in action:
-			self.send_action(action, 'unity.', self.menubar_path)
+			return self.send_action(action, 'unity.', self.menubar_path, target)
+		return False
 
-	def send_action(self, name, prefix, path):
+	def _dbus_target(self, target):
+		if target in (None, ''):
+			return []
+		if isinstance(target, dbus.Boolean):
+			return [target]
+		if isinstance(target, bool):
+			return [dbus.Boolean(target)]
+		if isinstance(target, (int, float)):
+			return [dbus.Int32(int(target))]
+		return [dbus.String(str(target))]
+
+	def send_action(self, name, prefix, path, target=None):
 		try:
 			obj       = self.session.get_object(self.bus_name, path)
 			interface = dbus.Interface(obj, dbus_interface='org.gtk.Actions')
 			print('Fildem sending action:', self.bus_name, path, name, flush=True)
-			interface.Activate(name.replace(prefix, ''), [], dict())
+			interface.Activate(name.replace(prefix, ''), self._dbus_target(target), dict())
+			return True
 		except Exception as e:
 			print('Fildem action failed:', repr(e), flush=True)
+			return False
 
 	def get_results(self):
 		paths = [self.appmenu_path, self.menubar_path]
@@ -102,7 +159,7 @@ class DbusGtkMenu(object):
 			for action_name, description in descriptions.items():
 				self.descriptions[prefix + str(action_name)] = description
 
-	def collect_entries(self, menu=(0, 0), labels=[], treelib_parent=None):
+	def collect_entries(self, menu=(0, 0), labels=[], treelib_parent=None, section_group=0):
 		section = (menu[0], menu[1])
 		for menu in self.results.get(section, []):
 			if 'label' in menu:
@@ -113,7 +170,7 @@ class DbusGtkMenu(object):
 					self.top_level_menus.append(label)
 
 				menu_item = DbusGtkMenuItem(menu, labels)
-				menu_item.section = section
+				menu_item.section = (tuple(labels), section_group)
 				description = self.descriptions.get(menu_item.action)
 				if description is not None:
 					menu_item.enabled = bool(description[0])
@@ -123,6 +180,9 @@ class DbusGtkMenu(object):
 					if description is not None:
 						menu_item.enabled = description[0]
 						menu_item.set_toggle(description[1])
+
+				if menu_item.action in self.toggle_overrides:
+					menu_item.toggle_state = bool(self.toggle_overrides[menu_item.action])
 
 				menu_path = labels + [menu_item.label]
 				# Some GTK menu entries (notably LibreOffice on newer GTK/appmenu
@@ -136,10 +196,11 @@ class DbusGtkMenu(object):
 				if ':submenu' in menu:
 					self.collect_entries(menu[':submenu'], menu_path, node_id)
 				elif 'action' in menu:
-					self.actions[menu_item.text] = menu_item.action
+					self.actions[menu_item.text] = (menu_item.action, menu_item.target)
 
 			elif ':section' in menu:
-				self.collect_entries(menu[':section'], labels, treelib_parent)
+				section_group += 1
+				self.collect_entries(menu[':section'], labels, treelib_parent, section_group)
 
 	def describe(self, action):
 		"""
@@ -192,6 +253,7 @@ class DbusGtkMenu(object):
 		"""
 		# print(f'{enabled_changed=} {removed=} {state_changed=} {new_actions=}')
 		prefixes = ['unity.', 'win.', 'app.']
+		needs_refresh = False
 		for action_name in [*enabled_changed, *state_changed]:
 			items = map(lambda prefix: self.tree.get_node(prefix + action_name), prefixes)
 			items = filter(None, items)
@@ -202,19 +264,55 @@ class DbusGtkMenu(object):
 
 			if action_name in enabled_changed:
 				item.data.enabled = enabled_changed[action_name]
+				needs_refresh = True
 			else:
-				if item.data.toggle_type == 'radio': # 'checkmark':
-					for s in self.tree.siblings(item.identifier):
-						if s.data.section == item.data.section:
-							s.data.toggle_state = False
-				item.data.toggle_state = state_changed[action_name]
+				if item.data.toggle_type == 'radio':
+					parent_path = tuple(item.data.path)
+					for node in self.tree.all_nodes():
+						if node.identifier == item.identifier or node.data is None:
+							continue
+						if node.data.toggle_type == 'radio' and tuple(node.data.path) == parent_path:
+							node.data.toggle_state = False
+							self.toggle_overrides[node.data.action] = False
+				item.data.toggle_state = bool(state_changed[action_name])
+				self.toggle_overrides[item.data.action] = bool(state_changed[action_name])
+				needs_refresh = True
 				# item.data.enabled = state_changed[action_name]
 				# item.data.set_description(self.describe(item.data.action))
+		if needs_refresh:
+			self.add_timer()
 
 	def remove_actions_listener(self):
 		for s in self.signal_matcher:
 			s.remove()
 		self.signal_matcher = []
+		if self._update_timer != 0:
+			GLib.source_remove(self._update_timer)
+			self._update_timer = 0
+
+	def add_timer(self):
+		if self._update_timer == 0:
+			self._update_timer = GLib.timeout_add(50, self._update)
+
+	def _update(self):
+		self.results = {}
+		self.actions = {}
+		self.accels = {}
+		self.top_level_menus = []
+		self.tree = Tree()
+		self.remove_actions_listener()
+		self.get_results()
+		self._update_timer = 0
+		if self.refresh_callback is not None:
+			try:
+				self.refresh_callback()
+			except Exception as error:
+				print('Fildem menu refresh callback failed:', repr(error), flush=True)
+		return False
+
+	def _schedule_refresh(self):
+		self.add_timer()
+		return False
 
 
 class DbusMozillaGtkMenu(DbusGtkMenu):
@@ -333,6 +431,7 @@ class DbusLomiriMenu(DbusGtkMenu):
 		self.top_level_menus = []
 		self.signal_matcher = []
 		self.describe_on_build = True
+		self.refresh_callback = None
 		self._resolve_registered_menu()
 
 	def _resolve_registered_menu(self):
@@ -359,12 +458,13 @@ class DbusLomiriMenu(DbusGtkMenu):
 			return
 		self.send_action(action, 'unity.', self.action_path)
 
-	def send_action(self, name, prefix, path):
+	def send_action(self, name, prefix, path, target=None):
 		try:
 			obj       = self.session.get_object(self.bus_name, path)
 			interface = dbus.Interface(obj, dbus_interface='org.gtk.Actions')
 			print('Fildem sending lomiri action:', self.bus_name, path, name, flush=True)
-			interface.Activate(name.replace(prefix, ''), [], dict())
+			params = [] if target in (None, '') else [dbus.String(str(target))]
+			interface.Activate(name.replace(prefix, ''), params, dict())
 		except Exception as e:
 			print('Fildem lomiri action failed:', repr(e), flush=True)
 
@@ -400,6 +500,7 @@ class DbusAppMenu(object):
 		self.interface = self.get_interface()
 		self.top_level_menus = []
 		self.results = None
+		self.refresh_callback = None
 
 	def activate(self, selection):
 		action = self.actions[selection]
@@ -564,7 +665,7 @@ class DbusAppMenu(object):
 
 	def add_timer(self):
 		if self._update_timer == 0:
-			self._update_timer = GLib.timeout_add(200, self._update)
+			self._update_timer = GLib.timeout_add(50, self._update)
 
 	def _update(self):
 		self.actions = {}
@@ -572,6 +673,11 @@ class DbusAppMenu(object):
 		self.tree = Tree()
 		self.get_results()
 		self._update_timer = 0
+		if self.refresh_callback is not None:
+			try:
+				self.refresh_callback()
+			except Exception as error:
+				print('Fildem menu refresh callback failed:', repr(error), flush=True)
 		return False
 
 	def remove_actions_listener(self):
@@ -580,6 +686,7 @@ class DbusAppMenu(object):
 		self.signal_matcher = []
 		if self._update_timer != 0:
 			GLib.source_remove(self._update_timer)
+			self._update_timer = 0
 
 
 class MenuModel:
@@ -598,6 +705,12 @@ class MenuModel:
 		self.gtkmenu = DbusGtkMenu(session, window)
 		self.mozillamenu = DbusMozillaGtkMenu(session, window)
 		self.lomirimenu = DbusLomiriMenu(session, window)
+
+	def set_refresh_callback(self, callback):
+		self.appmenu.refresh_callback = callback
+		self.gtkmenu.refresh_callback = callback
+		self.mozillamenu.refresh_callback = callback
+		self.lomirimenu.refresh_callback = callback
 
 	def _update_menus(self):
 		self.gtkmenu.get_results()
@@ -665,7 +778,9 @@ class MenuModel:
 
 	def activate(self, selection):
 		if selection in self.gtkmenu.actions:
-			self.gtkmenu.activate(selection)
+			if not self.gtkmenu.activate(selection):
+				self.gtkmenu._update()
+				self.gtkmenu.activate(selection)
 
 		elif selection in self.mozillamenu.actions:
 			self.mozillamenu.activate(selection)

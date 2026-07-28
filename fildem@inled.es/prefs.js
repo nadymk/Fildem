@@ -38,6 +38,40 @@ export default class FildemPreferences extends ExtensionPreferences {
         paddingRow.add_suffix(paddingSpin);
         group.add(paddingRow);
 
+        // leading-gap
+        const leadingGapRow = new Adw.ActionRow({
+            title: _('Menu leading gap'),
+            subtitle: _('Spacing between the leading icon or toggle and the menu label'),
+        });
+        const leadingGapSpin = new Gtk.SpinButton({
+            adjustment: new Gtk.Adjustment({
+                lower: 0,
+                upper: 32,
+                step_increment: 1,
+            }),
+            valign: Gtk.Align.CENTER,
+        });
+        settings.bind('leading-gap', leadingGapSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
+        leadingGapRow.add_suffix(leadingGapSpin);
+        group.add(leadingGapRow);
+
+        // leading-column-width
+        const leadingWidthRow = new Adw.ActionRow({
+            title: _('Menu leading width'),
+            subtitle: _('Width reserved for the leading icon or toggle column'),
+        });
+        const leadingWidthSpin = new Gtk.SpinButton({
+            adjustment: new Gtk.Adjustment({
+                lower: 0,
+                upper: 48,
+                step_increment: 1,
+            }),
+            valign: Gtk.Align.CENTER,
+        });
+        settings.bind('leading-column-width', leadingWidthSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
+        leadingWidthRow.add_suffix(leadingWidthSpin);
+        group.add(leadingWidthRow);
+
         // hover-switch-delay
         const hoverDelayRow = new Adw.ActionRow({
             title: _('Hover switch delay'),

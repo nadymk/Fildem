@@ -5,6 +5,16 @@
 			<default>6</default>
 			<summary>Button paddings (tweak this if the menu and items desynchronize)</summary>
 		</key>
+		<key type="i" name="leading-gap">
+			<range min="0" max="32"/>
+			<default>6</default>
+			<summary>Gap between the leading icon or toggle and the menu label</summary>
+		</key>
+		<key type="i" name="leading-column-width">
+			<range min="0" max="48"/>
+			<default>18</default>
+			<summary>Width reserved for the leading icon or toggle column</summary>
+		</key>
 		<key type="i" name="hover-switch-delay">
 			<range min="0" max="3000"/>
 			<default>1000</default>

@@ -197,6 +197,7 @@ class DbusMenu:
 
 	def _init_window(self):
 		self._menu_model = MenuModel(self.session, self.window)
+		self._menu_model.set_refresh_callback(self._publish_current_menu)
 		self._window_cache_key = self._cache_key(self.window)
 		if not self._send_cached_menu():
 			self._update()
@@ -281,6 +282,8 @@ class DbusMenu:
 		if cached is None:
 			return False
 		if time.monotonic() - cached.get('time', 0) > MENU_CACHE_MAX_AGE:
+			return False
+		if cached.get('provider') not in ('synthetic-browser',):
 			return False
 
 		self._restore_cached_actions(cached)
@@ -427,7 +430,7 @@ class DbusMenu:
 		self._handle_shortcuts(self._menu_model.top_level_menus)
 		self._send_msg(self._menu_model.top_level_menus)
 		tree_json = self._store_tree()
-		if self._window_cache_key and tree_json != '[]' and provider:
+		if self._window_cache_key and tree_json != '[]' and provider == 'synthetic-browser':
 			MENU_CACHE[self._window_cache_key] = {
 				'time': time.monotonic(),
 				'top_level_menus': list(self._menu_model.top_level_menus),
@@ -440,6 +443,12 @@ class DbusMenu:
 			provider or 'none',
 			'yes' if self._window_cache_key in MENU_CACHE else 'no',
 		), flush=True)
+
+	def _publish_current_menu(self):
+		self._handle_shortcuts(self._menu_model.top_level_menus)
+		self._send_msg(self._menu_model.top_level_menus)
+		tree_json = self._store_tree()
+		self._send_tree_json(tree_json)
 
 	def _store_tree(self):
 		tree = self._build_tree_payload()
@@ -478,6 +487,10 @@ class DbusMenu:
 	def _store_tree_json(self, tree_json):
 		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')
 		proxy.EchoStoreMenuTree(tree_json)
+
+	def _send_tree_json(self, tree_json):
+		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')
+		proxy.EchoSendMenuTree(tree_json)
 
 	def _send_msg(self, top_level_menus):
 		if len(top_level_menus) == 0:

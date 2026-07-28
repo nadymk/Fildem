@@ -66,6 +66,14 @@ export class NativeMenuManager {
         this._paddingSettingsId = this._settings?.connect('changed::min-padding', () => {
             this._buttons.forEach(button => this._applyPanelButtonStyle(button));
         }) ?? 0;
+        this._leadingGapSettingsId = this._settings?.connect('changed::leading-gap', () => {
+            if (this._menuTree)
+                this._replaceMenus(this._menuTree);
+        }) ?? 0;
+        this._leadingWidthSettingsId = this._settings?.connect('changed::leading-column-width', () => {
+            if (this._menuTree)
+                this._replaceMenus(this._menuTree);
+        }) ?? 0;
         this._hoverDelaySettingsId = this._settings?.connect('changed::hover-switch-delay', () => {
             this._cancelHoverSwitch();
         }) ?? 0;
@@ -470,14 +478,12 @@ export class NativeMenuManager {
             });
         }
 
-        return this._createDataIconActor(item.iconData) ?? new St.Widget({
-            style: 'width: 18px;',
-        });
+        return this._createDataIconActor(item.iconData) ?? this._leadingPlaceholder();
     }
 
     _createStateActor(item) {
         if (!item.toggleType && !item.toggle)
-            return new St.Widget({style: 'width: 18px;'});
+            return this._leadingPlaceholder();
 
         const isActive = Boolean(item.toggle);
         const isRadio = item.toggleType === 'radio';
@@ -527,19 +533,25 @@ export class NativeMenuManager {
 
         const rowBox = new St.BoxLayout({
             x_expand: true,
-            style: 'spacing: 10px;',
+            style: 'spacing: 0px;',
+        });
+        const leading = new St.BoxLayout({
+            x_expand: false,
+            y_align: Clutter.ActorAlign.CENTER,
+            style: `width: ${this._leadingColumnWidth()}px;`,
         });
         if (showIconColumn) {
-            const leading = new St.BoxLayout({
-                style: 'spacing: 6px;',
+            const graphic = new St.BoxLayout({
+                style: `spacing: ${this._leadingGap()}px;`,
                 y_align: Clutter.ActorAlign.CENTER,
             });
-            leading.add_child(this._createStateActor(item));
-            leading.add_child(this._itemHasLeadingGraphic(item)
+            graphic.add_child(this._createStateActor(item));
+            graphic.add_child(this._itemHasLeadingGraphic(item)
                 ? this._createIconActor(item)
-                : new St.Widget({style: 'width: 18px;'}));
-            rowBox.add_child(leading);
+                : this._leadingPlaceholder());
+            leading.add_child(graphic);
         }
+        rowBox.add_child(leading);
 
         const label = new St.Label({
             text: this._label(item.label),
@@ -550,12 +562,15 @@ export class NativeMenuManager {
         label.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
         rowBox.add_child(label);
 
+        rowBox.add_child(new St.Widget({x_expand: true}));
+
         const hint = this._shortcut(item.shortcut || item.accel || '');
         if (hint) {
             rowBox.add_child(new St.Label({
                 text: hint,
                 style_class: 'popup-menu-accelerator',
-                style: 'opacity: 0.65;',
+                style: 'opacity: 0.65; margin-left: 18px;',
+                x_align: Clutter.ActorAlign.END,
                 y_align: Clutter.ActorAlign.CENTER,
             }));
         }
@@ -575,6 +590,26 @@ export class NativeMenuManager {
 
     _panelPadding() {
         return this._settings ? this._settings.get_int('min-padding') : 6;
+    }
+
+    _leadingGap() {
+        if (!this._settings)
+            return 10;
+        return Math.max(0, Math.min(32, this._settings.get_int('leading-gap')));
+    }
+
+    _leadingColumnWidth() {
+        if (!this._settings)
+            return 18;
+        return Math.max(0, Math.min(48, this._settings.get_int('leading-column-width')));
+    }
+
+    _leadingPlaceholder() {
+        return new St.Widget({style: `width: ${this._leadingColumnWidth()}px;`});
+    }
+
+    _createSeparatorActor() {
+        return new PopupMenu.PopupSeparatorMenuItem().actor;
     }
 
     _applyPanelButtonStyle(button) {
@@ -669,13 +704,13 @@ export class NativeMenuManager {
         let previousSection = null;
         for (const item of items) {
             if (item.separator) {
-                box.add_child(new St.Widget({style_class: 'popup-separator-menu-item'}));
+                box.add_child(this._createSeparatorActor());
                 previousSection = null;
                 continue;
             }
             const sectionKey = this._sectionKey(item);
             if (previousSection !== null && sectionKey !== previousSection)
-                box.add_child(new St.Widget({style_class: 'popup-separator-menu-item'}));
+                box.add_child(this._createSeparatorActor());
             previousSection = sectionKey;
             if (item.children?.length) {
                 const row = this._createMenuRow(item, true, showIconColumn);
@@ -911,6 +946,10 @@ export class NativeMenuManager {
             global.stage.disconnect(this._stageId);
         if (this._settings && this._paddingSettingsId)
             this._settings.disconnect(this._paddingSettingsId);
+        if (this._settings && this._leadingGapSettingsId)
+            this._settings.disconnect(this._leadingGapSettingsId);
+        if (this._settings && this._leadingWidthSettingsId)
+            this._settings.disconnect(this._leadingWidthSettingsId);
         if (this._settings && this._hoverDelaySettingsId)
             this._settings.disconnect(this._hoverDelaySettingsId);
         if (this._settings && this._maxWidthSettingsId)

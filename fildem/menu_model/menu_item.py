@@ -117,6 +117,7 @@ class DbusGtkMenuItem(object):
 		self.label = clean_label(item.get('label', ''))
 		self.text = format_label(self.path + [self.label])
 		self.enabled = enabled
+		self.target = stringify_variant(deep_lookup(item, ('target', 'action-target', 'parameter')) or '')
 		self.toggle_type = ''
 		self.toggle_state = False
 		self.icon_name = first_string(deep_lookup(item, (
@@ -165,6 +166,7 @@ class DbusAppMenuItem(object):
 		self.text = format_label(self.path + [self.label])
 		self.enabled = item[1].get('enabled', True)
 		self.visible = item[1].get('visible', True)
+		self.target = stringify_variant(item[1].get('target', item[1].get('action-target', item[1].get('parameter', ''))))
 		self.toggle_state = item[1].get('toggle-state', 0) == 1
 		self.toggle_type = item[1].get('toggle-type', '') # 'radio' or 'checkmark'
 		self.icon_name = first_string(
