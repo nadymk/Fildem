@@ -62,6 +62,7 @@ export class NativeMenuManager {
         this._menuTree = null;
         this._hoverSwitchId = 0;
         this._pointerDismissId = 0;
+        this._destroyed = false;
         this._paddingSettingsId = this._settings?.connect('changed::min-padding', () => {
             this._buttons.forEach(button => this._applyPanelButtonStyle(button));
         }) ?? 0;
@@ -163,6 +164,8 @@ export class NativeMenuManager {
     }
 
     _closeBoxPopups() {
+        if (this._destroyed)
+            return;
         this._cancelHoverSwitch();
         for (const popup of this._boxPopups)
             popup.hide();
@@ -205,14 +208,30 @@ export class NativeMenuManager {
     _setActiveRootButton(button) {
         if (this._activeRootButton === button)
             return;
-        this._activeRootButton?.remove_style_pseudo_class('active');
-        this._activeRootButton?.remove_style_pseudo_class('checked');
+        const current = this._activeRootButton;
+        this._activeRootButton = null;
+        if (current && !current._fildemDestroyed) {
+            try {
+                current.remove_style_pseudo_class('active');
+                current.remove_style_pseudo_class('checked');
+            } catch (error) {
+                logError(error, 'Fildem active button cleanup');
+            }
+        }
         this._activeRootButton = button;
-        this._activeRootButton?.add_style_pseudo_class('active');
-        this._activeRootButton?.add_style_pseudo_class('checked');
+        if (this._activeRootButton && !this._activeRootButton._fildemDestroyed) {
+            try {
+                this._activeRootButton.add_style_pseudo_class('active');
+                this._activeRootButton.add_style_pseudo_class('checked');
+            } catch (error) {
+                logError(error, 'Fildem active button apply');
+            }
+        }
     }
 
     _showRootPopup(button) {
+        if (this._destroyed || !button || button._fildemDestroyed)
+            return;
         const popup = button._fildemBoxPopup;
         popup.setPosition(button, 0.0);
         popup.show();
@@ -397,27 +416,89 @@ export class NativeMenuManager {
             .replace(/\+minus$/i, '+−');
     }
 
-    _createIconActor(item) {
-        if (item.toggle)
-            return new St.Label({
-                text: item.toggleType === 'radio' ? '●' : '✓',
-                style_class: 'popup-menu-ornament',
+    _iconBytes(iconData) {
+        if (!iconData)
+            return [];
+        if (iconData instanceof Uint8Array)
+            return Array.from(iconData);
+        if (Array.isArray(iconData)) {
+            if (iconData.length > 0 && iconData.every(value =>
+                Number.isInteger(value) && value >= 0 && value <= 255))
+                return iconData;
+            for (const value of iconData) {
+                const bytes = this._iconBytes(value);
+                if (bytes.length)
+                    return bytes;
+            }
+        }
+        if (typeof iconData === 'object') {
+            for (const value of Object.values(iconData)) {
+                const bytes = this._iconBytes(value);
+                if (bytes.length)
+                    return bytes;
+            }
+        }
+        return [];
+    }
+
+    _createDataIconActor(iconData) {
+        const bytes = this._iconBytes(iconData);
+        if (!bytes.length)
+            return null;
+
+        try {
+            const gbytes = GLib.Bytes.new(Uint8Array.from(bytes));
+            const gicon = Gio.BytesIcon.new(gbytes);
+            return new St.Icon({
+                gicon,
+                icon_size: 16,
                 y_align: Clutter.ActorAlign.CENTER,
             });
+        } catch (error) {
+            logError(error, 'Fildem icon data');
+            return null;
+        }
+    }
 
+    _createIconActor(item) {
         const iconName = String(item.iconName ?? '');
-        if (!iconName)
+        if (iconName) {
+            return new St.Icon({
+                gicon: Gio.ThemedIcon.new(iconName),
+                icon_size: 16,
+                y_align: Clutter.ActorAlign.CENTER,
+            });
+        }
+
+        return this._createDataIconActor(item.iconData) ?? new St.Widget({
+            style: 'width: 18px;',
+        });
+    }
+
+    _createStateActor(item) {
+        if (!item.toggleType && !item.toggle)
             return new St.Widget({style: 'width: 18px;'});
 
-        return new St.Icon({
-            gicon: Gio.ThemedIcon.new(iconName),
-            icon_size: 16,
+        const isActive = Boolean(item.toggle);
+        const isRadio = item.toggleType === 'radio';
+        return new St.Label({
+            text: isRadio ? (isActive ? '◉' : '◯') : (isActive ? '☑' : '☐'),
+            style_class: 'popup-menu-ornament',
             y_align: Clutter.ActorAlign.CENTER,
         });
     }
 
     _itemHasLeadingGraphic(item) {
-        return Boolean(item?.toggle || String(item?.iconName ?? ''));
+        return Boolean(item?.toggle ||
+            String(item?.toggleType ?? '') ||
+            String(item?.iconName ?? '') ||
+            this._iconBytes(item?.iconData).length);
+    }
+
+    _sectionKey(item) {
+        if (!item || item.section === undefined || item.section === null)
+            return '';
+        return JSON.stringify(item.section);
     }
 
     _itemsNeedIconColumn(items) {
@@ -448,10 +529,17 @@ export class NativeMenuManager {
             x_expand: true,
             style: 'spacing: 10px;',
         });
-        if (showIconColumn)
-            rowBox.add_child(this._itemHasLeadingGraphic(item)
+        if (showIconColumn) {
+            const leading = new St.BoxLayout({
+                style: 'spacing: 6px;',
+                y_align: Clutter.ActorAlign.CENTER,
+            });
+            leading.add_child(this._createStateActor(item));
+            leading.add_child(this._itemHasLeadingGraphic(item)
                 ? this._createIconActor(item)
                 : new St.Widget({style: 'width: 18px;'}));
+            rowBox.add_child(leading);
+        }
 
         const label = new St.Label({
             text: this._label(item.label),
@@ -473,9 +561,10 @@ export class NativeMenuManager {
         }
 
         if (hasChildren) {
-            rowBox.add_child(new St.Label({
-                text: '›',
+            rowBox.add_child(new St.Icon({
+                icon_name: 'go-next-symbolic',
                 style_class: 'popup-menu-arrow',
+                icon_size: 12,
                 y_align: Clutter.ActorAlign.CENTER,
             }));
         }
@@ -577,11 +666,17 @@ export class NativeMenuManager {
         const box = new St.BoxLayout({vertical: true});
         scroll.set_child(box);
         const popup = this._createBoxPopup(sourceActor, scroll, side);
+        let previousSection = null;
         for (const item of items) {
             if (item.separator) {
                 box.add_child(new St.Widget({style_class: 'popup-separator-menu-item'}));
+                previousSection = null;
                 continue;
             }
+            const sectionKey = this._sectionKey(item);
+            if (previousSection !== null && sectionKey !== previousSection)
+                box.add_child(new St.Widget({style_class: 'popup-separator-menu-item'}));
+            previousSection = sectionKey;
             if (item.children?.length) {
                 const row = this._createMenuRow(item, true, showIconColumn);
                 box.add_child(row);
@@ -698,6 +793,12 @@ export class NativeMenuManager {
         labels.forEach((rawLabel, index) => {
             const label = this._label(rawLabel);
             const button = new PanelMenu.Button(0.0, label);
+            button._fildemDestroyed = false;
+            button.connect('destroy', () => {
+                button._fildemDestroyed = true;
+                if (this._activeRootButton === button)
+                    this._activeRootButton = null;
+            });
             this._applyPanelButtonStyle(button);
             // GNOME 50 no longer reliably toggles extension-created menus
             // through PanelMenu.Button's legacy click action. Install the
@@ -711,6 +812,8 @@ export class NativeMenuManager {
             button.menu.actor.hide();
             button._fildemMenuChildren = null;
             button._fildemClickGesture.connect('recognize', () => {
+                if (this._destroyed || button._fildemDestroyed)
+                    return;
                 for (const other of this._buttons) {
                     if (other !== button)
                         other._fildemBoxPopup?.hide();
@@ -739,13 +842,19 @@ export class NativeMenuManager {
             });
             button.add_action(button._fildemClickGesture);
             button.connect('enter-event', () => {
+                if (this._destroyed || button._fildemDestroyed)
+                    return Clutter.EVENT_PROPAGATE;
                 if (!this._activeRootButton || this._activeRootButton === button)
                     return Clutter.EVENT_PROPAGATE;
                 this._scheduleHoverSwitch(() => {
+                    if (this._destroyed || button._fildemDestroyed)
+                        return;
                     if (!this._activeRootButton || this._activeRootButton === button)
                         return;
                     if (!button._fildemMenuChildren) {
                         this._loadMenuTree(tree => {
+                            if (this._destroyed || button._fildemDestroyed)
+                                return;
                             const item = tree[index];
                             if (!item || !this._activeRootButton)
                                 return;
@@ -776,6 +885,7 @@ export class NativeMenuManager {
     }
 
     destroy() {
+        this._destroyed = true;
         this._cancelHoverSwitch();
         this._stopPointerDismissWatch();
         this._outsideOverlay?.destroy();

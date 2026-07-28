@@ -149,6 +149,8 @@ mkdir -p "$HOME/.config/systemd/user"
 install -m 0644 "$repo_dir/fildem.service" "$HOME/.config/systemd/user/fildem.service"
 systemctl --user daemon-reload
 systemctl --user enable fildem.service
+systemctl --user add-wants default.target fildem.service
+systemctl --user add-wants graphical-session.target fildem.service
 systemctl --user restart fildem.service
 
 echo "✅ Companion installation completed."

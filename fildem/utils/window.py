@@ -1,6 +1,7 @@
 import dbus
 import gi
 import os
+import time
 
 from gi.repository import Gio
 
@@ -115,12 +116,27 @@ class WindowManager(object):
 
 	@classmethod
 	def _start_listener(cls):
+		def wait_for_service(name, timeout=5.0):
+			session = dbus.SessionBus()
+			deadline = time.monotonic() + timeout
+			while time.monotonic() < deadline:
+				try:
+					if session.name_has_owner(name):
+						return session
+				except Exception:
+					pass
+				time.sleep(0.1)
+			return session
+
 		if not wayland:
 			cls._get_matcher().connect('active-window-changed', cls._window_switched_bamf)
 		else:
-			session = dbus.SessionBus()
-			proxy  = session.get_object('es.inled.fildem', '/es/inled/fildem')
-			signal = proxy.connect_to_signal("WindowSwitchedSignal", cls._window_switched)
+			session = wait_for_service('es.inled.fildem')
+			try:
+				proxy = session.get_object('es.inled.fildem', '/es/inled/fildem')
+				proxy.connect_to_signal("WindowSwitchedSignal", cls._window_switched)
+			except Exception:
+				pass
 
 	@classmethod
 	def _get_matcher(cls):

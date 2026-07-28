@@ -52,6 +52,42 @@ def first_string(*values):
 	return ''
 
 
+def _coerce_bool(value):
+	value = stringify_variant(value)
+	if isinstance(value, bool):
+		return value
+	if isinstance(value, (int, float)):
+		return bool(value)
+	if isinstance(value, str):
+		return value.strip().lower() not in ('', '0', 'false', 'none', 'null')
+	return bool(value)
+
+
+def deep_lookup(value, keys):
+	value = stringify_variant(value)
+	if isinstance(value, dict):
+		for key in keys:
+			if key in value:
+				candidate = stringify_variant(value.get(key))
+				if candidate not in ('', None, [], {}):
+					return candidate
+		for nested in value.values():
+			candidate = deep_lookup(nested, keys)
+			if candidate not in ('', None, [], {}):
+				return candidate
+	elif isinstance(value, list):
+		for nested in value:
+			candidate = deep_lookup(nested, keys)
+			if candidate not in ('', None, [], {}):
+				return candidate
+	elif isinstance(value, tuple):
+		for nested in value:
+			candidate = deep_lookup(nested, keys)
+			if candidate not in ('', None, [], {}):
+				return candidate
+	return None
+
+
 def format_accelerator(accel):
 	accel = stringify_variant(accel)
 	if not accel:
@@ -83,13 +119,18 @@ class DbusGtkMenuItem(object):
 		self.enabled = enabled
 		self.toggle_type = ''
 		self.toggle_state = False
-		self.icon_name = first_string(
-			item.get('icon-name', ''),
-			item.get('verb-icon', ''),
-			item.get('icon', ''),
-			item.get('stock-id', ''),
-		)
-		self.icon_data = stringify_variant(item.get('icon-data', []))
+		self.icon_name = first_string(deep_lookup(item, (
+			'icon-name',
+			'verb-icon',
+			'icon',
+			'stock-id',
+		)))
+		self.icon_data = stringify_variant(deep_lookup(item, ('icon-data', 'icon_data')) or [])
+		self.toggle_type = str(deep_lookup(item, ('toggle-type', 'toggle_type')) or '')
+		self.toggle_state = _coerce_bool(deep_lookup(item, ('toggle-state', 'toggle_state')))
+		if not self.toggle_type and _coerce_bool(deep_lookup(item, ('toggle',))):
+			self.toggle_type = 'checkmark'
+			self.toggle_state = True
 		# :submenu
 		# two index that indicate the group
 		# dbus.String(':submenu'): dbus.Struct((dbus.UInt32(11), dbus.UInt32(0))
@@ -102,7 +143,7 @@ class DbusGtkMenuItem(object):
 		toggle = toggle[0]
 		if isinstance(toggle, dbus.Boolean):
 			self.toggle_type = 'checkmark'
-			self.toggle_state = toggle
+			self.toggle_state = bool(toggle)
 		elif isinstance(toggle, str):
 			self.toggle_type = 'radio'
 			self.toggle_state = len(toggle) > 0
@@ -144,6 +185,13 @@ class DbusAppMenuItem(object):
 			return
 		self.enabled = props.get('enabled', self.enabled)
 		self.label = clean_label(props.get('label', self.label))
-		self.toggle_state = bool(props.get('toggle-state', self.toggle_state))
-		self.toggle_type = props.get('toggle-type', self.toggle_type)
+		self.toggle_state = _coerce_bool(props.get('toggle-state', self.toggle_state))
+		self.toggle_type = str(props.get('toggle-type', self.toggle_type) or self.toggle_type)
+		self.icon_name = first_string(
+			deep_lookup(props, ('icon-name', 'verb-icon', 'icon', 'stock-id')),
+			self.icon_name,
+		)
+		self.icon_data = stringify_variant(
+			deep_lookup(props, ('icon-data', 'icon_data')) or self.icon_data
+		)
 		self.visible = props.get('visible', self.visible)

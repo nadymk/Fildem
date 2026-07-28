@@ -18,6 +18,19 @@ MENU_CACHE = {}
 MENU_CACHE_MAX_AGE = 300
 
 
+def _wait_for_service(bus_name, timeout=5.0):
+	session = dbus.SessionBus()
+	deadline = time.monotonic() + timeout
+	while time.monotonic() < deadline:
+		try:
+			if session.name_has_owner(bus_name):
+				return session
+		except Exception:
+			pass
+		time.sleep(0.1)
+	return session
+
+
 def _json_safe(value):
 	if isinstance(value, (str, int, float, bool)) or value is None:
 		return value
@@ -300,16 +313,28 @@ class DbusMenu:
 			self.collect_timer = 0
 
 	def _listen_menu_activated(self):
-		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')
-		signal = proxy.connect_to_signal("MenuActivated", self.on_menu_activated)
+		session = _wait_for_service('es.inled.fildem')
+		try:
+			proxy = session.get_object('es.inled.fildem', '/es/inled/fildem')
+			proxy.connect_to_signal("MenuActivated", self.on_menu_activated)
+		except Exception as error:
+			print('Fildem failed to connect MenuActivated:', repr(error), flush=True)
 
 	def _listen_hud_activated(self):
-		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')
-		signal = proxy.connect_to_signal("HudActivated", self.on_hud_activated)
+		session = _wait_for_service('es.inled.fildem')
+		try:
+			proxy = session.get_object('es.inled.fildem', '/es/inled/fildem')
+			proxy.connect_to_signal("HudActivated", self.on_hud_activated)
+		except Exception as error:
+			print('Fildem failed to connect HudActivated:', repr(error), flush=True)
 
 	def _listen_cache_clear(self):
-		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')
-		proxy.connect_to_signal("ClearMenuCacheSignal", self.on_cache_clear_requested)
+		session = _wait_for_service('es.inled.fildem')
+		try:
+			proxy = session.get_object('es.inled.fildem', '/es/inled/fildem')
+			proxy.connect_to_signal("ClearMenuCacheSignal", self.on_cache_clear_requested)
+		except Exception as error:
+			print('Fildem failed to connect ClearMenuCacheSignal:', repr(error), flush=True)
 
 	def on_cache_clear_requested(self):
 		print('Fildem clearing menu cache:', len(MENU_CACHE), flush=True)
@@ -437,6 +462,7 @@ class DbusMenu:
 				'enabled': bool(data.enabled) if data else True,
 				'toggle': bool(data.toggle_state) if data else False,
 				'toggleType': str(getattr(data, 'toggle_type', '') or '') if data else '',
+				'section': _json_safe(getattr(data, 'section', None)) if data else None,
 				'shortcut': str(getattr(data, 'shortcut', '') or '') if data else '',
 				'accel': str(getattr(data, 'accel', '') or '') if data else '',
 				'iconName': str(getattr(data, 'icon_name', '') or '') if data else '',

@@ -17,6 +17,7 @@ class DbusGtkMenu(object):
 		self.results      = {}
 		self.actions      = {}
 		self.accels       = {}
+		self.descriptions = {}
 		self.tree         = Tree()
 		self._update_timer = 0
 		self.session      = session
@@ -77,10 +78,29 @@ class DbusGtkMenu(object):
 			for menu in results:
 				self.results[(menu[0], menu[1])] = menu[2]
 
+		self._load_descriptions()
 		self.tree.create_node('Root', 'Root')
 		self.collect_entries(treelib_parent='Root')
 		if not len(self.tree.children(self.tree[self.tree.root].identifier)):
 			self.tree = Tree()
+
+	def _load_descriptions(self):
+		self.descriptions = {}
+		for prefix, path in (
+			('app.', self.app_path),
+			('win.', self.win_path),
+			('unity.', self.menubar_path),
+		):
+			if not path:
+				continue
+			try:
+				obj = self.session.get_object(self.bus_name, path)
+				interface = dbus.Interface(obj, dbus_interface='org.gtk.Actions')
+				descriptions = interface.DescribeAll()
+			except Exception:
+				continue
+			for action_name, description in descriptions.items():
+				self.descriptions[prefix + str(action_name)] = description
 
 	def collect_entries(self, menu=(0, 0), labels=[], treelib_parent=None):
 		section = (menu[0], menu[1])
@@ -94,7 +114,11 @@ class DbusGtkMenu(object):
 
 				menu_item = DbusGtkMenuItem(menu, labels)
 				menu_item.section = section
-				if self.describe_on_build:
+				description = self.descriptions.get(menu_item.action)
+				if description is not None:
+					menu_item.enabled = bool(description[0])
+					menu_item.set_toggle(description[2])
+				elif self.describe_on_build:
 					description = self.describe(menu_item.action)
 					if description is not None:
 						menu_item.enabled = description[0]
