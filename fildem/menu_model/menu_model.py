@@ -11,6 +11,43 @@ from ..treelib import Tree
 from fildem.menu_model.menu_item import DbusGtkMenuItem, DbusAppMenuItem, clean_label
 
 
+CALL_TIMEOUT_MS = 300
+DISCOVERY_NEGATIVE_TTL_S = 3.0
+_MENU_ROOTS = ("/MenuBar", "/com/canonical/menu")
+_NODE_NAME_RE = re.compile(r'<node name="([^"]+)"')
+_QT_HINT_STOP_WORDS = {
+	'app', 'apps', 'bin', 'client', 'com', 'desktop', 'flatpak', 'gnome',
+	'gtk', 'kde', 'linux', 'org', 'qt', 'run', 'service', 'ubuntu',
+	'wayland', 'window', 'x11',
+}
+
+
+def _json_safe(value):
+	if isinstance(value, (str, int, float, bool)) or value is None:
+		return value
+	if isinstance(value, (bytes, bytearray)):
+		return list(value)
+	if isinstance(value, (list, tuple)):
+		return [_json_safe(item) for item in value]
+	if isinstance(value, dict):
+		return {str(key): _json_safe(item) for key, item in value.items()}
+	return str(value)
+
+
+def _flatpak_scope(pid):
+	try:
+		with open(f"/proc/{pid}/cgroup") as f:
+			cgroup = f.read()
+	except OSError:
+		return None
+
+	for line in cgroup.splitlines():
+		unit = line.rpartition("/")[2]
+		if unit.startswith("app-flatpak-"):
+			return unit
+	return None
+
+
 class DbusGtkMenu(object):
 
 	def __init__(self, session, window):
@@ -40,6 +77,7 @@ class DbusGtkMenu(object):
 
 		self.top_level_menus = []
 		self.signal_matcher = []
+		self.source_name  = 'gtk'
 
 	def activate(self, selection):
 		action = self.actions.get(selection, '')
@@ -333,6 +371,7 @@ class DbusMozillaGtkMenu(DbusGtkMenu):
 
 	def __init__(self, session, window):
 		super().__init__(session, window)
+		self.source_name = 'mozilla'
 		self.window = window
 		if self.bus_name and self.menubar_path:
 			return
@@ -422,6 +461,7 @@ class DbusLomiriMenu(DbusGtkMenu):
 		self._update_timer = 0
 		self.session      = session
 		self.window       = window
+		self.source_name  = 'lomiri'
 		self.bus_name     = None
 		self.app_path     = None
 		self.win_path     = None
@@ -432,13 +472,16 @@ class DbusLomiriMenu(DbusGtkMenu):
 		self.signal_matcher = []
 		self.describe_on_build = True
 		self.refresh_callback = None
-		self._resolve_registered_menu()
 
 	def _resolve_registered_menu(self):
 		try:
-			obj = self.session.get_object('com.lomiri.MenuRegistrar', '/com/lomiri/MenuRegistrar')
+			obj = self.session.get_object(
+				'com.lomiri.MenuRegistrar',
+				'/com/lomiri/MenuRegistrar',
+				introspect=False,
+			)
 			interface = dbus.Interface(obj, 'com.lomiri.MenuRegistrar')
-			menus = interface.GetAppMenus()
+			menus = interface.GetAppMenus(timeout=CALL_TIMEOUT_MS / 1000.0)
 			pid = self.window.get_pid()
 			entry = menus.get(pid) if pid else None
 			if entry is None and not pid and len(menus) == 1:
@@ -455,8 +498,8 @@ class DbusLomiriMenu(DbusGtkMenu):
 		action = self.actions.get(selection, '')
 		print('Fildem lomiri activate:', repr(selection), '->', repr(action), flush=True)
 		if not action or not self.action_path:
-			return
-		self.send_action(action, 'unity.', self.action_path)
+			return False
+		return self.send_action(action, 'unity.', self.action_path)
 
 	def send_action(self, name, prefix, path, target=None):
 		try:
@@ -465,10 +508,14 @@ class DbusLomiriMenu(DbusGtkMenu):
 			print('Fildem sending lomiri action:', self.bus_name, path, name, flush=True)
 			params = [] if target in (None, '') else [dbus.String(str(target))]
 			interface.Activate(name.replace(prefix, ''), params, dict())
+			return True
 		except Exception as e:
 			print('Fildem lomiri action failed:', repr(e), flush=True)
+			return False
 
 	def get_results(self):
+		if not self.bus_name or not self.appmenu_path:
+			self._resolve_registered_menu()
 		if not self.bus_name or not self.appmenu_path:
 			return
 		super().get_results()
@@ -495,9 +542,14 @@ class DbusAppMenu(object):
 		self.tree      = Tree()
 		self.session   = session
 		self.window    = window
+		self.source_name = 'appmenu'
 		self._update_timer = 0
 		self.signal_matcher = []
-		self.interface = self.get_interface()
+		self._discovery_tried = {}
+		# Qt/appmenu discovery can be expensive on GTK-heavy desktops. Keep it
+		# lazy so GTK windows can publish immediately and only probe this path
+		# when the other menu backends do not have anything useful.
+		self.interface = None
 		self.top_level_menus = []
 		self.results = None
 		self.refresh_callback = None
@@ -505,9 +557,11 @@ class DbusAppMenu(object):
 	def activate(self, selection):
 		action = self.actions[selection]
 		try:
-			self.interface.Event(action, 'clicked', 0, 0)
+			self._event(action, 'clicked')
+			return True
 		except Exception as e:
-			self.retry_activate(selection)
+			print('Fildem dbusmenu activate failed, retrying:', repr(e), flush=True)
+			return self.retry_activate(selection)
 
 	def retry_activate(self, selection):
 		# Electron apps change a lot their menus, we have to update to retry
@@ -517,7 +571,53 @@ class DbusAppMenu(object):
 		results = self.interface.GetLayout(0, -1, dbus.Array(signature="s"))
 		self.collect_entries(results[1], [])
 		action = self.actions[selection]
-		self.interface.Event(action, 'clicked', 0, 0)
+		try:
+			self._event(action, 'clicked')
+			return True
+		except Exception as e:
+			print('Fildem dbusmenu retry failed:', repr(e), flush=True)
+			return False
+
+	def _event(self, action, event='clicked'):
+		try:
+			return self.interface.Event(
+				dbus.Int32(int(action)),
+				dbus.String(event),
+				dbus.String(''),
+				dbus.UInt32(int(time.time())),
+			)
+		except TypeError:
+			# Some dbus-python builds are picky about the variant slot; retry with
+			# a plain Python string so the proxy can coerce it into the signature.
+			return self.interface.Event(
+				dbus.Int32(int(action)),
+				dbus.String(event),
+				'',
+				dbus.UInt32(int(time.time())),
+			)
+
+	def _discovery_key(self):
+		pid = int(self.window.get_pid() or 0)
+		if pid <= 0:
+			return None
+		return _flatpak_scope(pid) or f"pid:{pid}"
+
+	def _candidate_name_hints(self):
+		parts = (
+			str(self.window.get_app_name() or '').lower(),
+			str(self.window.get_utf8_prop('wmClass') or '').lower(),
+			str(self.window.get_utf8_prop('appId') or '').lower(),
+		)
+		hints = []
+		for part in parts:
+			for token in re.split(r'[^a-z0-9]+', part):
+				if len(token) < 4:
+					continue
+				if token in _QT_HINT_STOP_WORDS:
+					continue
+				if token not in hints:
+					hints.append(token)
+		return hints
 
 	def get_interface(self):
 		bus_name = 'com.canonical.AppMenu.Registrar'
@@ -527,7 +627,7 @@ class DbusAppMenu(object):
 		direct_path = self.window.get_utf8_prop('_GTK_MENUBAR_OBJECT_PATH')
 		if direct_name and direct_path:
 			try:
-				obj = self.session.get_object(direct_name, direct_path)
+				obj = self.session.get_object(direct_name, direct_path, introspect=False)
 				interface = dbus.Interface(obj, 'com.canonical.dbusmenu')
 				interface.GetLayout(0, 0, dbus.Array(signature="s"))
 
@@ -542,17 +642,25 @@ class DbusAppMenu(object):
 				print('Fildem direct DBusMenu unavailable:', direct_name, direct_path, repr(e), flush=True)
 
 		try:
-			obj        = self.session.get_object(bus_name, bus_path)
+			obj        = self.session.get_object(bus_name, bus_path, introspect=False)
 			interface  = dbus.Interface(obj, bus_name)
 			xid = self.window.get_xid()
 			if xid:
-				name, path = interface.GetMenuForWindow(xid)
+				try:
+					menu = interface.GetMenuForWindow(xid, timeout=CALL_TIMEOUT_MS / 1000.0)
+				except Exception:
+					menu = None
+				if not menu or not menu[0] or not menu[1]:
+					menus = interface.GetMenus(timeout=CALL_TIMEOUT_MS / 1000.0)
+					name, path = self._find_menu_for_wayland_window(menus)
+				else:
+					name, path = menu
 			else:
-				menus = interface.GetMenus()
+				menus = interface.GetMenus(timeout=CALL_TIMEOUT_MS / 1000.0)
 				name, path = self._find_menu_for_wayland_window(menus)
-				if not name or not path:
-					return None
-			obj        = self.session.get_object(name, path)
+			if not name or not path:
+				return self._discover_qt_menu()
+			obj        = self.session.get_object(name, path, introspect=False)
 			interface  = dbus.Interface(obj, 'com.canonical.dbusmenu')
 
 			s = interface.connect_to_signal('ItemsPropertiesUpdated', self.on_actions_changed)
@@ -563,7 +671,7 @@ class DbusAppMenu(object):
 			return interface
 		except dbus.exceptions.DBusException:
 			# import traceback; traceback.print_exc()
-			return None
+			return self._discover_qt_menu()
 
 	def _sender_pid(self, sender):
 		try:
@@ -572,9 +680,106 @@ class DbusAppMenu(object):
 				'/org/freedesktop/DBus'
 			)
 			bus_iface = dbus.Interface(bus_obj, 'org.freedesktop.DBus')
-			return int(bus_iface.GetConnectionUnixProcessID(sender))
+			return int(bus_iface.GetConnectionUnixProcessID(sender, timeout=CALL_TIMEOUT_MS / 1000.0))
 		except Exception:
 			return 0
+
+	def _pid_matches_window(self, pid):
+		window_pid = int(self.window.get_pid() or 0)
+		if pid <= 0 or window_pid <= 0:
+			return False
+		if pid == window_pid:
+			return True
+		scope = _flatpak_scope(window_pid)
+		return bool(scope) and _flatpak_scope(pid) == scope
+
+	def _introspect(self, sender, path):
+		try:
+			obj = self.session.get_object(sender, path, introspect=False)
+			return obj.Introspect(
+				dbus_interface='org.freedesktop.DBus.Introspectable',
+				timeout=CALL_TIMEOUT_MS / 1000.0,
+			)
+		except Exception:
+			return None
+
+	def _menubar_paths(self, sender):
+		paths = []
+		for root in _MENU_ROOTS:
+			xml = self._introspect(sender, root)
+			if not xml:
+				continue
+			children = _NODE_NAME_RE.findall(str(xml))
+
+			def sort_key(name):
+				return (0, int(name)) if name.isdigit() else (1, name)
+
+			for name in sorted(children, key=sort_key, reverse=True):
+				paths.append(f"{root}/{name}")
+		return paths
+
+	def _list_unique_names(self):
+		try:
+			return [name for name in self.session.list_names()]
+		except Exception:
+			return []
+
+	def _discover_qt_menu(self):
+		key = self._discovery_key()
+		if key is None:
+			return None
+
+		tried_at = self._discovery_tried.get(key)
+		if tried_at is not None and (time.monotonic() - tried_at) < DISCOVERY_NEGATIVE_TTL_S:
+			return None
+
+		self._discovery_tried[key] = time.monotonic()
+		hints = self._candidate_name_hints()
+		candidates = self._list_unique_names()
+		pid_matches = []
+		hint_matches = []
+		for sender in candidates:
+			pid = self._sender_pid(sender)
+			sender_name = str(sender).lower()
+			pid_match = self._pid_matches_window(pid)
+			hint_match = bool(hints) and any(hint in sender_name for hint in hints)
+			if pid_match:
+				pid_matches.append((sender, pid))
+			elif hint_match:
+				hint_matches.append((sender, pid))
+
+		for sender, pid in [*pid_matches, *hint_matches]:
+			for path in self._menubar_paths(sender):
+				try:
+					obj = self.session.get_object(sender, path)
+					interface = dbus.Interface(obj, 'com.canonical.dbusmenu')
+					results = interface.GetLayout(
+						0,
+						1,
+						dbus.Array(signature="s"),
+						timeout=CALL_TIMEOUT_MS / 1000.0,
+					)
+				except Exception:
+					continue
+
+				children = results[1][2]
+				labeled = [
+					child for child in children
+					if child[1].get('label', '') or child[1].get('type', '') == 'separator'
+				]
+				if not labeled:
+					continue
+
+				s = interface.connect_to_signal('ItemsPropertiesUpdated', self.on_actions_changed)
+				self.signal_matcher.append(s)
+				s = interface.connect_to_signal('LayoutUpdated', self.layout_updated)
+				self.signal_matcher.append(s)
+				self._discovery_tried.pop(key, None)
+				reason = 'pid' if self._pid_matches_window(pid) else 'hint'
+				print('Fildem discovered unregistered dbusmenu:', sender, path, 'pid', pid, 'reason', reason, flush=True)
+				return interface
+
+		return None
 
 	def _find_menu_for_wayland_window(self, menus):
 		pid = int(self.window.get_pid() or 0)
@@ -608,9 +813,13 @@ class DbusAppMenu(object):
 		return [None, None]
 
 	def get_results(self):
+		if self.interface is None:
+			self.interface = self.get_interface()
 		if self.interface:
 			self.results = self.interface.GetLayout(0, -1, dbus.Array(signature="s"))
+			print('Fildem dbusmenu root groups:', len(self.results[1][2]), flush=True)
 			self.collect_entries(self.results[1])
+			print('Fildem dbusmenu tree built:', len(self.tree), 'top:', len(self.top_level_menus), flush=True)
 
 			if not len(self.tree.children(self.tree[self.tree.root].identifier)):
 				self.tree = Tree()
@@ -696,15 +905,57 @@ class MenuModel:
 		self.gtkmenu = None
 		self.mozillamenu = None
 		self.lomirimenu = None
+		self.active_source = None
 		self._session = session
 		self.window = window
 		self._init_window(session, window)
+
+	def _looks_like_gtk_window(self):
+		return any([
+			self.window.get_utf8_prop('_GTK_UNIQUE_BUS_NAME'),
+			self.window.get_utf8_prop('_GTK_APPLICATION_OBJECT_PATH'),
+			self.window.get_utf8_prop('_GTK_WINDOW_OBJECT_PATH'),
+			self.window.get_utf8_prop('_GTK_MENUBAR_OBJECT_PATH'),
+			self.window.get_utf8_prop('_GTK_APP_MENU_OBJECT_PATH'),
+		])
 
 	def _init_window(self, session, window):
 		self.appmenu = DbusAppMenu(session, window)
 		self.gtkmenu = DbusGtkMenu(session, window)
 		self.mozillamenu = DbusMozillaGtkMenu(session, window)
 		self.lomirimenu = DbusLomiriMenu(session, window)
+		self.active_source = None
+
+	def _sources(self):
+		return (self.gtkmenu, self.mozillamenu, self.lomirimenu, self.appmenu)
+
+	def _source_has_menu(self, source):
+		tree = getattr(source, 'tree', None)
+		if tree is None or tree.root is None:
+			return False
+		try:
+			return len(tree.children(tree.root)) > 0
+		except Exception:
+			return False
+
+	def _select_active_source(self):
+		# Keep one active backend per window so the renderer and activator never
+		# mix trees from different sources.
+		for source in self._sources():
+			if self._source_has_menu(source):
+				return source
+		return None
+
+	@property
+	def source(self):
+		if self.active_source is None:
+			self.active_source = self._select_active_source()
+		return self.active_source
+
+	@property
+	def source_name(self):
+		source = self.source
+		return getattr(source, 'source_name', '') if source is not None else ''
 
 	def set_refresh_callback(self, callback):
 		self.appmenu.refresh_callback = callback
@@ -713,13 +964,32 @@ class MenuModel:
 		self.lomirimenu.refresh_callback = callback
 
 	def _update_menus(self):
-		self.gtkmenu.get_results()
+		try:
+			self.gtkmenu.get_results()
+		except Exception as error:
+			print('Fildem gtk menu build failed:', repr(error), flush=True)
+		print('Fildem gtk menu state:', len(self.gtkmenu.tree), 'actions:', len(self.gtkmenu.actions), flush=True)
 		if not len(self.gtkmenu.tree):
-			self.mozillamenu.get_results()
+			try:
+				self.mozillamenu.get_results()
+			except Exception as error:
+				print('Fildem mozilla menu build failed:', repr(error), flush=True)
+		print('Fildem mozilla menu state:', len(self.mozillamenu.tree), 'actions:', len(self.mozillamenu.actions), flush=True)
 		if not len(self.gtkmenu.tree):
-			self.lomirimenu.get_results()
-		if not len(self.gtkmenu.tree) and not len(self.mozillamenu.tree) and not len(self.lomirimenu.tree):
-			self.appmenu.get_results()
+			try:
+				self.lomirimenu.get_results()
+			except Exception as error:
+				print('Fildem lomiri menu build failed:', repr(error), flush=True)
+		print('Fildem lomiri menu state:', len(self.lomirimenu.tree), 'actions:', len(self.lomirimenu.actions), flush=True)
+		if (not len(self.gtkmenu.tree) and not len(self.mozillamenu.tree) and
+				not len(self.lomirimenu.tree) and not self._looks_like_gtk_window()):
+			try:
+				self.appmenu.get_results()
+			except Exception as error:
+				print('Fildem app menu build failed:', repr(error), flush=True)
+		print('Fildem app menu state:', len(self.appmenu.tree), 'actions:', len(self.appmenu.actions), 'iface:', bool(self.appmenu.interface), flush=True)
+		self.active_source = self._select_active_source()
+		print('Fildem active menu source:', self.source_name or 'none', flush=True)
 
 	@property
 	def prompt(self):
@@ -734,62 +1004,116 @@ class MenuModel:
 
 	@property
 	def action_map(self):
-		actions = self.gtkmenu.actions
-		if not len(actions):
-			actions = self.mozillamenu.actions
-		if not len(actions):
-			actions = self.lomirimenu.actions
-		if not len(actions):
-			actions = self.appmenu.actions
+		source = self.source
+		actions = source.actions if source is not None else {}
 		return actions
 
 	@property
 	def accel(self):
-		accel = self.gtkmenu.accels
-		if not len(accel):
-			accel = self.mozillamenu.accels
-		if not len(accel):
-			accel = self.lomirimenu.accels
-		if not len(accel):
-			accel = self.appmenu.accels
+		source = self.source
+		accel = source.accels if source is not None else {}
 		return accel
 
 	@property
 	def tree(self):
-		tree = self.gtkmenu.tree
-		if tree.root is None:
-			tree = self.mozillamenu.tree
-		if tree.root is None:
-			tree = self.lomirimenu.tree
-		if tree.root is None:
-			tree = self.appmenu.tree
-		return tree
+		source = self.source
+		return source.tree if source is not None else Tree()
 
 	@property
 	def top_level_menus(self):
-		if len(self.gtkmenu.top_level_menus):
-			return self.gtkmenu.top_level_menus
-		elif len(self.mozillamenu.top_level_menus):
-			return self.mozillamenu.top_level_menus
-		elif len(self.lomirimenu.top_level_menus):
-			return self.lomirimenu.top_level_menus
-		else:
-			return self.appmenu.top_level_menus
+		source = self.source
+		return source.top_level_menus if source is not None else []
 
 	def activate(self, selection):
-		if selection in self.gtkmenu.actions:
-			if not self.gtkmenu.activate(selection):
-				self.gtkmenu._update()
-				self.gtkmenu.activate(selection)
+		source = self.source
+		candidates = [source] if source is not None else []
+		candidates.extend([menu for menu in self._sources() if menu is not source])
+		for menu in candidates:
+			if menu is None or selection not in menu.actions:
+				continue
+			result = menu.activate(selection)
+			if result is False:
+				if hasattr(menu, '_update'):
+					menu._update()
+				result = menu.activate(selection)
+			return True if result is None else bool(result)
+		return False
 
-		elif selection in self.mozillamenu.actions:
-			self.mozillamenu.activate(selection)
+	def find_node(self, selection):
+		tree = self.tree
+		if tree.root is None:
+			return None
+		for node in tree.all_nodes():
+			data = node.data
+			if data is None:
+				continue
+			if node.identifier == selection or data.text == selection:
+				return node
+		return None
 
-		elif selection in self.lomirimenu.actions:
-			self.lomirimenu.activate(selection)
+	def _serialize_node(self, tree, node):
+		data = node.data
+		children = [self._serialize_node(tree, child) for child in tree.children(node.identifier)]
+		children = [child for child in children if child is not None]
+		if data and not data.separator and not data.action and not children:
+			return None
+		if data is None:
+			return None
 
-		elif selection in self.appmenu.actions:
-			self.appmenu.activate(selection)
+		node_type = 'submenu' if children else 'item'
+		if data.separator:
+			node_type = 'separator'
+		elif getattr(data, 'toggle_type', '') == 'radio':
+			node_type = 'radio'
+		elif getattr(data, 'toggle_type', '') in ('checkmark', 'checkbox'):
+			node_type = 'checkbox'
+
+		return {
+			'id': str(node.identifier),
+			'label': str(data.label if data else node.tag),
+			'action': str(data.text if data else ''),
+			'enabled': bool(data.enabled) if data else True,
+			'toggle': bool(data.toggle_state) if data else False,
+			'checked': bool(data.toggle_state) if data else False,
+			'toggleType': str(getattr(data, 'toggle_type', '') or '') if data else '',
+			'section': _json_safe(getattr(data, 'section', None)) if data else None,
+			'shortcut': str(getattr(data, 'shortcut', '') or '') if data else '',
+			'accel': str(getattr(data, 'accel', '') or '') if data else '',
+			'iconName': str(getattr(data, 'icon_name', '') or '') if data else '',
+			'iconData': _json_safe(getattr(data, 'icon_data', [])) if data else [],
+			'separator': bool(data.separator) if data else False,
+			'type': node_type,
+			'children': children,
+		}
+
+	def serialize_tree(self):
+		tree = self.tree
+		root = tree[tree.root] if tree.root is not None else None
+		if root is None:
+			return []
+		nodes = [self._serialize_node(tree, child) for child in tree.children(root.identifier)]
+		return [item for item in nodes if item is not None]
+
+	def serialize_children(self, selection):
+		node = self.find_node(selection)
+		if node is None:
+			return []
+		tree = self.tree
+		nodes = [self._serialize_node(tree, child) for child in tree.children(node.identifier)]
+		return [item for item in nodes if item is not None]
+
+	def serialize_bar(self, generation=0):
+		window_name = ''
+		try:
+			window_name = str(self.window.get_utf8_prop('appId') or self.prompt or '')
+		except Exception:
+			window_name = ''
+		return {
+			'source': self.source_name or '',
+			'generation': int(generation),
+			'app_id': str(window_name),
+			'menus': self.serialize_tree(),
+		}
 
 	def handle_empty(self, actions):
 		if not len(actions):
@@ -802,11 +1126,17 @@ class MenuModel:
 			print('Gnome HUD: WARNING: (%s) %s' % (promt, alert))
 
 	def __del__(self):
-		if self.appmenu is not None:
-			self.appmenu.remove_actions_listener()
-		if self.gtkmenu is not None:
-			self.gtkmenu.remove_actions_listener()
-		if self.mozillamenu is not None:
-			self.mozillamenu.remove_actions_listener()
-		if self.lomirimenu is not None:
-			self.lomirimenu.remove_actions_listener()
+		try:
+			if self.appmenu is not None:
+				self.appmenu.remove_actions_listener()
+			if self.gtkmenu is not None:
+				self.gtkmenu.remove_actions_listener()
+			if self.mozillamenu is not None:
+				self.mozillamenu.remove_actions_listener()
+			if self.lomirimenu is not None:
+				self.lomirimenu.remove_actions_listener()
+		except Exception:
+			pass
+
+	def destroy(self):
+		self.__del__()

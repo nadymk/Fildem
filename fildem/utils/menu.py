@@ -216,6 +216,9 @@ class DbusMenu:
 		return '|'.join(parts)
 
 	def _active_provider(self):
+		provider = getattr(self._menu_model, 'source_name', '')
+		if provider:
+			return provider
 		if len(self._menu_model.gtkmenu.actions) or self._menu_model.gtkmenu.tree.root is not None:
 			return 'gtk'
 		if len(self._menu_model.mozillamenu.actions) or self._menu_model.mozillamenu.tree.root is not None:
@@ -452,16 +455,19 @@ class DbusMenu:
 
 	def _store_tree(self):
 		tree = self._build_tree_payload()
-		print('Fildem storing native tree:', len(tree), flush=True)
+		print('Fildem storing native tree:', len(tree), 'source=', self._active_provider() or 'none', flush=True)
 		print('Fildem native hierarchy:', [(item['label'], len(item['children'])) for item in tree], flush=True)
 		tree_json = json.dumps(tree, separators=(',', ':'))
 		self._store_tree_json(tree_json)
 		return tree_json
 
-	def _build_tree_payload(self):
+	def _build_tree_payload(self, tree=None):
+		if tree is None:
+			tree = self.tree
+
 		def node_data(node):
 			data = node.data
-			children = [node_data(child) for child in self.tree.children(node.identifier)]
+			children = [node_data(child) for child in tree.children(node.identifier)]
 			children = [child for child in children if child is not None]
 			if data and not data.separator and not data.action and not children:
 				return None
@@ -480,9 +486,10 @@ class DbusMenu:
 				'children': children,
 			}
 
-		root = self.tree[self.tree.root] if self.tree.root else None
-		tree = [node_data(child) for child in self.tree.children(root.identifier)] if root else []
-		return [item for item in tree if item is not None]
+		# dbusmenu roots can be numeric 0, so check for None instead of truthiness.
+		root = tree[tree.root] if tree.root is not None else None
+		nodes = [node_data(child) for child in tree.children(root.identifier)] if root is not None else []
+		return [item for item in nodes if item is not None]
 
 	def _store_tree_json(self, tree_json):
 		proxy = self.session.get_object('es.inled.fildem', '/es/inled/fildem')

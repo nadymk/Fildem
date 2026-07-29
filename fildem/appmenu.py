@@ -5,12 +5,14 @@ import dbus
 from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
+from fildem.globalmenu_service import GlobalMenuService
 from fildem.utils.service import BUS_NAME
 from fildem.utils.service import AppMenuService, MyService
 
 
 def run_service():
 	AppMenuService()
+	GlobalMenuService()
 	MyService()
 
 	try:

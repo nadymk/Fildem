@@ -147,6 +147,7 @@ ensure_gtk_module_setting "$gtk_module_name" "$HOME/.config/gtk-3.0/settings.ini
 echo "🚀 Configuring systemd service..."
 mkdir -p "$HOME/.config/systemd/user"
 install -m 0644 "$repo_dir/fildem.service" "$HOME/.config/systemd/user/fildem.service"
+ln -sfn fildem.service "$HOME/.config/systemd/user/gnome-globalmenu.service"
 systemctl --user daemon-reload
 systemctl --user enable fildem.service
 systemctl --user add-wants default.target fildem.service

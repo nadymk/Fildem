@@ -56,11 +56,12 @@ class Window(object):
 		self.props[key] = value
 
 	def get_app_name(self):
+		if 'appName' in self.props and self.props['appName']:
+			return self.props['appName']
+		if 'appId' in self.props and self.props['appId']:
+			return self.props['appId']
 		if not wayland:
 			return WindowManager.get_app_name()
-		elif 'appName' in self.props:
-			return self.props['appName']
-		
 		return ''
 
 
@@ -201,7 +202,13 @@ class WindowManager(object):
 	@classmethod
 	def get_app_name(cls):
 		app  = cls._get_matcher().get_active_application()
+		if app is None:
+			return ''
 		file = app.get_desktop_file()
+		if not file:
+			return ''
 		info = Gio.DesktopAppInfo.new_from_filename(file)
+		if info is None:
+			return ''
 
-		return info.get_string('Name')
+		return info.get_string('Name') or ''

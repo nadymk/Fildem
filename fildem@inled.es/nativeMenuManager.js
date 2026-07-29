@@ -9,9 +9,9 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as BoxPointer from 'resource:///org/gnome/shell/ui/boxpointer.js';
 import Shell from 'gi://Shell';
 
-const BUS = 'es.inled.fildem';
-const PATH = '/es/inled/fildem';
-const IFACE = 'es.inled.fildem';
+const BUS = 'org.gnome.GlobalMenu';
+const PATH = '/org/gnome/GlobalMenu';
+const IFACE = 'org.gnome.GlobalMenu';
 
 const KEYCODES = {
     ctrl: 29,
@@ -60,8 +60,16 @@ export class NativeMenuManager {
         this._outsideOverlay = null;
         this._activeRootButton = null;
         this._menuTree = null;
+        this._menuGeneration = 0;
         this._hoverSwitchId = 0;
         this._pointerDismissId = 0;
+        this._startupRefreshId = 0;
+        this._startupRefreshTries = 0;
+        this._pendingFocusRefresh = false;
+        this._focusOpenGuard = false;
+        this._focusOpenGuardId = 0;
+        this._proxyRetryId = 0;
+        this._pendingWindowData = null;
         this._destroyed = false;
         this._paddingSettingsId = this._settings?.connect('changed::min-padding', () => {
             this._buttons.forEach(button => this._applyPanelButtonStyle(button));
@@ -84,27 +92,18 @@ export class NativeMenuManager {
             });
             this._boxPopups = this._boxPopups.filter(popup => popup.get_parent());
         }) ?? 0;
-        this._proxy = Gio.DBusProxy.new_for_bus_sync(
-            Gio.BusType.SESSION, Gio.DBusProxyFlags.NONE, null,
-            BUS, PATH, IFACE, null);
-        this._signalId = this._proxy.connect('g-signal', (_proxy, _sender, name, params) => {
-            if (name === 'SendTopLevelMenus') {
-                const [labels] = params.deep_unpack();
-                this._menuTree = null;
-                this._replaceMenuButtons(labels);
+        this._proxy = null;
+        this._signalId = 0;
+        this._connectProxy();
+        this._focusId = global.display.connect('notify::focus-window', () => {
+            if (this._focusOpenGuard)
+                return;
+            if (this._anyBoxPopupVisible()) {
+                this._pendingFocusRefresh = true;
                 return;
             }
-            if (name === 'SendMenuTree') {
-                const [payload] = params.deep_unpack();
-                try {
-                    this._menuTree = JSON.parse(payload);
-                    this._replaceMenus(this._menuTree);
-                } catch (error) {
-                    logError(error, 'Fildem menu tree');
-                }
-            }
+            this._sendWindow();
         });
-        this._focusId = global.display.connect('notify::focus-window', () => this._sendWindow());
         this._workspaceId = global.workspace_manager.connect('active-workspace-changed',
             () => this._closeBoxPopups());
         this._overviewShownId = Main.overview.connect('shown', () => this._closeBoxPopups());
@@ -127,7 +126,108 @@ export class NativeMenuManager {
                 this._closeBoxPopups();
             return Clutter.EVENT_PROPAGATE;
         });
+        this._startupCompleteId = Main.layoutManager.connect('startup-complete', () => {
+            this._sendWindow();
+        });
         this._sendWindow();
+        this._scheduleStartupRefresh();
+    }
+
+    _scheduleProxyRetry() {
+        if (this._destroyed || this._proxyRetryId)
+            return;
+        this._proxyRetryId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+            this._proxyRetryId = 0;
+            if (!this._destroyed && !this._proxy)
+                this._connectProxy();
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    _connectProxy() {
+        if (this._destroyed || this._proxy)
+            return true;
+        try {
+            this._proxy = Gio.DBusProxy.new_for_bus_sync(
+                Gio.BusType.SESSION,
+                Gio.DBusProxyFlags.DO_NOT_AUTO_START,
+                null,
+                BUS, PATH, IFACE, null);
+        } catch (error) {
+            this._scheduleProxyRetry();
+            return false;
+        }
+
+        this._signalId = this._proxy.connect('g-signal', (_proxy, _sender, name, params) => {
+            if (name !== 'MenuBarChanged' && name !== 'MenuUpdated')
+                return;
+            const unpacked = params.deep_unpack();
+            if (name === 'MenuBarChanged' && unpacked.length > 0)
+                this._menuGeneration = Number(unpacked[0] ?? 0);
+            this._menuTree = null;
+            this._loadMenuTree(tree => {
+                this._menuTree = tree;
+                this._replaceMenus(tree);
+                if (tree?.length)
+                    this._cancelStartupRefresh();
+            }, 0, false, false);
+        });
+
+        if (this._pendingWindowData) {
+            const pending = this._pendingWindowData;
+            this._pendingWindowData = null;
+            this._sendActiveWindowData(pending);
+        }
+        return true;
+    }
+
+    _sendActiveWindowData(variantData) {
+        if (this._destroyed)
+            return false;
+        if (!this._proxy && !this._connectProxy()) {
+            this._pendingWindowData = variantData;
+            return false;
+        }
+        try {
+            this._proxy.call('SetActiveWindow', new GLib.Variant('(a{sv})', [variantData]),
+                Gio.DBusCallFlags.NONE, -1, null, null);
+            this._pendingWindowData = null;
+            return true;
+        } catch (error) {
+            this._pendingWindowData = variantData;
+            this._scheduleProxyRetry();
+            return false;
+        }
+    }
+
+    _scheduleStartupRefresh() {
+        if (this._destroyed || this._startupRefreshId)
+            return;
+        this._startupRefreshTries = 0;
+        this._startupRefreshId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+            if (this._destroyed) {
+                this._startupRefreshId = 0;
+                return GLib.SOURCE_REMOVE;
+            }
+            if (this._menuTree && this._buttons.length) {
+                this._startupRefreshId = 0;
+                return GLib.SOURCE_REMOVE;
+            }
+            if (this._startupRefreshTries >= 120) {
+                this._startupRefreshId = 0;
+                return GLib.SOURCE_REMOVE;
+            }
+            this._startupRefreshTries += 1;
+            this._sendWindow();
+            return GLib.SOURCE_CONTINUE;
+        });
+    }
+
+    _cancelStartupRefresh() {
+        if (!this._startupRefreshId)
+            return;
+        GLib.source_remove(this._startupRefreshId);
+        this._startupRefreshId = 0;
     }
 
     _isPointInsideOpenMenu(x, y) {
@@ -180,6 +280,14 @@ export class NativeMenuManager {
         this._outsideOverlay?.hide();
         this._setActiveRootButton(null);
         this._stopPointerDismissWatch();
+        if (this._pendingFocusRefresh) {
+            this._pendingFocusRefresh = false;
+            GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                if (!this._destroyed)
+                    this._sendWindow();
+                return GLib.SOURCE_REMOVE;
+            });
+        }
     }
 
     _cancelHoverSwitch() {
@@ -201,7 +309,19 @@ export class NativeMenuManager {
         });
     }
 
+    _setFocusOpenGuard(durationMs = 200) {
+        if (this._destroyed || this._focusOpenGuardId)
+            return;
+        this._focusOpenGuard = true;
+        this._focusOpenGuardId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, durationMs, () => {
+            this._focusOpenGuardId = 0;
+            this._focusOpenGuard = false;
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
     _showBoxPopup(popup) {
+        this._setFocusOpenGuard();
         const keep = new Set();
         for (let current = popup; current; current = current._fildemParent)
             keep.add(current);
@@ -241,13 +361,14 @@ export class NativeMenuManager {
         if (this._destroyed || !button || button._fildemDestroyed)
             return;
         const popup = button._fildemBoxPopup;
+        this._setFocusOpenGuard();
         popup.setPosition(button, 0.0);
         popup.show();
         this._setActiveRootButton(button);
         this._startPointerDismissWatch();
 
         GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-            if (!popup.visible)
+            if (this._destroyed || button._fildemDestroyed || !popup.visible)
                 return GLib.SOURCE_REMOVE;
             const [buttonX] = button.get_transformed_position();
             const [, popupY] = popup.get_position();
@@ -274,6 +395,7 @@ export class NativeMenuManager {
 
     _sendWindow() {
         this._closeBoxPopups();
+        this._menuTree = null;
         const window = global.display.get_focus_window();
         const data = {};
         if (window) {
@@ -317,17 +439,31 @@ export class NativeMenuManager {
                 }
             }
         }
-        this._proxy.call('WindowSwitched', new GLib.Variant('(a{ss})', [data]),
-            Gio.DBusCallFlags.NONE, -1, null, null);
+        const variantData = {};
+        for (const [key, value] of Object.entries(data)) {
+            if (value === undefined || value === null || value === '')
+                continue;
+            if (key === 'pid' || key === 'xid')
+                variantData[key] = GLib.Variant.new_int32(Number(value) || 0);
+            else
+                variantData[key] = GLib.Variant.new_string(String(value));
+        }
+        this._pendingWindowData = variantData;
+        this._sendActiveWindowData(variantData);
     }
 
     _activate(action) {
         if (this._activateSynthetic(action))
             return;
-        this._proxy.call(
-            'EchoSignal',
-            new GLib.Variant('(su)', [`__fildem_activate:${action}`, 0]),
-            Gio.DBusCallFlags.NONE, -1, null, null);
+        if (!this._proxy && !this._connectProxy())
+            return;
+        try {
+            this._proxy.call('Activate',
+                new GLib.Variant('(us)', [this._menuGeneration, String(action)]),
+                Gio.DBusCallFlags.NONE, -1, null, null);
+        } catch (error) {
+            this._scheduleProxyRetry();
+        }
     }
 
     _activateSynthetic(action) {
@@ -377,26 +513,81 @@ export class NativeMenuManager {
         return true;
     }
 
-    _loadMenuTree(callback) {
-        if (this._menuTree) {
+    _loadMenuTree(callback, tries = 0, force = false, retryOnEmpty = true) {
+        if (this._menuTree && !force) {
             callback(this._menuTree);
             return;
         }
-        this._proxy.call(
-            'GetMenuTree',
-            null,
-            Gio.DBusCallFlags.NONE,
-            -1,
-            null,
-            (_proxy, result) => {
-                try {
-                    const [payload] = this._proxy.call_finish(result).deep_unpack();
-                    this._menuTree = JSON.parse(payload);
-                    callback(this._menuTree);
-                } catch (error) {
-                    logError(error, 'Fildem GetMenuTree');
-                }
-            });
+        if (!this._proxy && !this._connectProxy()) {
+            if (retryOnEmpty && tries < 6) {
+                GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250 * (tries + 1), () => {
+                    this._loadMenuTree(callback, tries + 1, force, retryOnEmpty);
+                    return GLib.SOURCE_REMOVE;
+                });
+                return;
+            }
+            if (!retryOnEmpty) {
+                this._menuTree = [];
+                callback(this._menuTree);
+                return;
+            }
+            callback([]);
+            return;
+        }
+        try {
+            this._proxy.call(
+                'GetMenuBar',
+                null,
+                Gio.DBusCallFlags.NONE,
+                -1,
+                null,
+                (_proxy, result) => {
+                    try {
+                        const [payload] = this._proxy.call_finish(result).deep_unpack();
+                        const bar = JSON.parse(payload);
+                        const tree = Array.isArray(bar) ? bar : (bar?.menus ?? []);
+                        this._menuGeneration = Number(bar?.generation ?? this._menuGeneration ?? 0);
+                        if (!tree.length && retryOnEmpty && tries < 6) {
+                            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250 * (tries + 1), () => {
+                                this._loadMenuTree(callback, tries + 1, force, retryOnEmpty);
+                                return GLib.SOURCE_REMOVE;
+                            });
+                            return;
+                        }
+                        this._menuTree = tree;
+                        callback(this._menuTree);
+                    } catch (error) {
+                        if (retryOnEmpty && tries < 6) {
+                            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250 * (tries + 1), () => {
+                                this._loadMenuTree(callback, tries + 1, force, retryOnEmpty);
+                                return GLib.SOURCE_REMOVE;
+                            });
+                            return;
+                        }
+                        if (!retryOnEmpty) {
+                            this._menuTree = [];
+                            callback(this._menuTree);
+                            return;
+                        }
+                        logError(error, 'Fildem GetMenuBar');
+                    }
+                });
+        } catch (error) {
+            this._scheduleProxyRetry();
+            if (retryOnEmpty && tries < 6) {
+                GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250 * (tries + 1), () => {
+                    this._loadMenuTree(callback, tries + 1, force, retryOnEmpty);
+                    return GLib.SOURCE_REMOVE;
+                });
+                return;
+            }
+            if (!retryOnEmpty) {
+                this._menuTree = [];
+                callback(this._menuTree);
+                return;
+            }
+            logError(error, 'Fildem GetMenuBar');
+        }
     }
 
     _label(text) {
@@ -516,9 +707,7 @@ export class NativeMenuManager {
     }
 
     _maxMenuWidthPercent() {
-        if (!this._settings)
-            return 33;
-        return Math.max(10, Math.min(80, this._settings.get_int('max-menu-width-percent')));
+        return Math.max(10, Math.min(80, this._settingInt('max-menu-width-percent', 33)));
     }
 
     _createMenuRow(item, hasChildren = false, showIconColumn = false) {
@@ -589,19 +778,26 @@ export class NativeMenuManager {
     }
 
     _panelPadding() {
-        return this._settings ? this._settings.get_int('min-padding') : 6;
+        return this._settingInt('min-padding', 6);
     }
 
     _leadingGap() {
-        if (!this._settings)
-            return 10;
-        return Math.max(0, Math.min(32, this._settings.get_int('leading-gap')));
+        return Math.max(0, Math.min(32, this._settingInt('leading-gap', 10)));
     }
 
     _leadingColumnWidth() {
+        return Math.max(0, Math.min(48, this._settingInt('leading-column-width', 18)));
+    }
+
+    _settingInt(key, fallback) {
         if (!this._settings)
-            return 18;
-        return Math.max(0, Math.min(48, this._settings.get_int('leading-column-width')));
+            return fallback;
+        try {
+            return this._settings.get_int(key);
+        } catch (error) {
+            logError(error, `Fildem settings fallback for ${key}`);
+            return fallback;
+        }
     }
 
     _leadingPlaceholder() {
@@ -923,6 +1119,15 @@ export class NativeMenuManager {
         this._destroyed = true;
         this._cancelHoverSwitch();
         this._stopPointerDismissWatch();
+        if (this._proxyRetryId) {
+            GLib.source_remove(this._proxyRetryId);
+            this._proxyRetryId = 0;
+        }
+        if (this._focusOpenGuardId) {
+            GLib.source_remove(this._focusOpenGuardId);
+            this._focusOpenGuardId = 0;
+        }
+        this._focusOpenGuard = false;
         this._outsideOverlay?.destroy();
         this._outsideOverlay = null;
         this._boxPopups.forEach(popup => popup.destroy());
@@ -944,6 +1149,8 @@ export class NativeMenuManager {
             Main.overview.disconnect(this._overviewHiddenId);
         if (this._stageId)
             global.stage.disconnect(this._stageId);
+        if (this._startupCompleteId)
+            Main.layoutManager.disconnect(this._startupCompleteId);
         if (this._settings && this._paddingSettingsId)
             this._settings.disconnect(this._paddingSettingsId);
         if (this._settings && this._leadingGapSettingsId)
@@ -954,5 +1161,6 @@ export class NativeMenuManager {
             this._settings.disconnect(this._hoverDelaySettingsId);
         if (this._settings && this._maxWidthSettingsId)
             this._settings.disconnect(this._maxWidthSettingsId);
+        this._cancelStartupRefresh();
     }
 }

@@ -4,12 +4,13 @@ import os
 import sys
 
 from fildem.command import main as command_main
+from fildem.utils.wayland import is_wayland
 
 def main():
 	if sys.path[0] != '':
 		os.chdir(sys.path[0])
 
-	if os.environ.get('XDG_SESSION_TYPE', '').lower() != 'x11':
+	if is_wayland():
 		# Fildem's legacy Gtk.ApplicationWindow helper requires Xwayland.
 		# Native Wayland cannot create this popup correctly with the current
 		# GTK implementation.
