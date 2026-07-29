@@ -71,6 +71,12 @@ export class NativeMenuManager {
         this._proxyRetryId = 0;
         this._pendingWindowData = null;
         this._destroyed = false;
+        // Keep a copy so we can restore the session environment when the
+        // extension is disabled or reloaded.
+        this._appMenuDisplayBothOriginal = GLib.getenv('APPMENU_DISPLAY_BOTH');
+        this._appMenuDisplayBothSettingsId = this._settings?.connect('changed::keep-app-menubar', () => {
+            this._applyAppMenuDisplayBothSetting();
+        }) ?? 0;
         this._paddingSettingsId = this._settings?.connect('changed::min-padding', () => {
             this._buttons.forEach(button => this._applyPanelButtonStyle(button));
         }) ?? 0;
@@ -94,6 +100,7 @@ export class NativeMenuManager {
         }) ?? 0;
         this._proxy = null;
         this._signalId = 0;
+        this._applyAppMenuDisplayBothSetting();
         this._connectProxy();
         this._focusId = global.display.connect('notify::focus-window', () => {
             if (this._focusOpenGuard)
@@ -800,6 +807,35 @@ export class NativeMenuManager {
         }
     }
 
+    _settingBool(key, fallback) {
+        if (!this._settings)
+            return fallback;
+        try {
+            return this._settings.get_boolean(key);
+        } catch (error) {
+            logError(error, `Fildem settings fallback for ${key}`);
+            return fallback;
+        }
+    }
+
+    _applyAppMenuDisplayBothSetting() {
+        const keepVisible = this._settingBool('keep-app-menubar', false);
+        if (keepVisible) {
+            // Appmenu-based GTK and Qt apps can keep both menus visible via
+            // this session env toggle.
+            GLib.setenv('APPMENU_DISPLAY_BOTH', '1', true);
+            return;
+        }
+        GLib.unsetenv('APPMENU_DISPLAY_BOTH');
+    }
+
+    _restoreAppMenuDisplayBothSetting() {
+        if (this._appMenuDisplayBothOriginal !== null && this._appMenuDisplayBothOriginal !== undefined)
+            GLib.setenv('APPMENU_DISPLAY_BOTH', this._appMenuDisplayBothOriginal, true);
+        else
+            GLib.unsetenv('APPMENU_DISPLAY_BOTH');
+    }
+
     _leadingPlaceholder() {
         return new St.Widget({style: `width: ${this._leadingColumnWidth()}px;`});
     }
@@ -1153,6 +1189,8 @@ export class NativeMenuManager {
             Main.layoutManager.disconnect(this._startupCompleteId);
         if (this._settings && this._paddingSettingsId)
             this._settings.disconnect(this._paddingSettingsId);
+        if (this._settings && this._appMenuDisplayBothSettingsId)
+            this._settings.disconnect(this._appMenuDisplayBothSettingsId);
         if (this._settings && this._leadingGapSettingsId)
             this._settings.disconnect(this._leadingGapSettingsId);
         if (this._settings && this._leadingWidthSettingsId)
@@ -1161,6 +1199,7 @@ export class NativeMenuManager {
             this._settings.disconnect(this._hoverDelaySettingsId);
         if (this._settings && this._maxWidthSettingsId)
             this._settings.disconnect(this._maxWidthSettingsId);
+        this._restoreAppMenuDisplayBothSetting();
         this._cancelStartupRefresh();
     }
 }

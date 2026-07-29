@@ -116,13 +116,13 @@ export default class FildemPreferences extends ExtensionPreferences {
         settings.bind('show-only-when-hover', hoverRow, 'active', Gio.SettingsBindFlags.DEFAULT);
         group.add(hoverRow);
 
-        // hide-app-menu
-        const hideAppRow = new Adw.SwitchRow({
-            title: _('Hide app menu'),
-            subtitle: _('Hide the app label when showing the menu'),
+        // keep-app-menubar
+        const keepAppMenuRow = new Adw.SwitchRow({
+            title: _('Keep app menubar visible'),
+            subtitle: _('Keep the app\'s own menu bar visible alongside the global menu for GTK and Qt apps'),
         });
-        settings.bind('hide-app-menu', hideAppRow, 'active', Gio.SettingsBindFlags.DEFAULT);
-        group.add(hideAppRow);
+        settings.bind('keep-app-menubar', keepAppMenuRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        group.add(keepAppMenuRow);
 
         // refresh menu cache
         const refreshCacheRow = new Adw.ActionRow({

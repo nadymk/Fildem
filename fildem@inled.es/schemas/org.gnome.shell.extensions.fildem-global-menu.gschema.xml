@@ -33,5 +33,9 @@
 			<default>true</default>
 			<summary>Hide the app label when showing the menu</summary>
 		</key>
+		<key type="b" name="keep-app-menubar">
+			<default>false</default>
+			<summary>Keep the application's own menubar visible alongside the global menu</summary>
+		</key>
 	</schema>
 </schemalist>
