@@ -12,6 +12,12 @@ const FildemInterface = 'es.inled.fildem';
 export default class FildemPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
+        let appmenuSettings = null;
+        try {
+            appmenuSettings = new Gio.Settings({schema_id: 'org.appmenu.gtk-module'});
+        } catch (error) {
+            console.error(`Fildem failed to load org.appmenu.gtk-module settings: ${error.message}`);
+        }
 
         const page = new Adw.PreferencesPage();
         window.add(page);
@@ -122,6 +128,17 @@ export default class FildemPreferences extends ExtensionPreferences {
             subtitle: _('Keep the app\'s own menu bar visible alongside the global menu for GTK and Qt apps'),
         });
         settings.bind('keep-app-menubar', keepAppMenuRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        const syncInnerMenu = () => {
+            if (!appmenuSettings)
+                return;
+            try {
+                appmenuSettings.set_boolean('always-show-inner-menu', keepAppMenuRow.active);
+            } catch (error) {
+                console.error(`Fildem failed to update always-show-inner-menu: ${error.message}`);
+            }
+        };
+        keepAppMenuRow.connect('notify::active', syncInnerMenu);
+        syncInnerMenu();
         group.add(keepAppMenuRow);
 
         // refresh menu cache

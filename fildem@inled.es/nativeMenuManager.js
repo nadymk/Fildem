@@ -71,11 +71,19 @@ export class NativeMenuManager {
         this._proxyRetryId = 0;
         this._pendingWindowData = null;
         this._destroyed = false;
-        // Keep a copy so we can restore the session environment when the
-        // extension is disabled or reloaded.
+        // Keep copies so we can restore the session environment and GTK
+        // module setting when the extension is disabled or reloaded.
         this._appMenuDisplayBothOriginal = GLib.getenv('APPMENU_DISPLAY_BOTH');
+        this._appMenuGtkSettings = null;
+        this._appMenuGtkOriginal = null;
+        try {
+            this._appMenuGtkSettings = new Gio.Settings({schema_id: 'org.appmenu.gtk-module'});
+            this._appMenuGtkOriginal = this._appMenuGtkSettings.get_boolean('always-show-inner-menu');
+        } catch (error) {
+            logError(error, 'Fildem org.appmenu.gtk-module settings');
+        }
         this._appMenuDisplayBothSettingsId = this._settings?.connect('changed::keep-app-menubar', () => {
-            this._applyAppMenuDisplayBothSetting();
+            this._applyKeepAppMenubarSetting();
         }) ?? 0;
         this._paddingSettingsId = this._settings?.connect('changed::min-padding', () => {
             this._buttons.forEach(button => this._applyPanelButtonStyle(button));
@@ -100,7 +108,7 @@ export class NativeMenuManager {
         }) ?? 0;
         this._proxy = null;
         this._signalId = 0;
-        this._applyAppMenuDisplayBothSetting();
+        this._applyKeepAppMenubarSetting();
         this._connectProxy();
         this._focusId = global.display.connect('notify::focus-window', () => {
             if (this._focusOpenGuard)
@@ -818,22 +826,48 @@ export class NativeMenuManager {
         }
     }
 
-    _applyAppMenuDisplayBothSetting() {
-        const keepVisible = this._settingBool('keep-app-menubar', false);
-        if (keepVisible) {
-            // Appmenu-based GTK and Qt apps can keep both menus visible via
-            // this session env toggle.
-            GLib.setenv('APPMENU_DISPLAY_BOTH', '1', true);
-            return;
+    _runCommand(command) {
+        try {
+            GLib.spawn_command_line_async(command);
+        } catch (error) {
+            logError(error, `Fildem command: ${command}`);
         }
-        GLib.unsetenv('APPMENU_DISPLAY_BOTH');
     }
 
-    _restoreAppMenuDisplayBothSetting() {
+    _setSessionEnvironment(value) {
+        const shellValue = String(value ? '1' : '0');
+        GLib.setenv('APPMENU_DISPLAY_BOTH', shellValue, true);
+        this._runCommand(`systemctl --user set-environment APPMENU_DISPLAY_BOTH=${shellValue}`);
+        this._runCommand(`dbus-update-activation-environment --systemd APPMENU_DISPLAY_BOTH=${shellValue}`);
+    }
+
+    _applyKeepAppMenubarSetting() {
+        const keepVisible = this._settingBool('keep-app-menubar', false);
+        if (this._appMenuGtkSettings) {
+            try {
+                this._appMenuGtkSettings.set_boolean('always-show-inner-menu', keepVisible);
+            } catch (error) {
+                logError(error, 'Fildem org.appmenu.gtk-module always-show-inner-menu');
+            }
+        }
+        // Appmenu-aware Qt and GTK apps launched after this point inherit the
+        // same session setting, while already-running GTK apps can pick up the
+        // live GSettings change above.
+        this._setSessionEnvironment(keepVisible);
+    }
+
+    _restoreKeepAppMenubarSetting() {
+        if (this._appMenuGtkSettings && this._appMenuGtkOriginal !== null && this._appMenuGtkOriginal !== undefined) {
+            try {
+                this._appMenuGtkSettings.set_boolean('always-show-inner-menu', this._appMenuGtkOriginal);
+            } catch (error) {
+                logError(error, 'Fildem restore org.appmenu.gtk-module always-show-inner-menu');
+            }
+        }
         if (this._appMenuDisplayBothOriginal !== null && this._appMenuDisplayBothOriginal !== undefined)
-            GLib.setenv('APPMENU_DISPLAY_BOTH', this._appMenuDisplayBothOriginal, true);
+            this._setSessionEnvironment(this._appMenuDisplayBothOriginal !== '0' && this._appMenuDisplayBothOriginal !== '');
         else
-            GLib.unsetenv('APPMENU_DISPLAY_BOTH');
+            this._setSessionEnvironment(false);
     }
 
     _leadingPlaceholder() {
@@ -1199,7 +1233,7 @@ export class NativeMenuManager {
             this._settings.disconnect(this._hoverDelaySettingsId);
         if (this._settings && this._maxWidthSettingsId)
             this._settings.disconnect(this._maxWidthSettingsId);
-        this._restoreAppMenuDisplayBothSetting();
+        this._restoreKeepAppMenubarSetting();
         this._cancelStartupRefresh();
     }
 }
