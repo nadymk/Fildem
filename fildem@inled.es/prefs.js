@@ -47,7 +47,7 @@ export default class FildemPreferences extends ExtensionPreferences {
         // leading-gap
         const leadingGapRow = new Adw.ActionRow({
             title: _('Menu leading gap'),
-            subtitle: _('Spacing between the leading icon or toggle and the menu label'),
+            subtitle: _('Spacing between the leading element slots and the menu label'),
         });
         const leadingGapSpin = new Gtk.SpinButton({
             adjustment: new Gtk.Adjustment({
@@ -63,13 +63,13 @@ export default class FildemPreferences extends ExtensionPreferences {
 
         // leading-column-width
         const leadingWidthRow = new Adw.ActionRow({
-            title: _('Menu leading width'),
-            subtitle: _('Width reserved for the leading icon or toggle column'),
+            title: _('Element 1 width'),
+            subtitle: _('Width in pixels of the first leading slot, centered'),
         });
         const leadingWidthSpin = new Gtk.SpinButton({
             adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 48,
+                lower: 16,
+                upper: 64,
                 step_increment: 1,
             }),
             valign: Gtk.Align.CENTER,
@@ -77,6 +77,23 @@ export default class FildemPreferences extends ExtensionPreferences {
         settings.bind('leading-column-width', leadingWidthSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
         leadingWidthRow.add_suffix(leadingWidthSpin);
         group.add(leadingWidthRow);
+
+        // leading-column-width-2
+        const leadingWidth2Row = new Adw.ActionRow({
+            title: _('Element 2 width'),
+            subtitle: _('Width in pixels of the second leading slot, centered'),
+        });
+        const leadingWidth2Spin = new Gtk.SpinButton({
+            adjustment: new Gtk.Adjustment({
+                lower: 16,
+                upper: 64,
+                step_increment: 1,
+            }),
+            valign: Gtk.Align.CENTER,
+        });
+        settings.bind('leading-column-width-2', leadingWidth2Spin, 'value', Gio.SettingsBindFlags.DEFAULT);
+        leadingWidth2Row.add_suffix(leadingWidth2Spin);
+        group.add(leadingWidth2Row);
 
         // hover-switch-delay
         const hoverDelayRow = new Adw.ActionRow({

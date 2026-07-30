@@ -183,17 +183,43 @@ class DbusAppMenuItem(object):
 		return format_accelerator(item.get('shortcut', ''))
 
 	def update_props(self, props):
-		if 'children-display' in props:
-			return
-		self.enabled = props.get('enabled', self.enabled)
-		self.label = clean_label(props.get('label', self.label))
-		self.toggle_state = _coerce_bool(props.get('toggle-state', self.toggle_state))
-		self.toggle_type = str(props.get('toggle-type', self.toggle_type) or self.toggle_type)
-		self.icon_name = first_string(
-			deep_lookup(props, ('icon-name', 'verb-icon', 'icon', 'stock-id')),
-			self.icon_name,
-		)
-		self.icon_data = stringify_variant(
-			deep_lookup(props, ('icon-data', 'icon_data')) or self.icon_data
-		)
-		self.visible = props.get('visible', self.visible)
+		if not props:
+			return False
+
+		changed = False
+		props = stringify_variant(props)
+		if not isinstance(props, dict):
+			return False
+
+		if 'enabled' in props:
+			self.enabled = props.get('enabled', self.enabled)
+			changed = True
+		if 'visible' in props:
+			self.visible = props.get('visible', self.visible)
+			changed = True
+		if 'label' in props:
+			self.label = clean_label(props.get('label', self.label))
+			self.text = format_label(self.path + [self.label])
+			changed = True
+		if 'toggle-state' in props:
+			self.toggle_state = _coerce_bool(props.get('toggle-state', self.toggle_state))
+			changed = True
+		if 'toggle-type' in props:
+			self.toggle_type = str(props.get('toggle-type', self.toggle_type) or self.toggle_type)
+			changed = True
+		if 'shortcut' in props:
+			self.accel = format_accelerator(props.get('shortcut', self.accel))
+			changed = True
+		if 'icon-name' in props or 'icon' in props or 'stock-id' in props:
+			self.icon_name = first_string(
+				props.get('icon-name', ''),
+				props.get('icon', ''),
+				props.get('stock-id', ''),
+				self.icon_name,
+			)
+			changed = True
+		if 'icon-data' in props or 'icon_data' in props:
+			self.icon_data = stringify_variant(props.get('icon-data', props.get('icon_data', self.icon_data)))
+			changed = True
+
+		return changed

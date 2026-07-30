@@ -96,6 +96,10 @@ export class NativeMenuManager {
             if (this._menuTree)
                 this._replaceMenus(this._menuTree);
         }) ?? 0;
+        this._leadingWidth2SettingsId = this._settings?.connect('changed::leading-column-width-2', () => {
+            if (this._menuTree)
+                this._replaceMenus(this._menuTree);
+        }) ?? 0;
         this._hoverDelaySettingsId = this._settings?.connect('changed::hover-switch-delay', () => {
             this._cancelHoverSwitch();
         }) ?? 0;
@@ -193,6 +197,10 @@ export class NativeMenuManager {
             this._pendingWindowData = null;
             this._sendActiveWindowData(pending);
         }
+        // Reloads can reconnect while the focused window stays the same, so
+        // the service may not emit MenuBarChanged again. Pull the current
+        // tree once here to restore the panel immediately.
+        this._syncCurrentMenuTree();
         return true;
     }
 
@@ -213,6 +221,15 @@ export class NativeMenuManager {
             this._scheduleProxyRetry();
             return false;
         }
+    }
+
+    _syncCurrentMenuTree() {
+        this._loadMenuTree(tree => {
+            this._menuTree = tree;
+            this._replaceMenus(tree);
+            if (tree?.length)
+                this._cancelStartupRefresh();
+        }, 0, true, true);
     }
 
     _scheduleStartupRefresh() {
@@ -684,12 +701,12 @@ export class NativeMenuManager {
             });
         }
 
-        return this._createDataIconActor(item.iconData) ?? this._leadingPlaceholder();
+        return this._createDataIconActor(item.iconData);
     }
 
     _createStateActor(item) {
         if (!item.toggleType && !item.toggle)
-            return this._leadingPlaceholder();
+            return null;
 
         const isActive = Boolean(item.toggle);
         const isRadio = item.toggleType === 'radio';
@@ -700,11 +717,28 @@ export class NativeMenuManager {
         });
     }
 
-    _itemHasLeadingGraphic(item) {
-        return Boolean(item?.toggle ||
-            String(item?.toggleType ?? '') ||
-            String(item?.iconName ?? '') ||
-            this._iconBytes(item?.iconData).length);
+    _itemHasToggle(item) {
+        return Boolean(item?.toggle || String(item?.toggleType ?? ''));
+    }
+
+    _itemHasIcon(item) {
+        return Boolean(String(item?.iconName ?? '') || this._iconBytes(item?.iconData).length);
+    }
+
+    _leadingModeForItems(items) {
+        let hasToggle = false;
+        let hasIcon = false;
+        for (const item of items) {
+            if (item.separator)
+                continue;
+            hasToggle ||= this._itemHasToggle(item);
+            hasIcon ||= this._itemHasIcon(item);
+            if (hasToggle && hasIcon)
+                return 'dual';
+        }
+        if (hasToggle || hasIcon)
+            return 'single';
+        return 'none';
     }
 
     _sectionKey(item) {
@@ -713,82 +747,81 @@ export class NativeMenuManager {
         return JSON.stringify(item.section);
     }
 
-    _itemsNeedIconColumn(items) {
-        return items.some(item => {
-            if (item.separator)
-                return false;
-            return this._itemHasLeadingGraphic(item);
-        });
-    }
-
     _maxMenuWidthPercent() {
         return Math.max(10, Math.min(80, this._settingInt('max-menu-width-percent', 33)));
     }
 
-    _createMenuRow(item, hasChildren = false, showIconColumn = false) {
+    _createLeadingSlot(actor = null, slotIndex = 1) {
+        const slot = new St.Bin({
+            x_expand: false,
+            y_expand: false,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+            width: this._leadingColumnWidth(slotIndex),
+        });
+        if (actor)
+            slot.child = actor;
+        return slot;
+    }
+
+    _createMenuRow(item, hasChildren = false, leadingMode = 'single') {
         const row = new St.Button({
             style_class: 'popup-menu-item',
             x_expand: true,
             reactive: item.enabled !== false,
             can_focus: item.enabled !== false,
         });
-        if (item.enabled === false)
-            row.add_style_pseudo_class('insensitive');
+        row._fildemMenuRow = true;
+        row._fildemChildPopup = null;
+        row._fildemMenuItem = item;
+        row._fildemChildren = item.children || [];
+        row._fildemHasChildren = hasChildren;
+        row._fildemLeadingMode = leadingMode;
+        row._fildemItemId = item.id;
 
-        const rowBox = new St.BoxLayout({
-            x_expand: true,
-            style: 'spacing: 0px;',
+        row.connect('clicked', () => {
+            const current = row._fildemItem;
+            if (!current)
+                return;
+            if (row._fildemChildren?.length) {
+                if (!row._fildemChildPopup) {
+                    row._fildemChildPopup = this._buildBoxPopup(row._fildemChildren, row, St.Side.RIGHT);
+                    row._fildemChildPopup._fildemParent = row._fildemParentPopup ?? null;
+                }
+                const child = row._fildemChildPopup;
+                child.setPosition(row, 0.0);
+                this._showBoxPopup(child);
+                return;
+            }
+            if (current.enabled !== false)
+                this._activate(current.action);
         });
-        const leading = new St.BoxLayout({
-            x_expand: false,
-            y_align: Clutter.ActorAlign.CENTER,
-            style: `width: ${this._leadingColumnWidth()}px;`,
+        row.connect('enter-event', () => {
+            const popup = row._fildemParentPopup;
+            if (!popup?.visible)
+                return Clutter.EVENT_PROPAGATE;
+            const current = row._fildemItem;
+            if (row._fildemChildren?.length) {
+                this._scheduleHoverSwitch(() => {
+                    if (!popup.visible || !row._fildemChildren?.length)
+                        return;
+                    if (!row._fildemChildPopup) {
+                        row._fildemChildPopup = this._buildBoxPopup(row._fildemChildren, row, St.Side.RIGHT);
+                        row._fildemChildPopup._fildemParent = popup;
+                    }
+                    const child = row._fildemChildPopup;
+                    child.setPosition(row, 0.0);
+                    this._showBoxPopup(child);
+                });
+            } else if (current?.enabled !== false) {
+                this._scheduleHoverSwitch(() => {
+                    if (popup.visible)
+                        this._showBoxPopup(popup);
+                });
+            }
+            return Clutter.EVENT_PROPAGATE;
         });
-        if (showIconColumn) {
-            const graphic = new St.BoxLayout({
-                style: `spacing: ${this._leadingGap()}px;`,
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            graphic.add_child(this._createStateActor(item));
-            graphic.add_child(this._itemHasLeadingGraphic(item)
-                ? this._createIconActor(item)
-                : this._leadingPlaceholder());
-            leading.add_child(graphic);
-        }
-        rowBox.add_child(leading);
-
-        const label = new St.Label({
-            text: this._label(item.label),
-            x_expand: true,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        label.clutter_text.set_single_line_mode(true);
-        label.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
-        rowBox.add_child(label);
-
-        rowBox.add_child(new St.Widget({x_expand: true}));
-
-        const hint = this._shortcut(item.shortcut || item.accel || '');
-        if (hint) {
-            rowBox.add_child(new St.Label({
-                text: hint,
-                style_class: 'popup-menu-accelerator',
-                style: 'opacity: 0.65; margin-left: 18px;',
-                x_align: Clutter.ActorAlign.END,
-                y_align: Clutter.ActorAlign.CENTER,
-            }));
-        }
-
-        if (hasChildren) {
-            rowBox.add_child(new St.Icon({
-                icon_name: 'go-next-symbolic',
-                style_class: 'popup-menu-arrow',
-                icon_size: 12,
-                y_align: Clutter.ActorAlign.CENTER,
-            }));
-        }
-
-        row.set_child(rowBox);
+        this._syncMenuRow(row, item, hasChildren, leadingMode);
         return row;
     }
 
@@ -797,11 +830,12 @@ export class NativeMenuManager {
     }
 
     _leadingGap() {
-        return Math.max(0, Math.min(32, this._settingInt('leading-gap', 10)));
+        return Math.max(0, Math.min(32, this._settingInt('leading-gap', 8)));
     }
 
-    _leadingColumnWidth() {
-        return Math.max(0, Math.min(48, this._settingInt('leading-column-width', 18)));
+    _leadingColumnWidth(slotIndex = 1) {
+        const key = slotIndex === 2 ? 'leading-column-width-2' : 'leading-column-width';
+        return Math.max(16, Math.min(64, this._settingInt(key, 20)));
     }
 
     _settingInt(key, fallback) {
@@ -834,6 +868,29 @@ export class NativeMenuManager {
         }
     }
 
+    _setHelperKeepAppMenubar(keepVisible) {
+        try {
+            const proxy = Gio.DBusProxy.new_for_bus_sync(
+                Gio.BusType.SESSION,
+                Gio.DBusProxyFlags.DO_NOT_AUTO_START,
+                null,
+                'es.inled.fildem',
+                '/es/inled/fildem',
+                'es.inled.fildem',
+                null);
+            proxy.call_sync(
+                'SetKeepAppMenubar',
+                new GLib.Variant('(b)', [keepVisible]),
+                Gio.DBusCallFlags.NONE,
+                -1,
+                null);
+            return true;
+        } catch (error) {
+            logError(error, 'Fildem helper keep-app-menubar');
+            return false;
+        }
+    }
+
     _setSessionEnvironment(value) {
         const shellValue = String(value ? '1' : '0');
         GLib.setenv('APPMENU_DISPLAY_BOTH', shellValue, true);
@@ -843,7 +900,8 @@ export class NativeMenuManager {
 
     _applyKeepAppMenubarSetting() {
         const keepVisible = this._settingBool('keep-app-menubar', false);
-        if (this._appMenuGtkSettings) {
+        const handledByHelper = this._setHelperKeepAppMenubar(keepVisible);
+        if (!handledByHelper && this._appMenuGtkSettings) {
             try {
                 this._appMenuGtkSettings.set_boolean('always-show-inner-menu', keepVisible);
             } catch (error) {
@@ -857,25 +915,28 @@ export class NativeMenuManager {
     }
 
     _restoreKeepAppMenubarSetting() {
-        if (this._appMenuGtkSettings && this._appMenuGtkOriginal !== null && this._appMenuGtkOriginal !== undefined) {
+        const restoreValue = this._appMenuGtkOriginal;
+        const handledByHelper = restoreValue !== null && restoreValue !== undefined
+            ? this._setHelperKeepAppMenubar(restoreValue)
+            : this._setHelperKeepAppMenubar(false);
+        if (!handledByHelper && this._appMenuGtkSettings && restoreValue !== null && restoreValue !== undefined) {
             try {
-                this._appMenuGtkSettings.set_boolean('always-show-inner-menu', this._appMenuGtkOriginal);
+                this._appMenuGtkSettings.set_boolean('always-show-inner-menu', restoreValue);
             } catch (error) {
                 logError(error, 'Fildem restore org.appmenu.gtk-module always-show-inner-menu');
             }
         }
-        if (this._appMenuDisplayBothOriginal !== null && this._appMenuDisplayBothOriginal !== undefined)
+        if (this._appMenuDisplayBothOriginal !== null && this._appMenuDisplayBothOriginal !== undefined) {
             this._setSessionEnvironment(this._appMenuDisplayBothOriginal !== '0' && this._appMenuDisplayBothOriginal !== '');
-        else
+        } else {
             this._setSessionEnvironment(false);
-    }
-
-    _leadingPlaceholder() {
-        return new St.Widget({style: `width: ${this._leadingColumnWidth()}px;`});
+        }
     }
 
     _createSeparatorActor() {
-        return new PopupMenu.PopupSeparatorMenuItem().actor;
+        const actor = new PopupMenu.PopupSeparatorMenuItem().actor;
+        actor._fildemSeparator = true;
+        return actor;
     }
 
     _applyPanelButtonStyle(button) {
@@ -915,11 +976,98 @@ export class NativeMenuManager {
         return popup;
     }
 
+    _createMenuRowBox(item, hasChildren = false, leadingMode = 'single') {
+        const rowBox = new St.BoxLayout({
+            x_expand: true,
+            style: 'spacing: 0px;',
+        });
+        const leading = new St.BoxLayout({
+            x_expand: false,
+            y_align: Clutter.ActorAlign.CENTER,
+            style: 'spacing: 0px;',
+        });
+        const hasToggle = this._itemHasToggle(item);
+        const hasIcon = this._itemHasIcon(item);
+        if (leadingMode === 'dual') {
+            leading.add_child(this._createLeadingSlot(
+                hasToggle ? this._createStateActor(item) : null, 1));
+            leading.add_child(this._createLeadingSlot(
+                hasIcon ? this._createIconActor(item) : null, 2));
+        } else if (leadingMode === 'single') {
+            leading.add_child(this._createLeadingSlot(
+                hasToggle ? this._createStateActor(item) :
+                hasIcon ? this._createIconActor(item) :
+                null, 1));
+        }
+        if (leadingMode !== 'none') {
+            rowBox.add_child(leading);
+            rowBox.add_child(new St.Widget({
+                x_expand: false,
+                width: this._leadingGap(),
+            }));
+        }
+
+        const label = new St.Label({
+            text: this._label(item.label),
+            x_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        label.clutter_text.set_single_line_mode(true);
+        label.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
+        rowBox.add_child(label);
+
+        rowBox.add_child(new St.Widget({x_expand: true}));
+
+        const hint = this._shortcut(item.shortcut || item.accel || '');
+        if (hint) {
+            rowBox.add_child(new St.Label({
+                text: hint,
+                style_class: 'popup-menu-accelerator',
+                style: 'opacity: 0.65; margin-left: 18px;',
+                x_align: Clutter.ActorAlign.END,
+                y_align: Clutter.ActorAlign.CENTER,
+            }));
+        }
+
+        if (hasChildren) {
+            rowBox.add_child(new St.Icon({
+                icon_name: 'go-next-symbolic',
+                style_class: 'popup-menu-arrow',
+                icon_size: 12,
+                y_align: Clutter.ActorAlign.CENTER,
+            }));
+        }
+
+        return rowBox;
+    }
+
+    _syncMenuRow(row, item, hasChildren = false, leadingMode = 'single') {
+        row._fildemMenuRow = true;
+        row._fildemItem = item;
+        row._fildemChildren = item.children || [];
+        row._fildemHasChildren = hasChildren;
+        row._fildemLeadingMode = leadingMode;
+        row._fildemItemId = item.id;
+        row.reactive = item.enabled !== false;
+        row.can_focus = item.enabled !== false;
+        if (item.enabled === false)
+            row.add_style_pseudo_class('insensitive');
+        else
+            row.remove_style_pseudo_class('insensitive');
+        const oldChild = row.get_child?.();
+        const rowBox = this._createMenuRowBox(item, hasChildren, leadingMode);
+        row.set_child(rowBox);
+        if (oldChild && oldChild !== rowBox)
+            oldChild.destroy();
+        if (!hasChildren && row._fildemChildPopup)
+            row._fildemChildPopup.hide();
+    }
+
     _buildBoxPopup(items, sourceActor, side = St.Side.TOP) {
         const monitor = Main.layoutManager.primaryMonitor;
         const workArea = Main.layoutManager.getWorkAreaForMonitor(monitor.index);
         const maxWidth = Math.max(160, Math.floor(workArea.width * this._maxMenuWidthPercent() / 100));
-        const showIconColumn = this._itemsNeedIconColumn(items);
+        const leadingMode = this._leadingModeForItems(items);
         const scroll = new St.ScrollView({
             x_expand: true,
             vscrollbar_policy: St.PolicyType.AUTOMATIC,
@@ -967,10 +1115,104 @@ export class NativeMenuManager {
         const box = new St.BoxLayout({vertical: true});
         scroll.set_child(box);
         const popup = this._createBoxPopup(sourceActor, scroll, side);
+        popup._fildemScroll = scroll;
+        popup._fildemContentBox = box;
+        popup._fildemSourceActor = sourceActor;
+        popup._fildemSide = side;
+        this._syncPopupContents(popup, items, sourceActor, side, leadingMode);
+        return popup;
+    }
+
+    _popupChildMatchesItem(child, item) {
+        if (!child)
+            return false;
+        if (item.separator)
+            return Boolean(child._fildemSeparator);
+        return Boolean(child._fildemMenuRow);
+    }
+
+    _syncPopupContents(popup, items, sourceActor, side = St.Side.TOP, leadingMode = null) {
+        const box = popup?._fildemContentBox;
+        if (!box) {
+            if (popup && sourceActor)
+                popup._fildemSourceActor = sourceActor;
+            if (popup)
+                popup._fildemSide = side;
+            return;
+        }
+
+        const children = box.get_children();
+        const sameShape = children.length === items.length &&
+            children.every((child, index) => this._popupChildMatchesItem(child, items[index]));
+
+        if (!sameShape) {
+            this._rebuildPopupContents(popup, items, sourceActor, side, leadingMode);
+            return;
+        }
+
+        const mode = leadingMode ?? this._leadingModeForItems(items);
+        for (const [index, item] of items.entries()) {
+            const child = children[index];
+            if (item.separator) {
+                child._fildemSeparator = true;
+                continue;
+            }
+
+            child._fildemParentPopup = popup;
+            const hasChildren = item.children?.length > 0;
+            this._syncMenuRow(child, item, hasChildren, mode);
+
+            if (child._fildemChildPopup) {
+                child._fildemChildPopup._fildemParent = popup;
+                this._syncPopupContents(
+                    child._fildemChildPopup,
+                    child._fildemChildren,
+                    child,
+                    St.Side.RIGHT
+                );
+            }
+        }
+
+        if (popup)
+            popup._fildemSourceActor = sourceActor;
+        if (popup)
+            popup._fildemSide = side;
+    }
+
+    _rebuildPopupContents(popup, items, sourceActor, side = St.Side.TOP, leadingMode = null) {
+        if (!popup)
+            return;
+        const monitor = Main.layoutManager.primaryMonitor;
+        const workArea = Main.layoutManager.getWorkAreaForMonitor(monitor.index);
+        const maxWidth = Math.max(160, Math.floor(workArea.width * this._maxMenuWidthPercent() / 100));
+        const scroll = new St.ScrollView({
+            x_expand: true,
+            vscrollbar_policy: St.PolicyType.AUTOMATIC,
+            hscrollbar_policy: St.PolicyType.NEVER,
+        });
+        scroll.set_touch_scrolling?.(true);
+        scroll.set_mouse_scrolling?.(true);
+        scroll.add_style_class_name('popup-menu-content');
+        scroll.set_style(`max-height: ${Math.max(200, workArea.height * 0.8)}px; max-width: ${maxWidth}px;`);
+        const box = new St.BoxLayout({vertical: true});
+        scroll.set_child(box);
+
+        const oldScroll = popup._fildemScroll;
+        popup.bin.set_child(scroll);
+        popup._fildemScroll = scroll;
+        popup._fildemContentBox = box;
+        popup._fildemSourceActor = sourceActor ?? popup._fildemSourceActor ?? null;
+        popup._fildemSide = side;
+
+        if (oldScroll && oldScroll !== scroll)
+            oldScroll.destroy();
+
+        const mode = leadingMode ?? this._leadingModeForItems(items);
         let previousSection = null;
         for (const item of items) {
             if (item.separator) {
-                box.add_child(this._createSeparatorActor());
+                const separator = this._createSeparatorActor();
+                box.add_child(separator);
                 previousSection = null;
                 continue;
             }
@@ -978,52 +1220,12 @@ export class NativeMenuManager {
             if (previousSection !== null && sectionKey !== previousSection)
                 box.add_child(this._createSeparatorActor());
             previousSection = sectionKey;
-            if (item.children?.length) {
-                const row = this._createMenuRow(item, true, showIconColumn);
-                box.add_child(row);
-                row.connect('clicked', () => {
-                    if (!row._fildemChildPopup) {
-                        row._fildemChildPopup = this._buildBoxPopup(item.children, row, St.Side.RIGHT);
-                        row._fildemChildPopup._fildemParent = popup;
-                    }
-                    const child = row._fildemChildPopup;
-                    child.setPosition(row, 0.0);
-                    this._showBoxPopup(child);
-                });
-                row.connect('enter-event', () => {
-                    if (!popup.visible)
-                        return Clutter.EVENT_PROPAGATE;
-                    this._scheduleHoverSwitch(() => {
-                        if (!popup.visible)
-                            return;
-                        if (!row._fildemChildPopup) {
-                            row._fildemChildPopup = this._buildBoxPopup(item.children, row, St.Side.RIGHT);
-                            row._fildemChildPopup._fildemParent = popup;
-                        }
-                        const child = row._fildemChildPopup;
-                        child.setPosition(row, 0.0);
-                        this._showBoxPopup(child);
-                    });
-                    return Clutter.EVENT_PROPAGATE;
-                });
-                continue;
-            }
-            const row = this._createMenuRow(item, false, showIconColumn);
+            const hasChildren = item.children?.length > 0;
+            const row = this._createMenuRow(item, hasChildren, mode);
+            row._fildemParentPopup = popup;
+            row._fildemMenuRow = true;
             box.add_child(row);
-            row.connect('enter-event', () => {
-                if (popup.visible)
-                    this._scheduleHoverSwitch(() => {
-                        if (popup.visible)
-                            this._showBoxPopup(popup);
-                    });
-                return Clutter.EVENT_PROPAGATE;
-            });
-            row.connect('clicked', () => {
-                if (item.enabled !== false)
-                    this._activate(item.action);
-            });
         }
-        return popup;
     }
 
     _populate(items, menu, popupManager = null) {
@@ -1073,14 +1275,41 @@ export class NativeMenuManager {
 
     _replaceMenus(tree) {
         this._menuTree = tree;
-        this._replaceMenuButtons(tree.map(item => item.label));
-        for (const [index, item] of tree.entries()) {
-            if (this._buttons[index])
-                this._buttons[index]._fildemMenuChildren = item.children || [];
+        const sameRoots = this._buttons.length === tree.length &&
+            this._buttons.every((button, index) => {
+                const item = tree[index];
+                return button._fildemMenuId === item.id &&
+                    button._fildemMenuLabel === item.label;
+            });
+        if (sameRoots) {
+            this._syncMenuButtons(tree);
+            return;
         }
+        this._replaceMenuButtons(tree);
     }
 
-    _replaceMenuButtons(labels) {
+    _syncMenuButtons(items) {
+        items.forEach((item, index) => {
+            const button = this._buttons[index];
+            if (!button)
+                return;
+            this._syncPanelButton(button, item, index);
+        });
+    }
+
+    _syncPanelButton(button, item, index) {
+        button._fildemMenuId = item.id;
+        button._fildemMenuLabel = item.label;
+        button._fildemMenuChildren = item.children || [];
+        button._fildemMenuItem = item;
+        button._fildemMenuIndex = index;
+        if (button._fildemLabelActor)
+            button._fildemLabelActor.set_text(this._label(item.label));
+        if (button._fildemBoxPopup)
+            this._syncPopupContents(button._fildemBoxPopup, button._fildemMenuChildren, button, St.Side.TOP);
+    }
+
+    _replaceMenuButtons(items) {
         this._outsideOverlay?.destroy();
         this._outsideOverlay = null;
         this._boxPopups.forEach(popup => popup.destroy());
@@ -1091,8 +1320,8 @@ export class NativeMenuManager {
         });
         this._popupManagers = [];
         this._buttons = [];
-        labels.forEach((rawLabel, index) => {
-            const label = this._label(rawLabel);
+        items.forEach((item, index) => {
+            const label = this._label(item.label);
             const button = new PanelMenu.Button(0.0, label);
             button._fildemDestroyed = false;
             button.connect('destroy', () => {
@@ -1111,7 +1340,12 @@ export class NativeMenuManager {
             button._fildemClickGesture = new Clutter.ClickGesture();
             button._fildemClickGesture.set_recognize_on_press(true);
             button.menu.actor.hide();
-            button._fildemMenuChildren = null;
+            button._fildemLabelActor = null;
+            button._fildemMenuId = item.id;
+            button._fildemMenuChildren = item.children || [];
+            button._fildemMenuItem = item;
+            button._fildemMenuLabel = item.label;
+            button._fildemMenuIndex = index;
             button._fildemClickGesture.connect('recognize', () => {
                 if (this._destroyed || button._fildemDestroyed)
                     return;
@@ -1121,10 +1355,13 @@ export class NativeMenuManager {
                 }
                 if (!button._fildemMenuChildren) {
                     this._loadMenuTree(tree => {
-                        const item = tree[index];
-                        if (!item)
+                        const current = tree[index];
+                        if (!current)
                             return;
-                        button._fildemMenuChildren = item.children || [];
+                        button._fildemMenuId = current.id;
+                        button._fildemMenuLabel = current.label;
+                        button._fildemMenuItem = current;
+                        button._fildemMenuChildren = current.children || [];
                         button._fildemBoxPopup = this._buildBoxPopup(button._fildemMenuChildren, button);
                         this._closeBoxPopups();
                         this._showRootPopup(button);
@@ -1156,10 +1393,13 @@ export class NativeMenuManager {
                         this._loadMenuTree(tree => {
                             if (this._destroyed || button._fildemDestroyed)
                                 return;
-                            const item = tree[index];
-                            if (!item || !this._activeRootButton)
+                            const current = tree[index];
+                            if (!current || !this._activeRootButton)
                                 return;
-                            button._fildemMenuChildren = item.children || [];
+                            button._fildemMenuId = current.id;
+                            button._fildemMenuLabel = current.label;
+                            button._fildemMenuItem = current;
+                            button._fildemMenuChildren = current.children || [];
                             button._fildemBoxPopup = this._buildBoxPopup(button._fildemMenuChildren, button);
                             this._closeBoxPopups();
                             this._showRootPopup(button);
@@ -1179,6 +1419,7 @@ export class NativeMenuManager {
                 x_expand: false,
             });
             buttonLabel.clutter_text.set_ellipsize(Pango.EllipsizeMode.NONE);
+            button._fildemLabelActor = buttonLabel;
             button.add_child(buttonLabel);
             Main.panel.addToStatusArea(`fildem-native-${index}`, button, index + 1, 'left');
             this._buttons.push(button);
@@ -1229,6 +1470,8 @@ export class NativeMenuManager {
             this._settings.disconnect(this._leadingGapSettingsId);
         if (this._settings && this._leadingWidthSettingsId)
             this._settings.disconnect(this._leadingWidthSettingsId);
+        if (this._settings && this._leadingWidth2SettingsId)
+            this._settings.disconnect(this._leadingWidth2SettingsId);
         if (this._settings && this._hoverDelaySettingsId)
             this._settings.disconnect(this._hoverDelaySettingsId);
         if (this._settings && this._maxWidthSettingsId)

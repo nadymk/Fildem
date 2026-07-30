@@ -7,13 +7,18 @@
 		</key>
 		<key type="i" name="leading-gap">
 			<range min="0" max="32"/>
-			<default>6</default>
-			<summary>Gap between the leading icon or toggle and the menu label</summary>
+			<default>8</default>
+			<summary>Gap between the leading element slots and the menu label</summary>
 		</key>
 		<key type="i" name="leading-column-width">
-			<range min="0" max="48"/>
-			<default>18</default>
-			<summary>Width reserved for the leading icon or toggle column</summary>
+			<range min="16" max="64"/>
+			<default>20</default>
+			<summary>Width reserved for the first leading slot</summary>
+		</key>
+		<key type="i" name="leading-column-width-2">
+			<range min="16" max="64"/>
+			<default>20</default>
+			<summary>Width reserved for the second leading slot</summary>
 		</key>
 		<key type="i" name="hover-switch-delay">
 			<range min="0" max="3000"/>

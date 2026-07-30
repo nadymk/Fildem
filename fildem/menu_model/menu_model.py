@@ -451,94 +451,12 @@ class DbusMozillaGtkMenu(DbusGtkMenu):
 					print('Fildem using Mozilla GtkApplication menubar:', bus_name, path, flush=True)
 					return
 
-
-class DbusLomiriMenu(DbusGtkMenu):
-	def __init__(self, session, window):
-		self.results      = {}
-		self.actions      = {}
-		self.accels       = {}
-		self.tree         = Tree()
-		self._update_timer = 0
-		self.session      = session
-		self.window       = window
-		self.source_name  = 'lomiri'
-		self.bus_name     = None
-		self.app_path     = None
-		self.win_path     = None
-		self.menubar_path = None
-		self.appmenu_path = None
-		self.action_path  = None
-		self.top_level_menus = []
-		self.signal_matcher = []
-		self.describe_on_build = True
-		self.refresh_callback = None
-
-	def _resolve_registered_menu(self):
-		try:
-			obj = self.session.get_object(
-				'com.lomiri.MenuRegistrar',
-				'/com/lomiri/MenuRegistrar',
-				introspect=False,
-			)
-			interface = dbus.Interface(obj, 'com.lomiri.MenuRegistrar')
-			menus = interface.GetAppMenus(timeout=CALL_TIMEOUT_MS / 1000.0)
-			pid = self.window.get_pid()
-			entry = menus.get(pid) if pid else None
-			if entry is None and not pid and len(menus) == 1:
-				entry = list(menus.values())[0]
-			if entry is None:
-				return
-			self.bus_name = str(entry[0])
-			self.appmenu_path = str(entry[1])
-			self.action_path = str(entry[2])
-		except Exception as e:
-			return
-
-	def activate(self, selection):
-		action = self.actions.get(selection, '')
-		print('Fildem lomiri activate:', repr(selection), '->', repr(action), flush=True)
-		if not action or not self.action_path:
-			return False
-		return self.send_action(action, 'unity.', self.action_path)
-
-	def send_action(self, name, prefix, path, target=None):
-		try:
-			obj       = self.session.get_object(self.bus_name, path)
-			interface = dbus.Interface(obj, dbus_interface='org.gtk.Actions')
-			print('Fildem sending lomiri action:', self.bus_name, path, name, flush=True)
-			params = [] if target in (None, '') else [dbus.String(str(target))]
-			interface.Activate(name.replace(prefix, ''), params, dict())
-			return True
-		except Exception as e:
-			print('Fildem lomiri action failed:', repr(e), flush=True)
-			return False
-
-	def get_results(self):
-		if not self.bus_name or not self.appmenu_path:
-			self._resolve_registered_menu()
-		if not self.bus_name or not self.appmenu_path:
-			return
-		super().get_results()
-
-	def describe(self, action):
-		if not action or not self.action_path:
-			return None
-		if action.startswith('unity.'):
-			action = action.replace('unity.', '', 1)
-		obj = self.session.get_object(self.bus_name, self.action_path)
-		interface = dbus.Interface(obj, dbus_interface='org.gtk.Actions')
-		try:
-			description = interface.Describe(action)
-		except Exception:
-			return None
-		return description[0], description[2]
-
-
 class DbusAppMenu(object):
 
 	def __init__(self, session, window):
 		self.actions   = {}
 		self.accels    = {}
+		self.toggle_overrides = {}
 		self.tree      = Tree()
 		self.session   = session
 		self.window    = window
@@ -546,6 +464,7 @@ class DbusAppMenu(object):
 		self._update_timer = 0
 		self.signal_matcher = []
 		self._discovery_tried = {}
+		self._building = False
 		# Qt/appmenu discovery can be expensive on GTK-heavy desktops. Keep it
 		# lazy so GTK windows can publish immediately and only probe this path
 		# when the other menu backends do not have anything useful.
@@ -554,29 +473,152 @@ class DbusAppMenu(object):
 		self.results = None
 		self.refresh_callback = None
 
+	def _find_item(self, selection):
+		for node in self.tree.all_nodes():
+			data = node.data
+			if data is None:
+				continue
+			if data.text == selection:
+				return node
+		return None
+
+	def _set_radio_selection(self, selected_item):
+		parent_path = tuple(selected_item.path)
+		for node in self.tree.all_nodes():
+			if node.data is None:
+				continue
+			if node.data.toggle_type != 'radio':
+				continue
+			if tuple(node.data.path) != parent_path:
+				continue
+			is_selected = node.data.text == selected_item.text
+			self._set_toggle_override(node.data, is_selected)
+
+	def _toggle_checkmark(self, selected_item):
+		self._set_toggle_override(selected_item, not bool(selected_item.toggle_state))
+
+	def _set_toggle_override(self, menu_item, state):
+		if menu_item is None:
+			return
+		value = bool(state)
+		menu_item.toggle_state = value
+		self.toggle_overrides[menu_item.action] = value
+		self.toggle_overrides[menu_item.text] = value
+
+	def _apply_qt_item_updates(self, updated, removed):
+		changed = False
+		selected_radio_nodes = []
+
+		def _iter_updates(payload):
+			if payload is None:
+				return
+			try:
+				for entry in payload:
+					if entry is None:
+						continue
+					if isinstance(entry, dict):
+						item_id = entry.get('id', entry.get(0))
+						props = entry.get('props', entry.get('properties', {}))
+					else:
+						try:
+							item_id = entry[0]
+							props = entry[1] if len(entry) > 1 else {}
+						except Exception:
+							continue
+					if item_id is None:
+						continue
+					yield int(item_id), props
+			except TypeError:
+				return
+
+		for item_id, props in _iter_updates(updated):
+			node = self.tree.get_node(item_id)
+			if node is None or node.data is None:
+				continue
+			try:
+				changed = node.data.update_props(props) or changed
+			except Exception as error:
+				print('Fildem dbusmenu item update failed:', item_id, repr(error), flush=True)
+				continue
+			if node.data.toggle_type == 'radio' and node.data.toggle_state:
+				selected_radio_nodes.append(node)
+			else:
+				self._set_toggle_override(node.data, node.data.toggle_state)
+
+		for selected_node in selected_radio_nodes:
+			if selected_node is None or selected_node.data is None:
+				continue
+			parent_path = tuple(selected_node.data.path)
+			for node in self.tree.all_nodes():
+				if node.identifier == selected_node.identifier or node.data is None:
+					continue
+				if node.data.toggle_type != 'radio':
+					continue
+				if tuple(node.data.path) != parent_path:
+					continue
+				if node.data.toggle_state:
+					node.data.toggle_state = False
+					self._set_toggle_override(node.data, False)
+					changed = True
+			self._set_toggle_override(selected_node.data, True)
+			changed = True
+
+		return changed
+
 	def activate(self, selection):
+		item = self._find_item(selection)
+		if item is not None and item.data is not None:
+			if item.data.toggle_type == 'radio':
+				self._set_radio_selection(item.data)
+			elif item.data.toggle_type == 'checkmark':
+				self._toggle_checkmark(item.data)
 		action = self.actions[selection]
 		try:
-			self._event(action, 'clicked')
-			return True
+			activated = self._event(action, 'clicked')
+			if activated is not False:
+				if self.refresh_callback is not None:
+					try:
+						self.refresh_callback()
+					except Exception as error:
+						print('Fildem immediate app menu refresh failed:', repr(error), flush=True)
+				self.add_timer()
+				GLib.timeout_add(300, self._schedule_refresh)
+			return activated
 		except Exception as e:
 			print('Fildem dbusmenu activate failed, retrying:', repr(e), flush=True)
 			return self.retry_activate(selection)
 
 	def retry_activate(self, selection):
 		# Electron apps change a lot their menus, we have to update to retry
+		item = self._find_item(selection)
+		if item is not None and item.data is not None:
+			if item.data.toggle_type == 'radio':
+				self._set_radio_selection(item.data)
+			elif item.data.toggle_type == 'checkmark':
+				self._toggle_checkmark(item.data)
 		self.actions = {}
 		self.accels = {}
 		self.tree = Tree()
-		results = self.interface.GetLayout(0, -1, dbus.Array(signature="s"))
-		self.collect_entries(results[1], [])
-		action = self.actions[selection]
+		self._building = True
 		try:
-			self._event(action, 'clicked')
-			return True
+			results = self.interface.GetLayout(0, 1, dbus.Array(signature="s"))
+			self.collect_entries(results[1], [])
+			action = self.actions[selection]
+			activated = self._event(action, 'clicked')
+			if activated is not False:
+				if self.refresh_callback is not None:
+					try:
+						self.refresh_callback()
+					except Exception as error:
+						print('Fildem immediate app menu refresh failed:', repr(error), flush=True)
+				self.add_timer()
+				GLib.timeout_add(300, self._schedule_refresh)
+			return activated
 		except Exception as e:
 			print('Fildem dbusmenu retry failed:', repr(e), flush=True)
 			return False
+		finally:
+			self._building = False
 
 	def _event(self, action, event='clicked'):
 		try:
@@ -816,13 +858,17 @@ class DbusAppMenu(object):
 		if self.interface is None:
 			self.interface = self.get_interface()
 		if self.interface:
-			self.results = self.interface.GetLayout(0, -1, dbus.Array(signature="s"))
-			print('Fildem dbusmenu root groups:', len(self.results[1][2]), flush=True)
-			self.collect_entries(self.results[1])
-			print('Fildem dbusmenu tree built:', len(self.tree), 'top:', len(self.top_level_menus), flush=True)
+			self._building = True
+			try:
+				self.results = self.interface.GetLayout(0, 1, dbus.Array(signature="s"))
+				print('Fildem dbusmenu root groups:', len(self.results[1][2]), flush=True)
+				self.collect_entries(self.results[1])
+				print('Fildem dbusmenu tree built:', len(self.tree), 'top:', len(self.top_level_menus), flush=True)
 
-			if not len(self.tree.children(self.tree[self.tree.root].identifier)):
-				self.tree = Tree()
+				if not len(self.tree.children(self.tree[self.tree.root].identifier)):
+					self.tree = Tree()
+			finally:
+				self._building = False
 
 	def collect_entries(self, item=None, labels=None, treelib_parent=None):
 		if self.results is None:
@@ -837,14 +883,17 @@ class DbusAppMenu(object):
 		if 'children-display' in item[1]:
 			item_id = item[0]
 			try:
-				self.interface.AboutToShow(item_id)
+				item = self.interface.GetLayout(item_id, 1, dbus.Array(signature="s"))[1]
 			except Exception:
-				pass
-			self.interface.Event(item_id, 'opened', 'not used', dbus.UInt32(time.time()))
-			item = self.interface.GetLayout(item_id, -1, dbus.Array(signature="s"))[1]
+				item = (item_id, item[1], [])
 
 		if bool(menu_item.label) and menu_item.label != 'Root' and menu_item.label != 'DBusMenuRoot':
 			menu_path = labels + [menu_item.label]
+
+		if menu_item.action in self.toggle_overrides:
+			menu_item.toggle_state = bool(self.toggle_overrides[menu_item.action])
+		elif menu_item.text in self.toggle_overrides:
+			menu_item.toggle_state = bool(self.toggle_overrides[menu_item.text])
 
 		self.tree.create_node(menu_item.label, menu_item.action, treelib_parent, data=menu_item)
 		if len(item[2]):
@@ -858,18 +907,24 @@ class DbusAppMenu(object):
 			self.actions[menu_item.text] = menu_item.action
 
 	def on_actions_changed(self, updated, removed):
-		for upd in updated:
-			item = self.tree.get_node(int(upd[0]))
-			if item is not None:
-				item.data.update_props(upd[1])
-				if 'children-display' in upd[1]:
-					# Just update everything
-					self.add_timer()
-					break
-
-		# TODO removed
+		if self._building:
+			return
+		try:
+			changed = self._apply_qt_item_updates(updated, removed)
+		except Exception as error:
+			print('Fildem dbusmenu signal handling failed:', repr(error), flush=True)
+			changed = False
+		if changed and self.refresh_callback is not None:
+			try:
+				self.refresh_callback()
+			except Exception as error:
+				print('Fildem menu refresh callback failed:', repr(error), flush=True)
+		if updated or removed:
+			self.add_timer()
 
 	def layout_updated(self, revision, parent):
+		if self._building:
+			return
 		self.add_timer()
 
 	def add_timer(self):
@@ -880,13 +935,22 @@ class DbusAppMenu(object):
 		self.actions = {}
 		self.accels = {}
 		self.tree = Tree()
-		self.get_results()
-		self._update_timer = 0
+		try:
+			self.get_results()
+		except Exception as error:
+			print('Fildem dbusmenu update failed:', repr(error), flush=True)
+			self.interface = None
+		finally:
+			self._update_timer = 0
 		if self.refresh_callback is not None:
 			try:
 				self.refresh_callback()
 			except Exception as error:
 				print('Fildem menu refresh callback failed:', repr(error), flush=True)
+		return False
+
+	def _schedule_refresh(self):
+		self.add_timer()
 		return False
 
 	def remove_actions_listener(self):
@@ -904,7 +968,6 @@ class MenuModel:
 		self.appmenu = None
 		self.gtkmenu = None
 		self.mozillamenu = None
-		self.lomirimenu = None
 		self.active_source = None
 		self._session = session
 		self.window = window
@@ -923,11 +986,10 @@ class MenuModel:
 		self.appmenu = DbusAppMenu(session, window)
 		self.gtkmenu = DbusGtkMenu(session, window)
 		self.mozillamenu = DbusMozillaGtkMenu(session, window)
-		self.lomirimenu = DbusLomiriMenu(session, window)
 		self.active_source = None
 
 	def _sources(self):
-		return (self.gtkmenu, self.mozillamenu, self.lomirimenu, self.appmenu)
+		return (self.gtkmenu, self.mozillamenu, self.appmenu)
 
 	def _source_has_menu(self, source):
 		tree = getattr(source, 'tree', None)
@@ -961,7 +1023,6 @@ class MenuModel:
 		self.appmenu.refresh_callback = callback
 		self.gtkmenu.refresh_callback = callback
 		self.mozillamenu.refresh_callback = callback
-		self.lomirimenu.refresh_callback = callback
 
 	def _update_menus(self):
 		try:
@@ -975,14 +1036,8 @@ class MenuModel:
 			except Exception as error:
 				print('Fildem mozilla menu build failed:', repr(error), flush=True)
 		print('Fildem mozilla menu state:', len(self.mozillamenu.tree), 'actions:', len(self.mozillamenu.actions), flush=True)
-		if not len(self.gtkmenu.tree):
-			try:
-				self.lomirimenu.get_results()
-			except Exception as error:
-				print('Fildem lomiri menu build failed:', repr(error), flush=True)
-		print('Fildem lomiri menu state:', len(self.lomirimenu.tree), 'actions:', len(self.lomirimenu.actions), flush=True)
 		if (not len(self.gtkmenu.tree) and not len(self.mozillamenu.tree) and
-				not len(self.lomirimenu.tree) and not self._looks_like_gtk_window()):
+				not self._looks_like_gtk_window()):
 			try:
 				self.appmenu.get_results()
 			except Exception as error:
@@ -1043,11 +1098,18 @@ class MenuModel:
 		tree = self.tree
 		if tree.root is None:
 			return None
+		selection_text = str(selection)
+		try:
+			selection_id = int(selection)
+		except Exception:
+			selection_id = None
 		for node in tree.all_nodes():
 			data = node.data
 			if data is None:
 				continue
-			if node.identifier == selection or data.text == selection:
+			if node.identifier == selection or node.identifier == selection_id:
+				return node
+			if data.text == selection or data.text == selection_text:
 				return node
 		return None
 
@@ -1133,8 +1195,6 @@ class MenuModel:
 				self.gtkmenu.remove_actions_listener()
 			if self.mozillamenu is not None:
 				self.mozillamenu.remove_actions_listener()
-			if self.lomirimenu is not None:
-				self.lomirimenu.remove_actions_listener()
 		except Exception:
 			pass
 

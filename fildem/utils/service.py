@@ -1,12 +1,10 @@
 import dbus
 import dbus.service
 
-from gi.repository import GLib
+from gi.repository import Gio, GLib
 
 BUS_NAME = 'com.canonical.AppMenu.Registrar'
 BUS_PATH = '/com/canonical/AppMenu/Registrar'
-LOMIRI_BUS_NAME = 'com.lomiri.MenuRegistrar'
-LOMIRI_BUS_PATH = '/com/lomiri/MenuRegistrar'
 
 
 class AppMenuService(dbus.service.Object):
@@ -23,7 +21,6 @@ class AppMenuService(dbus.service.Object):
 	"""
 	def __init__(self):
 		self.window_dict = dict()
-		self.lomiri = LomiriMenuService()
 
 		bus_name = dbus.service.BusName(BUS_NAME, bus=dbus.SessionBus())
 		dbus.service.Object.__init__(self, bus_name, BUS_PATH)
@@ -63,72 +60,6 @@ class AppMenuService(dbus.service.Object):
 		GLib.MainLoop().quit()
 
 
-class LomiriMenuService(dbus.service.Object):
-	def __init__(self):
-		self.app_dict = dict()
-		self.surface_dict = dict()
-		self.bus = dbus.SessionBus()
-		bus_name = dbus.service.BusName(LOMIRI_BUS_NAME, bus=self.bus)
-		dbus.service.Object.__init__(self, bus_name, LOMIRI_BUS_PATH)
-
-	def prune_dead_owners(self):
-		def is_alive(entry):
-			service_name = str(entry[0])
-			try:
-				return self.bus.name_has_owner(service_name)
-			except Exception:
-				return False
-
-		self.app_dict = {pid: entry for pid, entry in self.app_dict.items() if is_alive(entry)}
-		self.surface_dict = {surface: entry for surface, entry in self.surface_dict.items() if is_alive(entry)}
-
-	@dbus.service.method(LOMIRI_BUS_NAME, in_signature='uoos', sender_keyword='sender')
-	def RegisterAppMenu(self, pid, menuObjectPath, actionObjectPath, service, sender):
-		self.prune_dead_owners()
-		service_name = service or sender
-		self.app_dict[int(pid)] = [
-			dbus.String(service_name),
-			dbus.ObjectPath(menuObjectPath),
-			dbus.ObjectPath(actionObjectPath),
-		]
-		print('Fildem Lomiri app menu registered:', int(pid), service_name, menuObjectPath, actionObjectPath, flush=True)
-
-	@dbus.service.method(LOMIRI_BUS_NAME, in_signature='uo')
-	def UnregisterAppMenu(self, pid, menuObjectPath):
-		pid = int(pid)
-		if pid in self.app_dict and self.app_dict[pid][1] == menuObjectPath:
-			del self.app_dict[pid]
-		print('Fildem Lomiri app menu unregistered:', pid, menuObjectPath, flush=True)
-
-	@dbus.service.method(LOMIRI_BUS_NAME, in_signature='soos', sender_keyword='sender')
-	def RegisterSurfaceMenu(self, surface, menuObjectPath, actionObjectPath, service, sender):
-		self.prune_dead_owners()
-		service_name = service or sender
-		self.surface_dict[str(surface)] = [
-			dbus.String(service_name),
-			dbus.ObjectPath(menuObjectPath),
-			dbus.ObjectPath(actionObjectPath),
-		]
-		print('Fildem Lomiri surface menu registered:', surface, service_name, menuObjectPath, actionObjectPath, flush=True)
-
-	@dbus.service.method(LOMIRI_BUS_NAME, in_signature='so')
-	def UnregisterSurfaceMenu(self, surfaceId, menuObjectPath):
-		surfaceId = str(surfaceId)
-		if surfaceId in self.surface_dict and self.surface_dict[surfaceId][1] == menuObjectPath:
-			del self.surface_dict[surfaceId]
-		print('Fildem Lomiri surface menu unregistered:', surfaceId, menuObjectPath, flush=True)
-
-	@dbus.service.method(LOMIRI_BUS_NAME, out_signature='a{u(soo)}')
-	def GetAppMenus(self):
-		self.prune_dead_owners()
-		return self.app_dict
-
-	@dbus.service.method(LOMIRI_BUS_NAME, out_signature='a{s(soo)}')
-	def GetSurfaceMenus(self):
-		self.prune_dead_owners()
-		return self.surface_dict
-
-
 class MyService(dbus.service.Object):
 
 	BUS_PATH = '/es/inled/fildem'
@@ -137,6 +68,13 @@ class MyService(dbus.service.Object):
 	def __init__(self):
 		self.bus_name = dbus.service.BusName(self.BUS_NAME, bus=dbus.SessionBus())
 		self.current_menu_tree = '[]'
+		self.keep_app_menubar = False
+		self._appmenu_gtk_settings = None
+		try:
+			self._appmenu_gtk_settings = Gio.Settings(schema_id='org.appmenu.gtk-module')
+			self.keep_app_menubar = self._appmenu_gtk_settings.get_boolean('always-show-inner-menu')
+		except Exception as error:
+			print('Fildem failed to load org.appmenu.gtk-module settings:', repr(error), flush=True)
 		dbus.service.Object.__init__(self, self.bus_name, self.BUS_PATH)
 
 	@dbus.service.signal(BUS_NAME, signature='su')
@@ -193,6 +131,24 @@ class MyService(dbus.service.Object):
 	@dbus.service.method(BUS_NAME, in_signature='b')
 	def EchoMenuOnOff(self, on):
 		self.MenuOnOff(on)
+
+	@dbus.service.method(BUS_NAME, in_signature='b')
+	def SetKeepAppMenubar(self, on):
+		self.keep_app_menubar = bool(on)
+		if self._appmenu_gtk_settings is not None:
+			try:
+				self._appmenu_gtk_settings.set_boolean('always-show-inner-menu', self.keep_app_menubar)
+			except Exception as error:
+				print('Fildem failed to update always-show-inner-menu:', repr(error), flush=True)
+		self.KeepAppMenubarChanged(self.keep_app_menubar)
+
+	@dbus.service.method(BUS_NAME, out_signature='b')
+	def GetKeepAppMenubar(self):
+		return bool(self.keep_app_menubar)
+
+	@dbus.service.signal(BUS_NAME, signature='b')
+	def KeepAppMenubarChanged(self, on):
+		pass
 
 	@dbus.service.signal(BUS_NAME, signature='b')
 	def MenuOnOff(self, on):

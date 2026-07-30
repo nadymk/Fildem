@@ -223,8 +223,6 @@ class DbusMenu:
 			return 'gtk'
 		if len(self._menu_model.mozillamenu.actions) or self._menu_model.mozillamenu.tree.root is not None:
 			return 'mozilla'
-		if len(self._menu_model.lomirimenu.actions) or self._menu_model.lomirimenu.tree.root is not None:
-			return 'lomiri'
 		if len(self._menu_model.appmenu.actions) or self._menu_model.appmenu.tree.root is not None:
 			return 'appmenu'
 		return ''
@@ -275,8 +273,6 @@ class DbusMenu:
 			self._menu_model.gtkmenu.actions = actions
 		elif provider == 'mozilla':
 			self._menu_model.mozillamenu.actions = actions
-		elif provider == 'lomiri':
-			self._menu_model.lomirimenu.actions = actions
 		elif provider == 'appmenu':
 			self._menu_model.appmenu.actions = actions
 
